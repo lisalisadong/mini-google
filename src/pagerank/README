@@ -1,0 +1,14 @@
+Folder instructions:
+- The page rank's source files are placed in this folder.
+
+Requirements:
+- Should perform link analysis using the PageRank algorithm, as discussed in class
+and in the PageRank paper.
+- Should implement PageRank as a MapReduce job.
+- May use either Hadoop or HW3 implementation.
+- Handle 'dangling links' (pages you have not yet crawled) or PageRank sinks
+- Encode the data such that the output of one iteration can serve as input to the next
+- Test whether the PageRank values have converged.
+- To prevent quality issues, manually inspect some of the values you get, to see how well they correspond
+with your intuition of the pages' quality (e.g., Wikipedia vs. some little-known web site).
+- Extend your HW3 solution to automatically run multiple instances of a job

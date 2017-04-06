@@ -1,0 +1,10 @@
+.idea
+bin
+target
+*.iml
+full_log.txt
+error_log.txt
+*.war
+*.jar
+database
+out

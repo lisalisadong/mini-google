@@ -1,11 +1,13 @@
-Team members:  ______________ ______________ ______________ ______________
-SEAS logins:   ______________ ______________ ______________ ______________
+Team members:  Qingxiao Dong, Xiaofan Dou, Jue Liu, Shang Yi
+SEAS logins:   qingxiao, xiaofand, liujue, yishang
 
 Which features did you implement? 
   (list features, or write 'Entire assignment')
+  Entire assignment
 
 Did you complete any extra-credit tasks? If so, describe them!
   (list extra-credit tasks)
+  TODO:
 
 Any special instructions for building and running your solution?
   (include detailed instructions)
@@ -13,15 +15,15 @@ Any special instructions for building and running your solution?
 Did the members of this team personally write _all_ the code they are 
 submitting (other than code from the course web page, code from their 
 own homework submissions, and tools specifically authorized on Piazza)?
-  [ ] Yes
+  [X] Yes
   [ ] No
 
 Did the members of this team copy any code from the Internet, or from 
 classmates who were not on this team?
   [ ] Yes
-  [ ] No
+  [X] No
 
 Did the members of this team collaborate with anyone on this assignment
 who was not on this team?
   [ ] Yes
-  [ ] No
+  [X] No

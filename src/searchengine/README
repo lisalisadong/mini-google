@@ -1,0 +1,9 @@
+Folder instructions:
+- The search engine and UI's source files are placed in this folder.
+
+Requirements:
+- Provide a search form and weighted results list.
+- Determine how to combine the various factors (PageRank, TF/IDF, other word features)
+- Tune ranking function.
+- Have a 'debug mode' in which the engine shows additional information about how the
+results were ranked, and why (e.g., the raw PageRank scores, the TF and IDF values, and so on).

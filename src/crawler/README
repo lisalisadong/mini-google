@@ -1,0 +1,15 @@
+Folder instructions:
+- The crawler's source files are placed in this folder.
+
+Requirements:
+- Should be able to parse typical HTML documents.
+- Should check for and respect the restrictions in robots.txt and be
+well-behaved in terms of concurrently requesting at most one document per
+hostname.
+- Requests should be distributed, Mercator-style, across multiple crawling peers.
+- Should track visited pages and not index a page more than once.
+- Must identify itself as 'cis455crawler' in the User-Agent header!!
+- Avoid wasting time when it runs into spider traps or starts crawling low-quality pages
+- Aim for a corpus of at least 1,000,000 documents.
+- Picking a set of good root URLs.
+- Be careful not to DoS anyone!

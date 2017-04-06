@@ -1,0 +1,17 @@
+Folder instructions:
+- The indexer's source files are placed in this folder.
+
+Requirements:
+- Should take words and other information from the crawler and create a lexicon, inverted
+index, and any other data structures that are necessary for answering queries.
+- Should provide a way to return weighted answers that make use of TF/IDF, proximity, and
+any other ranking features that are appropriate.
+- Should use MapReduce to generate the data structures from the output of the crawler,
+either using the framework from HW3 or via Hadoop/Elastic MapReduce.
+- Should store the resulting index data persistently across multiple nodes using BerkeleyDB
+or Amazon DynamoDB, so lookups are fast.
+- Adding some of the more advanced index features that the Google paper has, e.g., the
+distinction between normal, fancy, and anchor hits, or the support for phrase search
+- Write a few small MapReduce jobs for the index computation (TF, IDF, hit lists, web link graph)
+- Provide some kind of interface for the scoring/ranking component to look up data in the index
+(use REST-style messages)
