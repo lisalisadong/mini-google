@@ -22,7 +22,7 @@ public class PageRankTask {
     public static void task(String inputPath, String outputPath, String taskName) {
         try {
             Configuration config = new Configuration();
-            config.set("mapred.textoutputformat.separator", ",");
+            config.set("mapred.textoutputformat.separator", "@");
 
             Job job = Job.getInstance(config, taskName);
             job.setJarByClass(PageRankDriver.class);
