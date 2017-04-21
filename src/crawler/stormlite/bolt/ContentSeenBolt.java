@@ -1,14 +1,21 @@
 package crawler.stormlite.bolt;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.UUID;
 
+import crawler.Crawler;
+import crawler.client.Client;
+import crawler.robots.RobotInfoManager;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
 import crawler.stormlite.tuple.Values;
+import crawler.storage.*;
 import utils.Logger;
 
 /**
@@ -32,7 +39,12 @@ import utils.Logger;
 public class ContentSeenBolt implements IRichBolt {
 	static Logger logger = new Logger(ContentSeenBolt.class.getName());
 	
-	Fields schema = new Fields("url");
+	Fields schema = new Fields("page");
+	
+	long maxSize = Long.MAX_VALUE;
+	
+	DBWrapper db;
+	
 	
    /**
     * To make it easier to debug: we have a unique ID for each
@@ -44,6 +56,8 @@ public class ContentSeenBolt implements IRichBolt {
     * This is where we send our output stream
     */
    private OutputCollector collector;
+   
+   private RobotInfoManager robotManager;
    
    public ContentSeenBolt() {
    }
@@ -57,6 +71,8 @@ public class ContentSeenBolt implements IRichBolt {
    		TopologyContext context, OutputCollector collector) 
    {
        this.collector = collector;
+       robotManager = Crawler.getRobotManager();
+       db = new DBWrapper(Crawler.DBPath);
    }
 
    /**
@@ -67,8 +83,49 @@ public class ContentSeenBolt implements IRichBolt {
    public void execute(Tuple input) 
    {
 	   String url = input.getStringByField("url");
-	   System.out.println(id + " Got " + url);
-	   this.collector.emit(new Values<Object>(url));
+//	   System.out.println(id + " got " + url);
+	   
+	   /* download the page*/
+	   Client client = Client.getClient(url);
+	   client.setMethod("GET");
+	   robotManager.waitUntilAvailable(url);	
+	   /* set last access time */
+	   robotManager.setHostLastAccessTime(url);
+	   client.sendReq();
+	   
+	   byte[] content = null;
+	   InputStream in = client.getInputStream();
+	   ByteArrayOutputStream bos = new ByteArrayOutputStream();	
+	   int next;
+	   try {
+			while ((next = in.read()) != -1) {
+				bos.write(next);
+			}
+			bos.flush();
+			content = bos.toByteArray();
+			bos.close();
+	   } catch (IOException e) {
+			e.printStackTrace();
+	   }
+	   
+	   
+	   client.close();
+	   
+	   // TODO: 
+	   /* deal with the content seen */
+	   boolean contentSeen = false;
+	   
+	   if(!contentSeen) {
+//		   System.out.println(id + " emit " + url);
+		   System.out.println(id + ": " + url + " downloaded ");
+		   
+		   CrawledPage newPage = new CrawledPage(content, url, client.getResContentType());
+		   newPage.setLastCrawled(System.currentTimeMillis());
+		   this.collector.emit(new Values<Object>(newPage));
+	   } else {
+		   // TODO: get url via fp and increase the hit
+	   }
+	   
    }
 
    /**

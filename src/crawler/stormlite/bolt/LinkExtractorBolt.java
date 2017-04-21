@@ -1,8 +1,13 @@
 package crawler.stormlite.bolt;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import crawler.Crawler;
+import crawler.storage.CrawledPage;
+import crawler.storage.DBWrapper;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.routers.StreamRouter;
@@ -10,6 +15,11 @@ import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
 import crawler.stormlite.tuple.Values;
 import utils.Logger;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 /**
 * Licensed to the Apache Software Foundation (ASF) under one
@@ -32,7 +42,8 @@ import utils.Logger;
 public class LinkExtractorBolt implements IRichBolt {
 	static Logger logger = new Logger(LinkExtractorBolt.class.getName());
 	
-	Fields schema = new Fields("url");
+	Fields schema = new Fields("link");
+	DBWrapper db;
 	
    /**
     * To make it easier to debug: we have a unique ID for each
@@ -57,6 +68,9 @@ public class LinkExtractorBolt implements IRichBolt {
    		TopologyContext context, OutputCollector collector) 
    {
        this.collector = collector;
+       
+       db = new DBWrapper(Crawler.DBPath);
+       db.setup();
    }
 
    /**
@@ -66,9 +80,26 @@ public class LinkExtractorBolt implements IRichBolt {
    @Override
    public void execute(Tuple input) 
    {
-	   String url = input.getStringByField("url");
-	   System.out.println(id + " Got " + url);
-	   this.collector.emit(new Values<Object>(url));
+	   CrawledPage page = (CrawledPage)input.getObjectByField("page");
+//	   System.out.println(id + " got " + page.getUrl());
+	   if("text/html".equals(page.getContentType())) {
+		   byte[] content = page.getContent();
+		   
+		   Document doc = Jsoup.parse(new String(content), page.getUrl());
+		   Elements links = doc.select("a[href]");
+		   
+		   for (Element link : links) {
+			   String l = link.attr("abs:href");	
+			   page.addLink(l);
+			   if(l == null || l.length() <= 0) continue;
+//			   System.out.println(id + " emit " + l);
+			   
+			   this.collector.emit(new Values<Object>(l));
+		   }
+		   
+	   }
+	   
+	   db.savePage(page);
    }
 
    /**
@@ -110,6 +141,20 @@ public class LinkExtractorBolt implements IRichBolt {
 	@Override
 	public Fields getSchema() {
 		return schema;
+	}
+	
+	public List<String> extractLinks(String webpage, String url) {
+		Document doc = Jsoup.parse(webpage, url);
+		Elements links = doc.select("a[href]");
+		
+		List<String> res = new LinkedList<>();
+		
+		for (Element link : links) {
+			String l = link.attr("abs:href");
+			res.add(l);
+		}
+		
+		return res;
 	}
 
 }

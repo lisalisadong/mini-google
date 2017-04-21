@@ -8,16 +8,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import crawler.stormlite.Config;
 import crawler.stormlite.DistributedCluster;
-import crawler.stormlite.LocalCluster;
 import crawler.stormlite.Topology;
 import crawler.stormlite.TopologyBuilder;
 import crawler.stormlite.bolt.ContentSeenBolt;
 import crawler.stormlite.bolt.DUEBolt;
 import crawler.stormlite.bolt.HTTPModuleBolt;
-import crawler.stormlite.bolt.HostSplitterBolt;
 import crawler.stormlite.bolt.LinkExtractorBolt;
 import crawler.stormlite.bolt.URLFilterBolt;
 import crawler.urlfrontier.URLFrontier;
+import crawler.stormlite.tuple.Fields;
+import crawler.robots.RobotInfoManager;
+
 import utils.Logger;
 
 /**
@@ -58,9 +59,17 @@ public class Crawler {
     public static int fileNum = -1;
     
     public static URLFrontier urlFrontier;
+    public static RobotInfoManager robotManager;
     
     public static void setUp() {
+    	
+    	Logger.configure(false, false);
+    	
     	urlFrontier = new URLFrontier();
+    	urlFrontier.addURL("http://crawltest.cis.upenn.edu/");
+//    	urlFrontier.addURL("https://www.reddit.com/");
+    	
+    	robotManager = new RobotInfoManager();
     }
     
     private static Topology configTopology(Config config) {
@@ -70,7 +79,7 @@ public class Crawler {
         ContentSeenBolt contentSeen = new ContentSeenBolt();
         LinkExtractorBolt linkExtractor = new LinkExtractorBolt();
         URLFilterBolt urlFilter = new URLFilterBolt();
-        HostSplitterBolt hostSplitter = new HostSplitterBolt();
+//        HostSplitterBolt hostSplitter = new HostSplitterBolt();
         DUEBolt due = new DUEBolt();
         
         // wordSpout ==> countBolt ==> MongoInsertBolt
@@ -93,16 +102,20 @@ public class Crawler {
         .shuffleGrouping(LINK_EXTRACTOR_BOLT);
         
         // TODO: field based
-        builder.setBolt(HOST_SPLITTER_BOLT, hostSplitter, HOST_SPLITTER_BOLT_NUM)
-        .shuffleGrouping(URL_FILTER_BOLT);
+//        builder.setBolt(HOST_SPLITTER_BOLT, hostSplitter, HOST_SPLITTER_BOLT_NUM)
+//        .shuffleGrouping(URL_FILTER_BOLT);
         
         builder.setBolt(DUE_BOLT, due, DUE_BOLT_NUM)
-        .shuffleGrouping(HOST_SPLITTER_BOLT);
+        .fieldsGrouping(URL_FILTER_BOLT, new Fields("host"));
+//        .shuffleGrouping(URL_FILTER_BOLT);	// TODO: field based
        
         return builder.createTopology();
     }
     
     public static void main(String[] args) throws Exception {
+    	
+    	setUp();
+    	
     	
     	Config config = new Config();
     	config.put("workerList", "[0:0:0:0:8000]");
@@ -137,4 +150,7 @@ public class Crawler {
 		return urlFrontier;
 	} 
 
+	public static RobotInfoManager getRobotManager() {
+		return robotManager;
+	}
 }
