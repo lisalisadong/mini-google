@@ -116,4 +116,18 @@
         </zip>
     </target>
 
+    <target name="search" depends="compile-search-engine" description="Run search engine servlet">
+        <java classname="edu.upenn.cis455.webserver.HttpServer">
+            <classpath>
+                <pathelement location="lib/webserver.jar"/>
+                <pathelement location="lib/servlet-api.jar"/>
+                <pathelement location="lib/je-6.2.31.jar"/>
+                <pathelement location="${classes.dir}"/>
+            </classpath>
+            <arg value="1234"/>
+            <arg value="."/>
+            <arg value="conf/web.xml"/>
+        </java>
+    </target>
+
 </project>
