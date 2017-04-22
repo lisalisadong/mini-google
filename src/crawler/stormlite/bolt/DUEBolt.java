@@ -76,14 +76,18 @@ public class DUEBolt implements IRichBolt {
         
 //        System.out.println(id + " got " + url);
         
-        urlFrontier.addURL(url);
+//        urlFrontier.addURL(url);
         
         // add to frontier queue if set does not contain the url
-//        if(!urlSet.addURL(url)) {
-//            
-//            urlFrontier.addURL(url);
-//        	
-//        }
+        if(urlSet.addURL(url)) {
+            
+//        	System.out.println(id + " add " + url);
+        	
+            urlFrontier.addURL(url);
+        	
+        } else {
+//        	System.out.println(id +  " " + url + ": duplicate");
+        }
         
     }
 
