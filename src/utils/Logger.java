@@ -1,8 +1,6 @@
 package utils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -93,10 +91,9 @@ public class Logger {
             full_log.write((log + "\n").getBytes());
             error_log.write((log + "\n").getBytes());
             if (e != null) {
-                StackTraceElement[] elements = e.getStackTrace();
-                for (StackTraceElement trace : elements) {
-                    error_log.write(("\t\t" + trace.toString() + "\n").getBytes());
-                }
+                PrintWriter writer = new PrintWriter(error_log);
+                e.printStackTrace(writer);
+                writer.flush();
             }
         } catch (IOException e1) {}
         System.err.println(log);
