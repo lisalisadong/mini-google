@@ -3,6 +3,7 @@ package crawler.stormlite.bolt;
 import java.util.Map;
 import java.util.UUID;
 
+import crawler.client.URLInfo;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.routers.StreamRouter;
@@ -35,7 +36,7 @@ import utils.Logger;
 public class URLFilterBolt implements IRichBolt {
 	static Logger logger = new Logger(URLFilterBolt.class.getName());
 	
-	Fields schema = new Fields("url");
+	Fields schema = new Fields("host", "url");
 	
    /**
     * To make it easier to debug: we have a unique ID for each
@@ -69,9 +70,15 @@ public class URLFilterBolt implements IRichBolt {
    @Override
    public void execute(Tuple input) 
    {
-	   String url = input.getStringByField("url");
-	   System.out.println(id + " Got " + url);
-	   this.collector.emit(new Values<Object>(url));
+	   String link = input.getStringByField("link");
+//	   System.out.println(id + " got " + link);
+	   //TODO: convert relative path to absolute path
+
+	   String host = new URLInfo(link).getHostName();
+	   // TODO: filter the link
+	   
+	   this.collector.emit(new Values<Object>(host, link));
+//	   System.out.println(id + " emit (" + host + ", " + link + ")");
    }
 
    /**

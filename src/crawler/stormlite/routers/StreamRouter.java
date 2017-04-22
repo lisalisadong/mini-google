@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
@@ -35,6 +34,7 @@ import crawler.stormlite.spout.FileSpout;
 import crawler.stormlite.tasks.BoltTask;
 import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
+import utils.Logger;
 
 /**
  * A StreamRouter is an internal class used to determine where
@@ -45,7 +45,7 @@ import crawler.stormlite.tuple.Tuple;
  *
  */
 public abstract class StreamRouter implements OutputFieldsDeclarer {
-	static Logger log = Logger.getLogger(StreamRouter.class);
+	static Logger log = new Logger(StreamRouter.class.getName());
 	
 	List<IRichBolt> bolts;		// all bolts?
 	List<HttpURLConnection> workers;
@@ -132,7 +132,7 @@ public abstract class StreamRouter implements OutputFieldsDeclarer {
 	public synchronized void execute(List<Object> tuple, TopologyContext context) {
 			IRichBolt bolt = getBoltFor(tuple);
 			
-			log.info("Task queued: " + bolt.getClass().getName() + " (" + bolt.getExecutorId() + "): " + tuple.toString());
+			log.debug("Task queued: " + bolt.getClass().getName() + " (" + bolt.getExecutorId() + "): " + tuple.toString());
 			
 			if (bolt != null) {
 				context.addStreamTask(new BoltTask(bolt, new Tuple(schema, tuple)));

@@ -42,11 +42,11 @@ public class URLSpout implements IRichSpout {
      * To make it easier to debug: we have a unique ID for each
      * instance of the WordSpout, aka each "executor"
      */
-    String id = UUID.randomUUID().toString();
+    String id = "[SP]" + UUID.randomUUID().toString();
     
     Fields schema = new Fields("url");
     
-    private URLFrontier URLFrontier = new URLFrontier();
+    private URLFrontier URLFrontier = Crawler.getURLFrontier();
 
     /**
 	 * The collector is the destination for tuples; you "emit" tuples there
@@ -86,19 +86,17 @@ public class URLSpout implements IRichSpout {
      */
     @Override
     public void nextTuple() {
-//    	String url = URLFrontier.getNextURL();
-//    	
-//    	if(url != null) this.collector.emit(new Values<Object>(url));
-//    	
-    	String url = cnt++ + "hello world!";
-//    	System.out.println(id + ": " + url);
-    	if(cnt < 3) this.collector.emit(new Values<Object>(url));
+    	String url = URLFrontier.getNextURL();
     	
-    	try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+    	if(url != null) {
+    		this.collector.emit(new Values<Object>(url));
+    	}
+    	
+//    	try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
     	
         Thread.yield();
     }

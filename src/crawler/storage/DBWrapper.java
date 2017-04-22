@@ -1,4 +1,4 @@
-package crawler.stormlite.bolt;
+package crawler.storage;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,7 @@ public class DBWrapper {
 	private static Environment myEnv;
 	private static EntityStore store;
 	
-	public PrimaryIndex<String, Entry> eIdx;
+	public PrimaryIndex<String, CrawledPage> pIdx;
 	
 	public DBWrapper(String dir) {
 		envDir = dir;
@@ -41,36 +41,21 @@ public class DBWrapper {
 		 // Open the environment and entity store
 		 myEnv = new Environment(new File(envDir), envConfig);
 		 store = new EntityStore(myEnv, "EntityStore", storeConfig);
-		 eIdx = store.getPrimaryIndex(String.class, Entry.class);
+		 pIdx = store.getPrimaryIndex(String.class, CrawledPage.class);
 	 }
 	 
 	 public String getPath() {
 		 return envDir;
 	 }
 	 
-	 public void saveEntry(Entry e) {
-		 eIdx.put(e);
+	 
+	 public void savePage(CrawledPage page) {
+		 pIdx.put(page);
 		 sync();
 	 }
 	 
-	 public Entry getEntry(String key) {
-		 return eIdx.get(key);
-	 }
-	 
-	 public void clearDB() {
-		 Map<String, Entry> map = eIdx.map();
-		 for(String key: map.keySet()) {
-			 eIdx.delete(key);
-		 }
-		 sync();
-	 }
-	 
-	 public void show() {
-		 System.out.println("Database: ");
-		 Map<String, Entry> map = eIdx.map();
-		 for(String key: map.keySet()) {
-			 System.out.println("key: " + key);
-		 }
+	 public CrawledPage getPage(String url) {
+		 return pIdx.get(url);
 	 }
 	 
 	 public void sync() {
@@ -83,8 +68,34 @@ public class DBWrapper {
 		 if(store != null) store.close();
 	 }
 	 
+	 
 	
 	public static void main(String[] args) {
+//		 DBWrapper db = new DBWrapper("./db");
+//		 db.setup();
+//		 List<Channel> channels = db.getAllChannels();
+//		 for(Channel c: channels) {
+//			 System.out.println("Channel: " + c.getName());
+//			 for(String url: c.getLinks()) {
+//				System.out.println("	url: " + url);
+//				CrawledPage page = db.getPage(url);
+//				System.out.println("	content: " + page.getContent());
+//				
+//			}
+//		 }
+		 
+//		 db.saveUser(new User("user1", "123"));
+		 
+//		 Client c = Client.getClient("http://crawltest.cis.upenn.edu/bbc/");
+//		 c.setMethod("GET");
+//		 c.sendReq();
+//		 CrawledPage p = new CrawledPage(c, "http://crawltest.cis.upenn.edu/bbc/");
+//		 db.savePage(p);
 
-	}
+//		 System.out.println(db.getPage("http://crawltest.cis.upenn.edu/bbc/") == null);
+		 
+		 
+//		 System.out.println("get user1: " + db.getUser("user1"));
+//		 System.out.println("get user2: " + db.getUser("user2"));
+	 }
 }

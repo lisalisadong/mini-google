@@ -28,7 +28,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -41,6 +40,7 @@ import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.spout.IRichSpout;
 import crawler.stormlite.spout.SpoutOutputCollector;
 import crawler.stormlite.tasks.SpoutTask;
+import utils.Logger;
 
 /**
  * Use multiple threads to simulate a cluster of worker nodes.
@@ -54,7 +54,7 @@ import crawler.stormlite.tasks.SpoutTask;
  *
  */
 public class DistributedCluster implements Runnable {
-	static Logger log = Logger.getLogger(DistributedCluster.class);
+	static Logger log = new Logger(DistributedCluster.class.getName());
 	
 	static AtomicBoolean quit = new AtomicBoolean(false);
 	
@@ -211,14 +211,14 @@ public class DistributedCluster implements Runnable {
 					sender.prepare(config, context, null);
 					for (int i = 0; i < count; i++) {
 						router.addRemoteBolt(sender);
-						log.info("Adding a remote route from " + stream + " to " + worker);
+						log.debug("Adding a remote route from " + stream + " to " + worker);
 					}
 					
 				// Create one local executor for each node for us!
 				} else {
 					for (IRichBolt bolt: boltStreams.get(stream)) {
 						router.addBolt(bolt);
-						log.info("Adding a route from " + decl.getStream() + " to " + bolt);
+						log.debug("Adding a route from " + decl.getStream() + " to " + bolt);
 					}
 				}
 			}

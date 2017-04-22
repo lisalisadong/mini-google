@@ -28,19 +28,8 @@
             </classpath>
         </javac>
     </target>
-	
-	<target name="compile-stormlite" description="Compile stormlite package">
-        <mkdir dir="${classes.dir}"/>
-        <javac srcdir="src/edu/upenn/cis/stormlite" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
-            <classpath>
-                <fileset dir="${inputlib.dir}">
-                    <include name="*.jar"/>
-                </fileset>
-            </classpath>
-        </javac>
-    </target>
 
-    <target name="compile-crawler" depends="compile-utils, compile-stormlite" description="Compiles the crawler">
+    <target name="compile-crawler" depends="compile-utils" description="Compiles the crawler">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="src/crawler" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
             <classpath>

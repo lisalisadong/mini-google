@@ -51,7 +51,7 @@ public class DUEBolt implements IRichBolt {
    private OutputCollector collector;
    
    /* URLFrotier */
-   URLFrontier urlFrotier = Crawler.getURLFrontier();;
+   URLFrontier urlFrontier = Crawler.getURLFrontier();
    
    
    public DUEBolt() {
@@ -76,8 +76,10 @@ public class DUEBolt implements IRichBolt {
    public void execute(Tuple input) 
    {
 	   String url = input.getStringByField("url");
-	   System.out.println(id + " Got " + url);
-//	   this.collector.emit(new Values<Object>(url));
+	   
+	   //TODO: get rid of duplicate
+	   
+	   urlFrontier.addURL(url);
    }
 
    /**
