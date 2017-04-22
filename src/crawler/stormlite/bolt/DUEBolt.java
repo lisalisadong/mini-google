@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import crawler.Crawler;
+import crawler.URLSet;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.routers.StreamRouter;
@@ -51,7 +52,8 @@ public class DUEBolt implements IRichBolt {
 
     /* URLFrotier */
     URLFrontier urlFrontier = Crawler.getURLFrontier();
-
+    URLSet urlSet = Crawler.getURLSet();
+    
     public DUEBolt() {
     }
 
@@ -71,10 +73,18 @@ public class DUEBolt implements IRichBolt {
     @Override
     public void execute(Tuple input) {
         String url = input.getStringByField("url");
-
-        // TODO: get rid of duplicate
-
+        
+//        System.out.println(id + " got " + url);
+        
         urlFrontier.addURL(url);
+        
+        // add to frontier queue if set does not contain the url
+//        if(!urlSet.addURL(url)) {
+//            
+//            urlFrontier.addURL(url);
+//        	
+//        }
+        
     }
 
     /**

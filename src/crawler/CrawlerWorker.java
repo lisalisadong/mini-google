@@ -88,6 +88,9 @@ public class CrawlerWorker extends WorkerServer {
 					Tuple tuple = om.readValue(arg0.body(), Tuple.class);
 					logger.debug("Worker received: " + tuple + " for " + stream);
 //					System.out.println("Worker received: " + tuple + " for " + stream);
+					
+					crawler.pushData(stream, tuple);
+					
 					return "";
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

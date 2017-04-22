@@ -3,7 +3,9 @@ package crawler;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,8 +23,10 @@ import crawler.stormlite.bolt.HTTPModuleBolt;
 import crawler.stormlite.bolt.LinkExtractorBolt;
 import crawler.stormlite.bolt.URLFilterBolt;
 import crawler.urlfrontier.URLFrontier;
+import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.distributed.WorkerJob;
 import crawler.stormlite.tuple.Fields;
+import crawler.stormlite.tuple.Tuple;
 import crawler.robots.RobotInfoManager;
 
 /**
@@ -66,6 +70,9 @@ public class Crawler {
     public static URLFrontier urlFrontier = new URLFrontier();
     public static RobotInfoManager  robotManager = new RobotInfoManager();
     
+    // TODO: write to disk?
+    public static URLSet urlSet;
+    
     private DistributedCluster cluster;
     private List<String> topologies;
     private List<TopologyContext> contexts;
@@ -74,13 +81,15 @@ public class Crawler {
     	cluster = new DistributedCluster();
     	topologies = new ArrayList<>();
     	contexts = new ArrayList<>();
+    	
+    	urlSet = new URLSet();
     }
     
     public void setUp(WorkerJob workerJob) {
     	
     	Logger.configure(false, false);
     	cluster = new DistributedCluster();
-//    	urlFrontier.addURL("http://crawltest.cis.upenn.edu/");
+    	urlFrontier.addURL("http://crawltest.cis.upenn.edu/");
     	
     	System.out.println("frontier queue size: " + urlFrontier.urls.size());
     	
@@ -115,6 +124,15 @@ public class Crawler {
 		}
 		cluster.shutdown();
     }
+	
+	public void pushData(String stream, Tuple tuple) {
+		// Find the destination stream and route to it
+		StreamRouter router = cluster.getStreamRouter(stream);
+		
+		contexts.get(contexts.size() - 1).incSendOutputs(router.getKey(tuple.getValues()));
+		
+		router.executeLocally(tuple, contexts.get(contexts.size() - 1));
+	}
 
     private static Topology configTopology(Config config) {
 
@@ -194,5 +212,9 @@ public class Crawler {
 
     public static RobotInfoManager getRobotManager() {
         return robotManager;
+    }
+    
+    public static URLSet getURLSet() {
+    	return urlSet;
     }
 }

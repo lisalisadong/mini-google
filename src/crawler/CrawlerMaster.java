@@ -27,7 +27,8 @@ import crawler.stormlite.distributed.WorkerHelper;
 public class CrawlerMaster {
 	static Logger logger = Logger.getLogger(CrawlerMaster.class.getName());
 	
-	static String workerList = "[127.0.0.1:8000,127.0.0.1:8001]";
+//	static String workerList = "[127.0.0.1:8000,127.0.0.1:8001]";
+	static String workerList = "[127.0.0.1:8000]";
 	
 	
 	public static void main(String[] args) {
