@@ -124,7 +124,7 @@
                 <pathelement location="lib/je-6.2.31.jar"/>
                 <pathelement location="${classes.dir}"/>
             </classpath>
-            <arg value="1234"/>
+            <arg value="8080"/>
             <arg value="."/>
             <arg value="conf/web.xml"/>
         </java>

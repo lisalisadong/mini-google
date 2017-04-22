@@ -7,3 +7,6 @@ Requirements:
 - Tune ranking function.
 - Have a 'debug mode' in which the engine shows additional information about how the
 results were ranked, and why (e.g., the raw PageRank scores, the TF and IDF values, and so on).
+
+Compile and run:
+    ant search
