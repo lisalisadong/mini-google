@@ -8,5 +8,16 @@ Requirements:
 - Have a 'debug mode' in which the engine shows additional information about how the
 results were ranked, and why (e.g., the raw PageRank scores, the TF and IDF values, and so on).
 
+Milestone 1:
+- Build search engine framework with fake data (search and display results)
+- Build UI framework (choose an AJAX framework that supports auto-complete)
+
+Milestone 2:
+- Integrate search with APIs (e.g. Amazon, Ebay, weather, Yelp, GoogleMap, Wikipedia, etc.)
+- Integrate search with real data from database, implement stop-list, root analysis and optimize ranking algorithm
+
+Milestone 3:
+- Optimization of ranking algorithm and implement auto-correction mispelled words.
+
 Compile and run:
     ant search
