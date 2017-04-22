@@ -20,20 +20,20 @@ package crawler.stormlite.tuple;
 import java.util.ArrayList;
 
 public class Values<E> extends ArrayList<E> {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
-	public Values() {
-		
-	}
-	
-	@SafeVarargs
-	public Values(E... values) {
-		super(values.length);
-		
-		for (E e: values)
-			add(e);
-	}
+    public Values() {
+
+    }
+
+    @SafeVarargs
+    public Values(E... values) {
+        super(values.length);
+
+        for (E e : values)
+            add(e);
+    }
 }

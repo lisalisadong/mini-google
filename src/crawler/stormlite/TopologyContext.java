@@ -24,82 +24,83 @@ import java.util.Queue;
 import crawler.stormlite.routers.StreamRouter;
 
 /**
- * Information about the execution of a topology, including
- * the stream routers
+ * Information about the execution of a topology, including the stream routers
  * 
  * @author zives
  *
  */
 public class TopologyContext {
-	Topology topology;
-	
-	Queue<Runnable> taskQueue;
-	
-	public static enum STATE {INIT, MAP, REDUCE, DONE};
-	
-	STATE state = STATE.INIT;
-	
-	int mapOutputs = 0;
-	
-	int reduceOutputs = 0;
-	
-	Map<String, Integer> sendOutputs = new HashMap<>();
-	
-	/**
-	 * Mappings from stream IDs to routers
-	 */
-	Map<String, StreamRouter> next = new HashMap<>();
-	
-	public TopologyContext(Topology topo, Queue<Runnable> theTaskQueue) {
-		topology = topo;
-		taskQueue = theTaskQueue;
-	}
-	
-	public Topology getTopology() {
-		return topology;
-	}
-	
-	public void setTopology(Topology topo) {
-		this.topology = topo;
-	}
-	
-	public void addStreamTask(Runnable next) {
-		taskQueue.add(next);
-	}
+    Topology topology;
 
-	public STATE getState() {
-		return state;
-	}
+    Queue<Runnable> taskQueue;
 
-	public void setState(STATE state) {
-		this.state = state;
-	}
+    public static enum STATE {
+        INIT, MAP, REDUCE, DONE
+    };
 
-	public int getMapOutputs() {
-		return mapOutputs;
-	}
+    STATE state = STATE.INIT;
 
-	public void incMapOutputs(String key) {
-		this.mapOutputs++;
-	}
+    int mapOutputs = 0;
 
-	public int getReduceOutputs() {
-		return reduceOutputs;
-	}
+    int reduceOutputs = 0;
 
-	public void incReduceOutputs(String key) {
-		this.reduceOutputs++;
-	}
-	
-	public void incSendOutputs(String key) {
-		 if (!sendOutputs.containsKey(key))
-			 sendOutputs.put(key, new Integer(0));
-		 
-		 sendOutputs.put(key,  new Integer(sendOutputs.get(key) + 1));
-	}
-	
-	public Map<String, Integer> getSendOutputs() {
-		return sendOutputs;
-	}
-	
+    Map<String, Integer> sendOutputs = new HashMap<>();
+
+    /**
+     * Mappings from stream IDs to routers
+     */
+    Map<String, StreamRouter> next = new HashMap<>();
+
+    public TopologyContext(Topology topo, Queue<Runnable> theTaskQueue) {
+        topology = topo;
+        taskQueue = theTaskQueue;
+    }
+
+    public Topology getTopology() {
+        return topology;
+    }
+
+    public void setTopology(Topology topo) {
+        this.topology = topo;
+    }
+
+    public void addStreamTask(Runnable next) {
+        taskQueue.add(next);
+    }
+
+    public STATE getState() {
+        return state;
+    }
+
+    public void setState(STATE state) {
+        this.state = state;
+    }
+
+    public int getMapOutputs() {
+        return mapOutputs;
+    }
+
+    public void incMapOutputs(String key) {
+        this.mapOutputs++;
+    }
+
+    public int getReduceOutputs() {
+        return reduceOutputs;
+    }
+
+    public void incReduceOutputs(String key) {
+        this.reduceOutputs++;
+    }
+
+    public void incSendOutputs(String key) {
+        if (!sendOutputs.containsKey(key))
+            sendOutputs.put(key, new Integer(0));
+
+        sendOutputs.put(key, new Integer(sendOutputs.get(key) + 1));
+    }
+
+    public Map<String, Integer> getSendOutputs() {
+        return sendOutputs;
+    }
+
 }

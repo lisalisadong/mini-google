@@ -31,45 +31,43 @@ import crawler.stormlite.bolt.IRichBolt;
  *
  */
 public class RoundRobin extends StreamRouter {
-	static Logger log = Logger.getLogger(RoundRobin.class);
-	
-	int inx = 0;
-	List<IRichBolt> children;
-	
-	public RoundRobin() {
-		children = new ArrayList<IRichBolt>();
-	}
-	
-	public RoundRobin(IRichBolt child) {
-		children = new ArrayList<IRichBolt>();
-		children.add(child);
-	}
-	
-	public RoundRobin(List<IRichBolt> children) {
-		this.children = children;
-	}
-	
+    static Logger log = Logger.getLogger(RoundRobin.class);
 
-	/**
-	 * Round-robin through the bolts
-	 * 
-	 */
-	@Override
-	protected IRichBolt getBoltFor(List<Object> tuple) {
-		
-		if (getBolts().isEmpty()) {
-			log.error("Could not find destination for " + tuple.toString());
-			return null;
-		}
-		
-		IRichBolt bolt = getBolts().get(inx);
-		
-		inx = (inx + 1) % getBolts().size();
+    int inx = 0;
+    List<IRichBolt> children;
 
-		log.debug("Routing " + tuple.toString() + " to " + bolt.getExecutorId());
-		
-		return bolt;
-	}
+    public RoundRobin() {
+        children = new ArrayList<IRichBolt>();
+    }
 
+    public RoundRobin(IRichBolt child) {
+        children = new ArrayList<IRichBolt>();
+        children.add(child);
+    }
+
+    public RoundRobin(List<IRichBolt> children) {
+        this.children = children;
+    }
+
+    /**
+     * Round-robin through the bolts
+     * 
+     */
+    @Override
+    protected IRichBolt getBoltFor(List<Object> tuple) {
+
+        if (getBolts().isEmpty()) {
+            log.error("Could not find destination for " + tuple.toString());
+            return null;
+        }
+
+        IRichBolt bolt = getBolts().get(inx);
+
+        inx = (inx + 1) % getBolts().size();
+
+        log.debug("Routing " + tuple.toString() + " to " + bolt.getExecutorId());
+
+        return bolt;
+    }
 
 }

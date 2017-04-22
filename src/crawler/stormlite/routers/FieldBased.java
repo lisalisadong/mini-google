@@ -24,101 +24,100 @@ import crawler.stormlite.bolt.IRichBolt;
 import crawler.stormlite.tuple.Fields;
 
 /**
- * Does hash partitioning on the tuple to determine
- * a destination
+ * Does hash partitioning on the tuple to determine a destination
  * 
  * @author zives
  *
  */
 public class FieldBased extends StreamRouter {
-	List<Integer> fieldsToHash;
-	List<String> shardFields;
-	
-	public FieldBased() {
-		fieldsToHash = new ArrayList<Integer>();
-	}
-	
-	public FieldBased(List<String> shardFields) {
-		fieldsToHash = new ArrayList<Integer>();
-		this.shardFields = shardFields;
-	}
-	
-	/**
-	 * Adds an index field of an attribute that's used to shard the data
-	 * @param field
-	 */
-	public void addField(Integer field) {
-		fieldsToHash.add(field);
-	}
-	
-	/**
-	 * Determines which bolt to route tuples to
-	 */
-	public IRichBolt getBoltFor(List<Object> tuple) {
-		
-		int hash = 0;
-		
-		if (fieldsToHash.isEmpty())
-			throw new IllegalArgumentException("Field-based grouping without a shard attribute");
-		
-		for (Integer i: fieldsToHash)
-			hash ^= tuple.get(i).hashCode();
-		
-		hash = hash % getBolts().size();
-		if (hash < 0)
-			hash = hash + getBolts().size();
+    List<Integer> fieldsToHash;
+    List<String> shardFields;
 
-		return getBolts().get(hash);
-	}
+    public FieldBased() {
+        fieldsToHash = new ArrayList<Integer>();
+    }
 
-	/**
-	 * Handler that, given a schema, looks up the index positions used
-	 * for sharding fields
-	 */
-	@Override
-	public void declare(Fields fields) {
-		super.declare(fields);
+    public FieldBased(List<String> shardFields) {
+        fieldsToHash = new ArrayList<Integer>();
+        this.shardFields = shardFields;
+    }
 
-		if (shardFields != null) {
-			for (String name: shardFields) {
-				Integer pos = fields.indexOf(name);
-				if (pos < 0)
-					throw new IllegalArgumentException("Shard field " + name + " was not found in " + fields);
-				if (!fieldsToHash.contains(pos))
-					fieldsToHash.add(pos);
-			}
-		}
-	}
+    /**
+     * Adds an index field of an attribute that's used to shard the data
+     * 
+     * @param field
+     */
+    public void addField(Integer field) {
+        fieldsToHash.add(field);
+    }
 
-	public List<Integer> getFieldsToHash() {
-		return fieldsToHash;
-	}
-	
-	public String getKey(List<Object> input) {
-		StringBuilder sb = new StringBuilder();
-		
-		int inx = 0;
-		for (Integer i: fieldsToHash) {
-			if (inx > 0)
-				sb.append(',');
-			else
-				inx++;
-			sb.append(input.get(i));
-		}
-		return sb.toString();
-	}
+    /**
+     * Determines which bolt to route tuples to
+     */
+    public IRichBolt getBoltFor(List<Object> tuple) {
 
-	public void setFieldsToHash(List<Integer> fieldsToHash) {
-		this.fieldsToHash = fieldsToHash;
-	}
+        int hash = 0;
 
-	public List<String> getShardFields() {
-		return shardFields;
-	}
+        if (fieldsToHash.isEmpty())
+            throw new IllegalArgumentException("Field-based grouping without a shard attribute");
 
-	public void setShardFields(List<String> shardFields) {
-		this.shardFields = shardFields;
-	}
+        for (Integer i : fieldsToHash)
+            hash ^= tuple.get(i).hashCode();
 
-	
+        hash = hash % getBolts().size();
+        if (hash < 0)
+            hash = hash + getBolts().size();
+
+        return getBolts().get(hash);
+    }
+
+    /**
+     * Handler that, given a schema, looks up the index positions used for
+     * sharding fields
+     */
+    @Override
+    public void declare(Fields fields) {
+        super.declare(fields);
+
+        if (shardFields != null) {
+            for (String name : shardFields) {
+                Integer pos = fields.indexOf(name);
+                if (pos < 0)
+                    throw new IllegalArgumentException("Shard field " + name + " was not found in " + fields);
+                if (!fieldsToHash.contains(pos))
+                    fieldsToHash.add(pos);
+            }
+        }
+    }
+
+    public List<Integer> getFieldsToHash() {
+        return fieldsToHash;
+    }
+
+    public String getKey(List<Object> input) {
+        StringBuilder sb = new StringBuilder();
+
+        int inx = 0;
+        for (Integer i : fieldsToHash) {
+            if (inx > 0)
+                sb.append(',');
+            else
+                inx++;
+            sb.append(input.get(i));
+        }
+        return sb.toString();
+    }
+
+    public void setFieldsToHash(List<Integer> fieldsToHash) {
+        this.fieldsToHash = fieldsToHash;
+    }
+
+    public List<String> getShardFields() {
+        return shardFields;
+    }
+
+    public void setShardFields(List<String> shardFields) {
+        this.shardFields = shardFields;
+    }
+
 }

@@ -26,22 +26,23 @@ import java.util.ArrayList;
  *
  */
 public class Fields extends ArrayList<String> {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
-	public Fields() {}
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
-	public Fields(String s) {
-		super();
-		add(s);
-	}
-	
-	public Fields(String... lst) {
-		super();
-		for (String s: lst)
-			add(s);
-	}
+    public Fields() {
+    }
+
+    public Fields(String s) {
+        super();
+        add(s);
+    }
+
+    public Fields(String... lst) {
+        super();
+        for (String s : lst)
+            add(s);
+    }
 
 }

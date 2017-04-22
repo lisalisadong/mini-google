@@ -6,7 +6,8 @@ import java.util.Date;
 import java.util.regex.Pattern;
 
 /**
- * Print formatted logs. Error messages will be printed in full_log.txt and error_log.txt.
+ * Print formatted logs. Error messages will be printed in full_log.txt and
+ * error_log.txt.
  */
 public class Logger {
 
@@ -27,12 +28,14 @@ public class Logger {
             error.createNewFile();
             full_log = new FileOutputStream(full, true);
             error_log = new FileOutputStream(error, true);
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
 
     }
 
     /**
      * Configure the verbose mode.
+     * 
      * @param verbose
      * @param debug
      */
@@ -43,6 +46,7 @@ public class Logger {
 
     /**
      * [TRACE] trivial things
+     * 
      * @param pattern
      * @param components
      */
@@ -50,12 +54,15 @@ public class Logger {
         String log = getTimestamp() + getThread() + getClassName() + "[TRACE] " + getMessage(pattern, components);
         try {
             full_log.write((log + "\n").getBytes());
-        } catch (IOException e) {}
-        if (verbose) System.out.println(log);
+        } catch (IOException e) {
+        }
+        if (verbose)
+            System.out.println(log);
     }
 
     /**
      * [WARN] for important things
+     * 
      * @param pattern
      * @param components
      */
@@ -63,12 +70,14 @@ public class Logger {
         String log = getTimestamp() + getThread() + getClassName() + "[WARN] " + getMessage(pattern, components);
         try {
             full_log.write((log + "\n").getBytes());
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
         System.out.println(log);
     }
 
     /**
      * [DEBUG] for critical things
+     * 
      * @param pattern
      * @param components
      */
@@ -76,12 +85,15 @@ public class Logger {
         String log = getTimestamp() + getThread() + getClassName() + "[DEBUG] " + getMessage(pattern, components);
         try {
             full_log.write((log + "\n").getBytes());
-        } catch (IOException e) {}
-        if (debug) System.out.println(log);
+        } catch (IOException e) {
+        }
+        if (debug)
+            System.out.println(log);
     }
 
     /**
      * [ERROR] for errors
+     * 
      * @param pattern
      * @param components
      */
@@ -95,7 +107,8 @@ public class Logger {
                 e.printStackTrace(writer);
                 writer.flush();
             }
-        } catch (IOException e1) {}
+        } catch (IOException e1) {
+        }
         System.err.println(log);
     }
 
@@ -110,8 +123,8 @@ public class Logger {
     }
 
     private String getTimestamp() {
-        Date now = new Date( );
-        SimpleDateFormat ft = new SimpleDateFormat ("[yyyy.MM.dd hh:mm:ss]");
+        Date now = new Date();
+        SimpleDateFormat ft = new SimpleDateFormat("[yyyy.MM.dd hh:mm:ss]");
         return ft.format(now);
     }
 

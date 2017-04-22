@@ -31,43 +31,41 @@ import crawler.stormlite.bolt.IRichBolt;
  *
  */
 public class First extends StreamRouter {
-	static Logger log = Logger.getLogger(First.class);
-	
-	int inx = 0;
-	List<IRichBolt> children;
-	
-	public First() {
-		children = new ArrayList<IRichBolt>();
-	}
-	
-	public First(IRichBolt child) {
-		children = new ArrayList<IRichBolt>();
-		children.add(child);
-	}
-	
-	public First(List<IRichBolt> children) {
-		this.children = children;
-	}
-	
+    static Logger log = Logger.getLogger(First.class);
 
-	/**
-	 * Only the first bolt
-	 * 
-	 */
-	@Override
-	protected IRichBolt getBoltFor(List<Object> tuple) {
-		
-		if (getBolts().isEmpty()) {
-			log.error("Could not find destination for " + tuple.toString());
-			return null;
-		}
-		
-		IRichBolt bolt = getBolts().get(0);
-		
-		log.debug("Routing " + tuple.toString() + " to " + bolt.getExecutorId());
-		
-		return bolt;
-	}
+    int inx = 0;
+    List<IRichBolt> children;
 
+    public First() {
+        children = new ArrayList<IRichBolt>();
+    }
+
+    public First(IRichBolt child) {
+        children = new ArrayList<IRichBolt>();
+        children.add(child);
+    }
+
+    public First(List<IRichBolt> children) {
+        this.children = children;
+    }
+
+    /**
+     * Only the first bolt
+     * 
+     */
+    @Override
+    protected IRichBolt getBoltFor(List<Object> tuple) {
+
+        if (getBolts().isEmpty()) {
+            log.error("Could not find destination for " + tuple.toString());
+            return null;
+        }
+
+        IRichBolt bolt = getBolts().get(0);
+
+        log.debug("Routing " + tuple.toString() + " to " + bolt.getExecutorId());
+
+        return bolt;
+    }
 
 }

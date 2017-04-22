@@ -11,24 +11,23 @@ import com.sleepycat.persist.model.SecondaryKey;
 
 /**
  * wrapper class for user
+ * 
  * @author xiaofandou
  *
  */
 @Entity
 public class Entry {
-	
-	@PrimaryKey
-	private String key;
-	public List<String> values;
-	
-	public Entry(String key) {
-		this.key = key;
-		this.values = new LinkedList<>();
-	}
-	
-	public Entry() {
-	}
-	
-	
-	
+
+    @PrimaryKey
+    private String key;
+    public List<String> values;
+
+    public Entry(String key) {
+        this.key = key;
+        this.values = new LinkedList<>();
+    }
+
+    public Entry() {
+    }
+
 }

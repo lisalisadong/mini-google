@@ -22,21 +22,20 @@ import java.util.List;
 import crawler.stormlite.routers.StreamRouter;
 
 /**
- * A stream propagation interface, used by a spout or bolt to send
- * tuples to the next stage
+ * A stream propagation interface, used by a spout or bolt to send tuples to the
+ * next stage
  * 
  * @author zives
  *
  */
 public interface IOutputCollector {
-	/**
-	 * Propagates a tuple (list of objects) to a particular
-	 * stream
-	 * 
-	 * @param tuple
-	 */
-	public void emit(List<Object> tuple);
-	
-	public void setRouter(StreamRouter router);
+    /**
+     * Propagates a tuple (list of objects) to a particular stream
+     * 
+     * @param tuple
+     */
+    public void emit(List<Object> tuple);
+
+    public void setRouter(StreamRouter router);
 
 }
