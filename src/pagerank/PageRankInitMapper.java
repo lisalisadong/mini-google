@@ -15,8 +15,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 public class PageRankInitMapper extends Mapper<LongWritable, Text, Text, Text> {
 
     /**
-     * Input line: [url@link1@link2@link3...]; [url] if no internal links
-     * Output line: [url@pagerank@#oflinks@link1@link2@link3...]
+     * Input line: [url@link1@link2@link3...]; [url] if no internal links Output
+     * line: [url@pagerank@#oflinks@link1@link2@link3...]
      */
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
         Text url = new Text();
@@ -33,10 +33,10 @@ public class PageRankInitMapper extends Mapper<LongWritable, Text, Text, Text> {
             if (!allLinks.isEmpty()) {
                 numOfLinks = allLinks.split("@").length;
             }
-    
+
             double initialPageRank = 1.0;
             links.set(initialPageRank + "@" + numOfLinks + "@" + allLinks);
-    
+
             context.write(url, links);
         }
     }

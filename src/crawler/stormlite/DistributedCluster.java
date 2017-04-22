@@ -43,17 +43,18 @@ import crawler.stormlite.tasks.SpoutTask;
 import utils.Logger;
 
 /**
- * Use multiple threads to simulate a cluster of worker nodes.
- * Hooks to other nodes in a distributed environment.
+ * Use multiple threads to simulate a cluster of worker nodes. Hooks to other
+ * nodes in a distributed environment.
  * 
- * A thread pool (the executor) executes runnable tasks.  Each
- * task involves calling a nextTuple() or execute() method in
- * a spout or bolt, then routing its tuple to the router. 
+ * A thread pool (the executor) executes runnable tasks. Each task involves
+ * calling a nextTuple() or execute() method in a spout or bolt, then routing
+ * its tuple to the router.
  * 
  * @author zives
  *
  */
 public class DistributedCluster implements Runnable {
+
 	static Logger log = new Logger(DistributedCluster.class.getName());
 	
 	static AtomicBoolean quit = new AtomicBoolean(false);

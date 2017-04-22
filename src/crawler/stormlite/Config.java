@@ -25,13 +25,13 @@ import java.util.HashMap;
  * @author zives
  *
  */
-public class Config extends HashMap<String,String> {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class Config extends HashMap<String, String> {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
-	public Config() {
-		super();
-	}
+    public Config() {
+        super();
+    }
 }

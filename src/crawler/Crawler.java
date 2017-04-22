@@ -27,6 +27,7 @@ import crawler.robots.RobotInfoManager;
 
 /**
  * The Crawler
+ * 
  * @author xiaofandou
  *
  */
@@ -108,23 +109,23 @@ public class Crawler {
 		}
 		cluster.shutdown();
     }
-    
+
     private static Topology configTopology(Config config) {
-    	
-    	URLSpout URLSpout = new URLSpout();
+
+        URLSpout URLSpout = new URLSpout();
         HTTPModuleBolt httpModule = new HTTPModuleBolt();
         ContentSeenBolt contentSeen = new ContentSeenBolt();
         LinkExtractorBolt linkExtractor = new LinkExtractorBolt();
         URLFilterBolt urlFilter = new URLFilterBolt();
-//        HostSplitterBolt hostSplitter = new HostSplitterBolt();
+        // HostSplitterBolt hostSplitter = new HostSplitterBolt();
         DUEBolt due = new DUEBolt();
-        
+
         // wordSpout ==> countBolt ==> MongoInsertBolt
         TopologyBuilder builder = new TopologyBuilder();
 
         // Only one source ("spout") for the words
         builder.setSpout(URL_SPOUT, URLSpout, URL_SPOUT_NUM);
-        
+
         // Four parallel word counters, each of which gets specific words
         builder.setBolt(HTTP_MODULE_BOLT, httpModule, HTTP_MODULE_BOLT_NUM)
         .shuffleGrouping(URL_SPOUT);
@@ -140,10 +141,10 @@ public class Crawler {
         
         builder.setBolt(DUE_BOLT, due, DUE_BOLT_NUM)
         .fieldsGrouping(URL_FILTER_BOLT, new Fields("host"));
-       
+        
         return builder.createTopology();
     }
-    
+
     public static void main(String[] args) throws Exception {
     	
     	Crawler crawler = new Crawler();
@@ -181,11 +182,11 @@ public class Crawler {
 		return new WorkerJob(topo, config);
 	}
 
-	public static URLFrontier getURLFrontier() {
-		return urlFrontier;
-	} 
+    public static URLFrontier getURLFrontier() {
+        return urlFrontier;
+    }
 
-	public static RobotInfoManager getRobotManager() {
-		return robotManager;
-	}
+    public static RobotInfoManager getRobotManager() {
+        return robotManager;
+    }
 }
