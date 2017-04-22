@@ -88,7 +88,7 @@ public class HTTPModuleBolt implements IRichBolt {
 	   }
 	   client.setMethod("HEAD");
 	   robotManager.setHostLastAccessTime(url);
-	   robotManager.waitUntilAvailable(url);
+//	   robotManager.waitUntilAvailable(url);
 	   client.sendReq();
 	   
 	   //TODO: HANDLE 3XX

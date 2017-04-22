@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,6 +18,7 @@ import crawler.stormlite.bolt.OutputCollector;
 import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
+import utils.Logger;
 
 /**
  * This is a virtual bolt that is used to route data to the WorkerServer
@@ -29,7 +29,7 @@ import crawler.stormlite.tuple.Tuple;
  */
 public class SenderBolt implements IRichBolt {
 
-	static Logger log = Logger.getLogger(SenderBolt.class);
+	static Logger log = new Logger(SenderBolt.class.getName());
 
     /**
      * To make it easier to debug: we have a unique ID for each
@@ -94,21 +94,18 @@ public class SenderBolt implements IRichBolt {
     	isEndOfStream = tuple.isEndOfStream();
     	
 		log.debug("Sender is routing " + tuple.toString() + " to " + address + "/" + stream);
-//		if (isEndOfStream) System.out.println("Sender is routing " + tuple.toString() + " to " + address + "/" + stream);
 		
+		// TODO: send this to /pushdata/{stream} as a POST!
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		conn.setRequestProperty("Content-Type", "application/json");
-		// TODO: send this to /pushdata/{stream} as a POST!
 		conn.setRequestMethod("POST");
 		conn.setDoOutput(true);
-		
 		OutputStream os = conn.getOutputStream();
 		String jsonForTuple = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(tuple);
 		byte[] toSend = jsonForTuple.getBytes();
 		os.write(toSend);
 		os.flush();
 		conn.getResponseCode();
-		
 		conn.disconnect();
     }
     

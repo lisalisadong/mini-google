@@ -71,7 +71,7 @@ public class DistributedCluster implements Runnable {
 	
 	//we'll do a single threaded pool to avoid races
 	// between EOS propagation and tuple propagation!
-	ExecutorService executor = Executors.newFixedThreadPool(1);	
+	ExecutorService executor = Executors.newFixedThreadPool(5);	
 	
 	Queue<Runnable> taskQueue = new ConcurrentLinkedQueue<Runnable>();
 	

@@ -88,7 +88,7 @@ public class ContentSeenBolt implements IRichBolt {
 	   /* download the page*/
 	   Client client = Client.getClient(url);
 	   client.setMethod("GET");
-	   robotManager.waitUntilAvailable(url);	
+//	   robotManager.waitUntilAvailable(url);	
 	   /* set last access time */
 	   robotManager.setHostLastAccessTime(url);
 	   client.sendReq();
