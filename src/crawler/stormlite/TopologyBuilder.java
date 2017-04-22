@@ -22,25 +22,21 @@ import crawler.stormlite.bolt.IRichBolt;
 import crawler.stormlite.spout.IRichSpout;
 
 public class TopologyBuilder {
-	Topology topo = new Topology();
-	
-	public void setSpout(
-			String streamID, 
-			IRichSpout spout, 
-			int parallelism) 
-	{
-		topo.setSpouts(streamID, spout.getClass(), parallelism);
-	}
-	
-	public BoltDeclarer setBolt(String streamID, IRichBolt bolt, int parallelism) {
-		topo.setBolts(streamID, bolt.getClass(), parallelism);
-		
-		topo.setBoltGrouping(streamID, new BoltDeclarer());
-		
-		return topo.boltGrouping.get(streamID);
-	}
-	
-	public Topology createTopology() {
-		return topo;
-	}
+    Topology topo = new Topology();
+
+    public void setSpout(String streamID, IRichSpout spout, int parallelism) {
+        topo.setSpouts(streamID, spout.getClass(), parallelism);
+    }
+
+    public BoltDeclarer setBolt(String streamID, IRichBolt bolt, int parallelism) {
+        topo.setBolts(streamID, bolt.getClass(), parallelism);
+
+        topo.setBoltGrouping(streamID, new BoltDeclarer());
+
+        return topo.boltGrouping.get(streamID);
+    }
+
+    public Topology createTopology() {
+        return topo;
+    }
 }

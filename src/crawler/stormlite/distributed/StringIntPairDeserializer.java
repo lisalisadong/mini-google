@@ -12,22 +12,22 @@ import com.fasterxml.jackson.databind.node.IntNode;
 import crawler.stormlite.StringIntPair;
 
 public class StringIntPairDeserializer extends JsonDeserializer<StringIntPair> {
-    public StringIntPairDeserializer() { 
+    public StringIntPairDeserializer() {
         this(null);
-    } 
- 
-    public StringIntPairDeserializer(Class<?> vc) { 
-        super(); 
     }
- 
+
+    public StringIntPairDeserializer(Class<?> vc) {
+        super();
+    }
+
     @Override
-    public StringIntPair deserialize(JsonParser jsonparser, DeserializationContext context) 
-      throws IOException, JsonProcessingException {
-    	JsonNode node = jsonparser.getCodec().readTree(jsonparser);
-    	
-    	String className = node.get("left").asText();
-    	int count = (Integer) ((IntNode) node.get("right")).numberValue();
-        
+    public StringIntPair deserialize(JsonParser jsonparser, DeserializationContext context)
+            throws IOException, JsonProcessingException {
+        JsonNode node = jsonparser.getCodec().readTree(jsonparser);
+
+        String className = node.get("left").asText();
+        int count = (Integer) ((IntNode) node.get("right")).numberValue();
+
         return new StringIntPair(className, count);
     }
 }

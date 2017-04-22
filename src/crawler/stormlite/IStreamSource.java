@@ -18,7 +18,7 @@
 package crawler.stormlite;
 
 public interface IStreamSource {
-	public String getExecutorId();
+    public String getExecutorId();
 
-	void declareOutputFields(OutputFieldsDeclarer declarer);
+    void declareOutputFields(OutputFieldsDeclarer declarer);
 }

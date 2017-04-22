@@ -23,24 +23,24 @@ public class SearchEngineServlet extends HttpServlet {
         logger.warn(servletPath);
         PrintWriter writer = response.getWriter();
         switch (servletPath) {
-            case "/":
-                String contents = new String(Files.readAllBytes(Paths.get("resources/sites/main.html")));
-                writer.println(contents);
-                break;
-            case "/search":
-                if (request.getParameter("query") == null) {
-                    response.sendError(404, "Page Not Found");
-                } else {
-                    writer.println("This is the result page");
-                    writer.println("query is: " + request.getParameter("query"));
-                }
-                break;
-            case "/scripts":
-                contents = new String(Files.readAllBytes(Paths.get("resources/scripts/main.js")));
-                writer.println(contents);
-                break;
-            default:
-                break;
+        case "/":
+            String contents = new String(Files.readAllBytes(Paths.get("resources/sites/main.html")));
+            writer.println(contents);
+            break;
+        case "/search":
+            if (request.getParameter("query") == null) {
+                response.sendError(404, "Page Not Found");
+            } else {
+                writer.println("This is the result page");
+                writer.println("query is: " + request.getParameter("query"));
+            }
+            break;
+        case "/scripts":
+            contents = new String(Files.readAllBytes(Paths.get("resources/scripts/main.js")));
+            writer.println(contents);
+            break;
+        default:
+            break;
         }
     }
 }

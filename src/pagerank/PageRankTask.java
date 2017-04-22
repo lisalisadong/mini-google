@@ -5,6 +5,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.map.MultithreadedMapper;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 /**
@@ -28,18 +29,27 @@ public class PageRankTask {
             job.setJarByClass(PageRankDriver.class);
 
             if (taskName.equals(INIT)) {
-                job.setMapperClass(PageRankInitMapper.class);
+                MultithreadedMapper.setMapperClass(job, PageRankInitMapper.class);
+                MultithreadedMapper.setNumberOfThreads(job, 10);
+                job.setMapperClass(MultithreadedMapper.class);
+                // job.setMapperClass(PageRankInitMapper.class);
                 job.setReducerClass(PageRankInitReducer.class);
             }
 
             else if (taskName.equals(RUN)) {
-                job.setMapperClass(PageRankRunMapper.class);
+                MultithreadedMapper.setMapperClass(job, PageRankRunMapper.class);
+                MultithreadedMapper.setNumberOfThreads(job, 10);
+                job.setMapperClass(MultithreadedMapper.class);
+                // job.setMapperClass(PageRankRunMapper.class);
                 job.setReducerClass(PageRankRunReducer.class);
             }
 
             else if (taskName.equals(CLEAN)) {
-                 job.setMapperClass(PageRankCleanMapper.class);
-                 job.setReducerClass(PageRankCleanReducer.class);
+                MultithreadedMapper.setMapperClass(job, PageRankCleanMapper.class);
+                MultithreadedMapper.setNumberOfThreads(job, 10);
+                job.setMapperClass(MultithreadedMapper.class);
+                // job.setMapperClass(PageRankCleanMapper.class);
+                job.setReducerClass(PageRankCleanReducer.class);
             }
 
             else {

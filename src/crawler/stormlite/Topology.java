@@ -30,85 +30,85 @@ import crawler.stormlite.tuple.Fields;
 
 public class Topology {
 
-	/**
-	 * Spouts are the inputs, and each has a stream ID and a parallelism
-	 */
-	Map<String,StringIntPair> spouts = new HashMap<>();
-	
-	/**
-	 * Bolts are the operators, and each has a stream ID
-	 * disjoint from the spouts
-	 */
-	Map<String, StringIntPair> bolts = new HashMap<>();
-	
-	/**
-	 * Bolts have multiple inputs connected to spouts (or other bolts)
-	 */
-	@JsonDeserialize(keyUsing = StringIntPairKeyDeserializer.class)
-	Map<StringIntPair, String> boltConnectors = new HashMap<>();
-	
-	/**
-	 * Each Stream has a set of fields, i.e., a schema
-	 */
-	Map<String, Fields> streamSchemas = new HashMap<>();
+    /**
+     * Spouts are the inputs, and each has a stream ID and a parallelism
+     */
+    Map<String, StringIntPair> spouts = new HashMap<>();
 
-	/**
-	 * Each stream also has a grouping type
-	 */
-	Map<String, BoltDeclarer> boltGrouping = new HashMap<>();
+    /**
+     * Bolts are the operators, and each has a stream ID disjoint from the
+     * spouts
+     */
+    Map<String, StringIntPair> bolts = new HashMap<>();
 
-	public Map<String, StringIntPair> getSpouts() {
-		return spouts;
-	}
-	
-	public StringIntPair getSpout(String key) throws ClassNotFoundException {
-		StringIntPair entry = spouts.get(key);
-		return entry;
-	}
+    /**
+     * Bolts have multiple inputs connected to spouts (or other bolts)
+     */
+    @JsonDeserialize(keyUsing = StringIntPairKeyDeserializer.class)
+    Map<StringIntPair, String> boltConnectors = new HashMap<>();
 
-	public void setSpouts(String name, Class<? extends IRichSpout> spoutClass, Integer parallel) {
-		this.spouts.put(name, new StringIntPair(spoutClass.getName(), Integer.valueOf(parallel)));
-	}
+    /**
+     * Each Stream has a set of fields, i.e., a schema
+     */
+    Map<String, Fields> streamSchemas = new HashMap<>();
 
-	public Map<String, StringIntPair> getBolts() {
-		return bolts;
-	}
-	
-	public StringIntPair getBolt(String key) throws ClassNotFoundException {
-		StringIntPair entry = bolts.get(key);
-		return entry;
-	}
+    /**
+     * Each stream also has a grouping type
+     */
+    Map<String, BoltDeclarer> boltGrouping = new HashMap<>();
 
-	public void setBolts(String bolt, Class<? extends IRichBolt> boltClass, Integer parallel) {
-		this.bolts.put(bolt, new StringIntPair(boltClass.getName(), Integer.valueOf(parallel)));
-	}
+    public Map<String, StringIntPair> getSpouts() {
+        return spouts;
+    }
 
-	public Map<StringIntPair, String> getBoltConnectors() {
-		return boltConnectors;
-	}
+    public StringIntPair getSpout(String key) throws ClassNotFoundException {
+        StringIntPair entry = spouts.get(key);
+        return entry;
+    }
 
-	public void setBoltConnectors(Map<StringIntPair, String> boltConnectors) {
-		this.boltConnectors = boltConnectors;
-	}
+    public void setSpouts(String name, Class<? extends IRichSpout> spoutClass, Integer parallel) {
+        this.spouts.put(name, new StringIntPair(spoutClass.getName(), Integer.valueOf(parallel)));
+    }
 
-	public Map<String, Fields> getStreamSchemas() {
-		return streamSchemas;
-	}
+    public Map<String, StringIntPair> getBolts() {
+        return bolts;
+    }
 
-	public void setStreamSchemas(Map<String, Fields> streamSchemas) {
-		this.streamSchemas = streamSchemas;
-	}
+    public StringIntPair getBolt(String key) throws ClassNotFoundException {
+        StringIntPair entry = bolts.get(key);
+        return entry;
+    }
 
-	public Map<String, BoltDeclarer> getBoltGrouping() {
-		return boltGrouping;
-	}
+    public void setBolts(String bolt, Class<? extends IRichBolt> boltClass, Integer parallel) {
+        this.bolts.put(bolt, new StringIntPair(boltClass.getName(), Integer.valueOf(parallel)));
+    }
 
-	public void setBoltGrouping(String streamID, BoltDeclarer boltDeclarer) {
-		this.boltGrouping.put(streamID, boltDeclarer);
-	}
+    public Map<StringIntPair, String> getBoltConnectors() {
+        return boltConnectors;
+    }
 
-	public BoltDeclarer getBoltDeclarer(String stream) {
-		return getBoltGrouping().get(stream);
-	}
-	
+    public void setBoltConnectors(Map<StringIntPair, String> boltConnectors) {
+        this.boltConnectors = boltConnectors;
+    }
+
+    public Map<String, Fields> getStreamSchemas() {
+        return streamSchemas;
+    }
+
+    public void setStreamSchemas(Map<String, Fields> streamSchemas) {
+        this.streamSchemas = streamSchemas;
+    }
+
+    public Map<String, BoltDeclarer> getBoltGrouping() {
+        return boltGrouping;
+    }
+
+    public void setBoltGrouping(String streamID, BoltDeclarer boltDeclarer) {
+        this.boltGrouping.put(streamID, boltDeclarer);
+    }
+
+    public BoltDeclarer getBoltDeclarer(String stream) {
+        return getBoltGrouping().get(stream);
+    }
+
 }
