@@ -1,6 +1,7 @@
 package crawler;
 
 import crawler.worker.WorkerServer;
+import crawler.stormlite.tuple.Tuple;
 import crawler.stormlite.distributed.WorkerJob;
 import utils.Logger;
 
@@ -13,6 +14,8 @@ import spark.Response;
 import spark.Route;
 import spark.Spark;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CrawlerWorker extends WorkerServer {
@@ -21,9 +24,15 @@ public class CrawlerWorker extends WorkerServer {
 	
 	Crawler crawler;
 	
+	ObjectMapper om;
+	
 	public CrawlerWorker(String masterAddr, int myPort) {
 		super(masterAddr, myPort);
+		
 		crawler = new Crawler();
+		
+		om = new ObjectMapper();
+	    om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 	}
 
 	@Override
@@ -33,12 +42,12 @@ public class CrawlerWorker extends WorkerServer {
 		runBackgroundThread();
 		
 		setPort(myPort);
-    	final ObjectMapper om = new ObjectMapper();
-        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         
         Spark.post(new Route("/setup") {
         	@Override
 			public Object handle(Request arg0, Response arg1) {
+        		
+        		System.out.println("received setup");
         		
 				try {
 					WorkerJob workerJob = om.readValue(arg0.body(), WorkerJob.class);
@@ -54,10 +63,12 @@ public class CrawlerWorker extends WorkerServer {
 			}
         });
         
-        Spark.post(new Route("/runjob") {
+        Spark.post(new Route("/run") {
         	
 			@Override
 			public Object handle(Request arg0, Response arg1) {
+				
+				System.out.println("received run");
 				
 				crawler.start();
 				
@@ -70,7 +81,22 @@ public class CrawlerWorker extends WorkerServer {
         	// TODO: data handler
 			@Override
 			public Object handle(Request arg0, Response arg1) {
-				return "";
+				
+				
+				try {
+					String stream = arg0.params(":stream");
+					Tuple tuple = om.readValue(arg0.body(), Tuple.class);
+					logger.debug("Worker received: " + tuple + " for " + stream);
+//					System.out.println("Worker received: " + tuple + " for " + stream);
+					return "";
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					arg1.status(500);
+					return e.getMessage();
+				}
+				
+				
 			}
         	
         });

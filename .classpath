@@ -24,5 +24,13 @@
 	<classpathentry kind="lib" path="lib/jackson-core-asl-1.9.13.jar"/>
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="/Users/xiaofandou/Desktop/CIS 555/SharedFolder/mini-google/lib/spark-core-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/xiaofandou/Desktop/CIS 555/SharedFolder/HW3/lib/slf4j-api-1.7.21.jar"/>
+	<classpathentry kind="lib" path="/Users/xiaofandou/Desktop/CIS 555/SharedFolder/HW3/lib/slf4j-log4j12-1.7.21.jar"/>
+	<classpathentry kind="lib" path="/Users/xiaofandou/Desktop/CIS 555/SharedFolder/HW3/lib/jetty-http-9.3.13.v20161014.jar"/>
+	<classpathentry kind="lib" path="/Users/xiaofandou/Desktop/CIS 555/SharedFolder/HW3/lib/jetty-io-9.3.13.v20161014.jar"/>
+	<classpathentry kind="lib" path="/Users/xiaofandou/Desktop/CIS 555/SharedFolder/HW3/lib/jetty-server-9.3.13.v20161014.jar"/>
+	<classpathentry kind="lib" path="/Users/xiaofandou/Desktop/CIS 555/SharedFolder/HW3/lib/jetty-util-9.3.13.v20161014.jar"/>
+	<classpathentry kind="lib" path="/Users/xiaofandou/Desktop/CIS 555/SharedFolder/HW3/lib/jetty-webapp-9.3.13.v20161014.jar"/>
+	<classpathentry kind="lib" path="/Users/xiaofandou/Desktop/CIS 555/SharedFolder/HW3/lib/servlet-api-3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

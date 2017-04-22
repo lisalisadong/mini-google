@@ -59,7 +59,7 @@ public class Crawler {
     public static final String ROBOT_MANAGER = "ROBOT_MANAGER";
     public static final String FRONTIER_QUEUE = "FRONTIER_QUEUE";
     
-    public static String DBPath = "./db";
+    public static String DBPath;
     
     public static int fileNum = -1;
     
@@ -80,12 +80,18 @@ public class Crawler {
     	
     	Logger.configure(false, false);
     	cluster = new DistributedCluster();
-    	urlFrontier.addURL("http://crawltest.cis.upenn.edu/");
+//    	urlFrontier.addURL("http://crawltest.cis.upenn.edu/");
+    	
+    	System.out.println("frontier queue size: " + urlFrontier.urls.size());
+    	
 //    	urlFrontier.addURL("https://www.reddit.com/");
     	
     	try {
     		Config config = workerJob.getConfig();
     		Topology topo = workerJob.getTopology();
+    		
+    		DBPath = "./db" + (config.get("workerIndex") == null? "": config.get("workerIndex"));
+    		
     		TopologyContext context = 
         			cluster.submitTopology("CrawlerJob", config, topo);
 			contexts.add(context);

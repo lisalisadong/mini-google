@@ -18,6 +18,7 @@
 package crawler.stormlite;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +75,7 @@ public class DistributedCluster implements Runnable {
 	// between EOS propagation and tuple propagation!
 	ExecutorService executor = Executors.newFixedThreadPool(5);	
 	
-	Queue<Runnable> taskQueue = new ConcurrentLinkedQueue<Runnable>();
+	Queue<Runnable> taskQueue = new LinkedList<Runnable>();
 	
 
 	public TopologyContext submitTopology(String name, Config config, 
@@ -107,7 +108,13 @@ public class DistributedCluster implements Runnable {
 	
 	public void run() {
 		while (!quit.get()) {
-			Runnable task = taskQueue.poll();
+			
+//			System.out.println("Task queue size: " + taskQueue.size());
+			Runnable task = null;
+//			task = taskQueue.poll();
+			synchronized(taskQueue) {
+				task = taskQueue.poll();
+			}
 			if (task == null)
 				Thread.yield();
 			else {

@@ -27,14 +27,14 @@ import crawler.stormlite.distributed.WorkerHelper;
 public class CrawlerMaster {
 	static Logger logger = Logger.getLogger(CrawlerMaster.class.getName());
 	
-	static String workerList = "[0:0:0:0:8000]";
+	static String workerList = "[127.0.0.1:8000,127.0.0.1:8001]";
 	
 	
 	public static void main(String[] args) {
 		
 		try {
 			
-			System.out.println("Press [Enter] to launch query, once nodes are alive...");
+			System.out.println("Master is up, Press [Enter] to launch query, once nodes are alive...");
 			
 			(new BufferedReader(new InputStreamReader(System.in))).readLine();
 			
@@ -49,8 +49,9 @@ public class CrawlerMaster {
 			
 		    int i = 0;
 			for(String dest: workers) {
+//				System.out.println("dest: " + dest);
 				config.put("workerIndex", String.valueOf(i++));
-				if (sendJob(dest, "POST", config, "definejob", 
+				if (sendJob(dest, "POST", config, "setup", 
 						mapper.writerWithDefaultPrettyPrinter().writeValueAsString(workerJob)).getResponseCode() != 
 						HttpURLConnection.HTTP_OK) 
 				{
@@ -59,7 +60,7 @@ public class CrawlerMaster {
 			}
 			
 			for (String dest: workers) {
-				if (sendJob(dest, "POST", config, "runjob", "").getResponseCode() != 
+				if (sendJob(dest, "POST", config, "run", "").getResponseCode() != 
 						HttpURLConnection.HTTP_OK) {
 					throw new RuntimeException("Job execution request failed");
 				}
@@ -102,14 +103,13 @@ private static Topology configTopology(Config config) {
         .shuffleGrouping(Crawler.LINK_EXTRACTOR_BOLT);
         
         builder.setBolt(Crawler.DUE_BOLT, due, Crawler.DUE_BOLT_NUM)
-        .fieldsGrouping(Crawler.URL_FILTER_BOLT, new Fields("host"));
+        .fieldsGrouping(Crawler.URL_FILTER_BOLT, new Fields("url"));
+//        .fieldsGrouping(Crawler.URL_FILTER_BOLT, new Fields("host"));
        
         return builder.createTopology();
     }
 	
 	public static WorkerJob getWorkerJob(Config config) {
-
-    	
     	
     	Topology topo = configTopology(config);
     	
@@ -127,6 +127,9 @@ private static Topology configTopology(Config config) {
 	
 	
 	static HttpURLConnection sendJob(String dest, String reqType, Config config, String job, String parameters) throws IOException {
+
+		System.out.println(dest + "/" + job);
+		
 		URL url = new URL(dest + "/" + job);
 		
 		logger.info("Sending request to " + url.toString());

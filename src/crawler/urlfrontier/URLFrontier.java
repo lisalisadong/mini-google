@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 public class URLFrontier {
 
-    private LinkedList<String> urls;
+    public  LinkedList<String> urls;
 
     public URLFrontier() {
         urls = new LinkedList<>();
