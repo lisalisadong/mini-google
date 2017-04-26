@@ -26,5 +26,6 @@
 	<classpathentry kind="lib" path="lib/jackson-databind-2.5.2.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-core-asl-1.9.13.jar"/>
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-app-1.8.9.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
