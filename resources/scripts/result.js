@@ -42,7 +42,7 @@ render() {
         <div className="ui divider"></div>
         <div className="row">
         <div className="two wide column"></div>
-        <div className="seven wide column">
+        <div className="eight wide column">
             <div className="ui fluid link card" href="#">
                 <div className="content">
                     <i className="right floated like thumbs up icon"></i>
@@ -194,7 +194,7 @@ render() {
             </div>
 
             <div className="row"><br/></div>
-            <div className="row">
+            <div className="row" style={{textAlign:'center'}}>
                 <a className="ui red circular label">prev</a>
                 <a className="ui orange circular label">1</a>
                 <a className="ui yellow circular label">2</a>
@@ -209,7 +209,7 @@ render() {
                 <a className="ui black circular label">next</a>
             </div>
         </div>
-        <div className="six wide column">
+        <div className="five wide column">
             <div className="ui fluid link card" href="#">
                 <div className="content">
                     <div className="header" style={{color:'steelblue',fontFamily:'Cochin',fontSize: 20}}>API Content</div>
