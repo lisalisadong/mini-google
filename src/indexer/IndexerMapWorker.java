@@ -8,8 +8,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-//import org.apache.pdfbox.pdmodel.PDDocument;
-//import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.util.PDFTextStripper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -56,13 +56,13 @@ public class IndexerMapWorker {
 			}
 			break;
 		case "pdf":
-//			PDDocument pdoc = PDDocument.load(in);
-//			PDFTextStripper stripper = new PDFTextStripper();
-//			stripper.setStartPage(1);
-//	        stripper.setEndPage(Integer.MAX_VALUE);
-//	        content = stripper.getText(pdoc);
-//	        pdoc.close();
-//	        parseElement(content);
+			PDDocument pdoc = PDDocument.load(in);
+			PDFTextStripper stripper = new PDFTextStripper();
+			stripper.setStartPage(1);
+	        stripper.setEndPage(Integer.MAX_VALUE);
+	        content = stripper.getText(pdoc);
+	        pdoc.close();
+	        parseElement(content);
 			break;
 		// xml or plain/text
 		default:
