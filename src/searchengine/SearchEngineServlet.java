@@ -1,10 +1,13 @@
 package searchengine;
 
+import edu.upenn.cis455.webserver.HttpEnum;
 import utils.Logger;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -31,13 +34,31 @@ public class SearchEngineServlet extends HttpServlet {
             if (request.getParameter("query") == null) {
                 response.sendError(404, "Page Not Found");
             } else {
-                writer.println("This is the result page");
-                writer.println("query is: " + request.getParameter("query"));
+//                writer.println("This is the result page");
+//                writer.println("query is: " + request.getParameter("query"));
+                response.sendRedirect("/result");
             }
             break;
-        case "/scripts":
-            contents = new String(Files.readAllBytes(Paths.get("resources/scripts/main.js")));
+        case "/result":
+            contents = new String(Files.readAllBytes(Paths.get("resources/sites/result.html")));
             writer.println(contents);
+            break;
+        case "/scripts":
+            try {
+                contents = new String(Files.readAllBytes(Paths.get("resources/scripts" + request.getPathInfo())));
+                writer.println(contents);
+            } catch (Exception e) {
+                response.sendError(404);
+            }
+            break;
+        case "/images":
+            try {
+                response.setContentType(HttpEnum.CONTENT_IMAGE_PNG.text());
+                contents = new String(Files.readAllBytes(Paths.get("resources/images" + request.getPathInfo())));
+                writer.println(contents);
+            } catch (Exception e) {
+                response.sendError(404);
+            }
             break;
         default:
             break;

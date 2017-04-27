@@ -27,4 +27,14 @@
   <url-pattern>/scripts*</url-pattern>
  </servlet-mapping>
 
+ <servlet-mapping>
+  <servlet-name>search-engine</servlet-name>
+  <url-pattern>/images*</url-pattern>
+ </servlet-mapping>
+
+ <servlet-mapping>
+  <servlet-name>search-engine</servlet-name>
+  <url-pattern>/result</url-pattern>
+ </servlet-mapping>
+
 </web-app>
