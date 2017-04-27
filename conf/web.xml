@@ -4,6 +4,37 @@
     PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" 
     "http://java.sun.com/dtd/web-app_2_3.dtd">
 
- <web-app>
+<web-app>
+ <display-name>Channel Subscription Servlets</display-name>
+
+ <servlet>
+  <servlet-name>search-engine</servlet-name>
+  <servlet-class>searchengine.SearchEngineServlet</servlet-class>
+ </servlet>
+
+ <servlet-mapping>
+  <servlet-name>search-engine</servlet-name>
+  <url-pattern>/</url-pattern>
+ </servlet-mapping>
+
+ <servlet-mapping>
+  <servlet-name>search-engine</servlet-name>
+  <url-pattern>/search</url-pattern>
+ </servlet-mapping>
+
+ <servlet-mapping>
+  <servlet-name>search-engine</servlet-name>
+  <url-pattern>/scripts*</url-pattern>
+ </servlet-mapping>
+
+ <servlet-mapping>
+  <servlet-name>search-engine</servlet-name>
+  <url-pattern>/images*</url-pattern>
+ </servlet-mapping>
+
+ <servlet-mapping>
+  <servlet-name>search-engine</servlet-name>
+  <url-pattern>/result</url-pattern>
+ </servlet-mapping>
 
 </web-app>

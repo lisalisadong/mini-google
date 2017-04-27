@@ -20,5 +20,5 @@ package crawler.stormlite;
 import crawler.stormlite.tuple.Fields;
 
 public interface OutputFieldsDeclarer {
-	public void declare(Fields fields);
+    public void declare(Fields fields);
 }

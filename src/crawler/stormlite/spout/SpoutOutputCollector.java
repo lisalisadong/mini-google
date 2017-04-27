@@ -29,29 +29,30 @@ import crawler.stormlite.routers.StreamRouter;
  * @author zives
  *
  */
-public class SpoutOutputCollector implements IOutputCollector  {
-	StreamRouter router;
-	TopologyContext context;
-	
-	public SpoutOutputCollector(TopologyContext context) {
-		this.context = context;
-	}
-	
-	@Override
-	public void setRouter(StreamRouter router) {
-		this.router = router;
-	}
+public class SpoutOutputCollector implements IOutputCollector {
+    StreamRouter router;
+    TopologyContext context;
 
-	/**
-	 * Emits a tuple to the stream destination
-	 * @param tuple
-	 */
-	public void emit(List<Object> tuple) {
-		router.execute(tuple, context);
-	}
+    public SpoutOutputCollector(TopologyContext context) {
+        this.context = context;
+    }
 
-	public void emitEndOfStream() {
-		router.executeEndOfStream(context);
-	}
+    @Override
+    public void setRouter(StreamRouter router) {
+        this.router = router;
+    }
+
+    /**
+     * Emits a tuple to the stream destination
+     * 
+     * @param tuple
+     */
+    public void emit(List<Object> tuple) {
+        router.execute(tuple, context);
+    }
+
+    public void emitEndOfStream() {
+        router.executeEndOfStream(context);
+    }
 
 }

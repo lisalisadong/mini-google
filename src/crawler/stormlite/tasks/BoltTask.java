@@ -21,28 +21,27 @@ import crawler.stormlite.bolt.IRichBolt;
 import crawler.stormlite.tuple.Tuple;
 
 /**
- * This is a simple task that, when scheduled, processes
- * a tuple through a bolt.
+ * This is a simple task that, when scheduled, processes a tuple through a bolt.
  * 
  * @author zives
  *
  */
 public class BoltTask implements Runnable {
-	
-	IRichBolt bolt;
-	Tuple tuple;
-	
-	public BoltTask(IRichBolt bolt, Tuple tuple) {
-		this.bolt = bolt;
-		this.tuple = tuple;
-	}
 
-	@Override
-	public void run() {
-		bolt.execute(tuple);
-	}
+    IRichBolt bolt;
+    Tuple tuple;
 
-	public String toString() {
-		return bolt.getClass().getName() + " (" + bolt.getExecutorId() + "): " + tuple.toString();
-	}
+    public BoltTask(IRichBolt bolt, Tuple tuple) {
+        this.bolt = bolt;
+        this.tuple = tuple;
+    }
+
+    @Override
+    public void run() {
+        bolt.execute(tuple);
+    }
+
+    public String toString() {
+        return bolt.getClass().getName() + " (" + bolt.getExecutorId() + "): " + tuple.toString();
+    }
 }

@@ -28,19 +28,8 @@
             </classpath>
         </javac>
     </target>
-	
-	<target name="compile-stormlite" description="Compile stormlite package">
-        <mkdir dir="${classes.dir}"/>
-        <javac srcdir="src/edu/upenn/cis/stormlite" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
-            <classpath>
-                <fileset dir="${inputlib.dir}">
-                    <include name="*.jar"/>
-                </fileset>
-            </classpath>
-        </javac>
-    </target>
 
-    <target name="compile-crawler" depends="compile-utils, compile-stormlite" description="Compiles the crawler">
+    <target name="compile-crawler" depends="compile-utils" description="Compiles the crawler">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="src/crawler" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
             <classpath>
@@ -123,8 +112,22 @@
 
     <target name="pack" description="Create an archive for submission">
         <zip destfile="mini-google.zip">
-            <zipfileset dir="." excludes=".idea/**,database/**,target/**,examples/**,**/*.class,mini-google.zip"/>
+            <zipfileset dir="." excludes="lib/**,.idea/**,database/**,target/**,examples/**,**/*.class,mini-google.zip"/>
         </zip>
+    </target>
+
+    <target name="search" depends="compile-search-engine" description="Run search engine servlet">
+        <java classname="edu.upenn.cis455.webserver.HttpServer">
+            <classpath>
+                <pathelement location="lib/webserver.jar"/>
+                <pathelement location="lib/servlet-api.jar"/>
+                <pathelement location="lib/je-6.2.31.jar"/>
+                <pathelement location="${classes.dir}"/>
+            </classpath>
+            <arg value="8080"/>
+            <arg value="."/>
+            <arg value="conf/web.xml"/>
+        </java>
     </target>
 
 </project>

@@ -18,6 +18,7 @@
 package crawler.stormlite;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +29,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import crawler.Crawler;
 import crawler.stormlite.bolt.BoltDeclarer;
 import crawler.stormlite.bolt.IRichBolt;
 import crawler.stormlite.bolt.OutputCollector;
@@ -41,20 +42,22 @@ import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.spout.IRichSpout;
 import crawler.stormlite.spout.SpoutOutputCollector;
 import crawler.stormlite.tasks.SpoutTask;
+import utils.Logger;
 
 /**
- * Use multiple threads to simulate a cluster of worker nodes.
- * Hooks to other nodes in a distributed environment.
+ * Use multiple threads to simulate a cluster of worker nodes. Hooks to other
+ * nodes in a distributed environment.
  * 
- * A thread pool (the executor) executes runnable tasks.  Each
- * task involves calling a nextTuple() or execute() method in
- * a spout or bolt, then routing its tuple to the router. 
+ * A thread pool (the executor) executes runnable tasks. Each task involves
+ * calling a nextTuple() or execute() method in a spout or bolt, then routing
+ * its tuple to the router.
  * 
  * @author zives
  *
  */
 public class DistributedCluster implements Runnable {
-	static Logger log = Logger.getLogger(DistributedCluster.class);
+
+	static Logger log = new Logger(DistributedCluster.class.getName());
 	
 	static AtomicBoolean quit = new AtomicBoolean(false);
 	
@@ -71,9 +74,9 @@ public class DistributedCluster implements Runnable {
 	
 	//we'll do a single threaded pool to avoid races
 	// between EOS propagation and tuple propagation!
-	ExecutorService executor = Executors.newFixedThreadPool(1);	
+	ExecutorService executor = Executors.newFixedThreadPool(5);	
 	
-	Queue<Runnable> taskQueue = new ConcurrentLinkedQueue<Runnable>();
+	Queue<Runnable> taskQueue = new LinkedList<Runnable>();
 	
 
 	public TopologyContext submitTopology(String name, Config config, 
@@ -106,7 +109,13 @@ public class DistributedCluster implements Runnable {
 	
 	public void run() {
 		while (!quit.get()) {
-			Runnable task = taskQueue.poll();
+			
+//			System.out.println("Task queue size: " + taskQueue.size());
+			Runnable task = null;
+//			task = taskQueue.poll();
+			synchronized(taskQueue) {
+				task = taskQueue.poll();
+			}
 			if (task == null)
 				Thread.yield();
 			else {
@@ -194,34 +203,46 @@ public class DistributedCluster implements Runnable {
 		for (String stream: topo.getBolts().keySet()) {
 			BoltDeclarer decl = topo.getBoltDeclarer(stream);
 			
+			System.out.println("Creating routes for " + stream);
+			
 			StreamRouter router = decl.getRouter();
 			
 			streams.put(stream, router);
 			
 			int count = boltStreams.get(stream).size();
 			
-			// TODO: 
-			// Create a bolt for each remote worker, give it the same # of entries
-			// as we had locally so round-robin and partitioning will be consistent
-			int workerId = 0;
-			for (String worker: WorkerHelper.getWorkers(config)) {
-				// Create one sender bolt for each node aside from us!
-				if (workerId++ != Integer.valueOf(config.get("workerIndex"))) {
-					SenderBolt sender = new SenderBolt(worker, stream);
-					sender.prepare(config, context, null);
-					for (int i = 0; i < count; i++) {
-						router.addRemoteBolt(sender);
-						log.info("Adding a remote route from " + stream + " to " + worker);
-					}
-					
-				// Create one local executor for each node for us!
-				} else {
-					for (IRichBolt bolt: boltStreams.get(stream)) {
-						router.addBolt(bolt);
-						log.info("Adding a route from " + decl.getStream() + " to " + bolt);
+			// only to emit remotely to DUE
+			if(Crawler.DUE_BOLT.equals(stream)) {
+				// TODO: 
+				// Create a bolt for each remote worker, give it the same # of entries
+				// as we had locally so round-robin and partitioning will be consistent
+				int workerId = 0;
+				for (String worker: WorkerHelper.getWorkers(config)) {
+					// Create one sender bolt for each node aside from us!
+					if (workerId++ != Integer.valueOf(config.get("workerIndex"))) {
+						SenderBolt sender = new SenderBolt(worker, stream);
+						sender.prepare(config, context, null);
+						for (int i = 0; i < count; i++) {
+							router.addRemoteBolt(sender);
+							log.debug("Adding a remote route from " + stream + " to " + worker);
+						}
+						
+					// Create one local executor for each node for us!
+					} else {
+						for (IRichBolt bolt: boltStreams.get(stream)) {
+							router.addBolt(bolt);
+							log.debug("Adding a route from " + decl.getStream() + " to " + bolt);
+						}
 					}
 				}
+			} else {
+				for (IRichBolt bolt: boltStreams.get(stream)) {
+					router.addBolt(bolt);
+					log.debug("Adding a route from " + decl.getStream() + " to " + bolt);
+				}
 			}
+			
+			
 			
 			if (topo.getBolts().containsKey(decl.getStream())) {
 				for (IRichBolt bolt: boltStreams.get(decl.getStream())) {

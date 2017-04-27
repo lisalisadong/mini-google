@@ -6,46 +6,45 @@ import crawler.stormlite.Config;
 import crawler.stormlite.Topology;
 
 /**
- * Simple object to pass along topology and
- * config info
+ * Simple object to pass along topology and config info
  * 
  * @author zives
  *
  */
 public class WorkerJob implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
-	Topology topology;
-	
-	Config config;
-	
-	public WorkerJob() {
-		
-	}
-	
-	public WorkerJob(Topology topology, Config config) {
-		super();
-		this.topology = topology;
-		this.config = config;
-	}
+    Topology topology;
 
-	public Topology getTopology() {
-		return topology;
-	}
+    Config config;
 
-	public void setTopology(Topology topology) {
-		this.topology = topology;
-	}
+    public WorkerJob() {
 
-	public Config getConfig() {
-		return config;
-	}
+    }
 
-	public void setConfig(Config config) {
-		this.config = config;
-	}
+    public WorkerJob(Topology topology, Config config) {
+        super();
+        this.topology = topology;
+        this.config = config;
+    }
+
+    public Topology getTopology() {
+        return topology;
+    }
+
+    public void setTopology(Topology topology) {
+        this.topology = topology;
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
+    }
 
 }

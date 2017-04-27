@@ -2,26 +2,36 @@ package crawler;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import utils.Logger;
+
 import crawler.stormlite.Config;
 import crawler.stormlite.DistributedCluster;
-import crawler.stormlite.LocalCluster;
 import crawler.stormlite.Topology;
 import crawler.stormlite.TopologyBuilder;
+import crawler.stormlite.TopologyContext;
 import crawler.stormlite.bolt.ContentSeenBolt;
 import crawler.stormlite.bolt.DUEBolt;
 import crawler.stormlite.bolt.HTTPModuleBolt;
-import crawler.stormlite.bolt.HostSplitterBolt;
 import crawler.stormlite.bolt.LinkExtractorBolt;
 import crawler.stormlite.bolt.URLFilterBolt;
 import crawler.urlfrontier.URLFrontier;
-import utils.Logger;
+import crawler.stormlite.routers.StreamRouter;
+import crawler.stormlite.distributed.WorkerJob;
+import crawler.stormlite.tuple.Fields;
+import crawler.stormlite.tuple.Tuple;
+import crawler.robots.RobotInfoManager;
 
 /**
  * The Crawler
+ * 
  * @author xiaofandou
  *
  */
@@ -29,7 +39,7 @@ public class Crawler {
 
 	static Logger logger = new Logger(Crawler.class.getName());
 	
-	public static final String URL_SPOUT = "c_SPOUT";
+	public static final String URL_SPOUT = "URL_SPOUT";
 	public static final int URL_SPOUT_NUM = 1;
 	
 	public static final String HTTP_MODULE_BOLT = "HTTP_MODULE_BOLT";
@@ -52,33 +62,94 @@ public class Crawler {
     
     public static final String ROBOT_MANAGER = "ROBOT_MANAGER";
     public static final String FRONTIER_QUEUE = "FRONTIER_QUEUE";
-    public static final String MAX_SIZE = "MAX_SIZE";
-    public static final String DBPath = "./db";
+    
+    public static String DBPath;
     
     public static int fileNum = -1;
     
-    public static URLFrontier urlFrontier;
+    public static URLFrontier urlFrontier = new URLFrontier();
+    public static RobotInfoManager  robotManager = new RobotInfoManager();
     
-    public static void setUp() {
-    	urlFrontier = new URLFrontier();
+    // TODO: write to disk?
+    public static URLSet urlSet;
+    
+    private DistributedCluster cluster;
+    private List<String> topologies;
+    private List<TopologyContext> contexts;
+    
+    public Crawler() {
+    	cluster = new DistributedCluster();
+    	topologies = new ArrayList<>();
+    	contexts = new ArrayList<>();
+    	
+    	urlSet = new URLSet();
     }
     
-    private static Topology configTopology(Config config) {
+    public void setUp(WorkerJob workerJob) {
     	
-    	URLSpout URLSpout = new URLSpout();
+    	Logger.configure(false, false);
+    	cluster = new DistributedCluster();
+    	urlFrontier.addURL("http://crawltest.cis.upenn.edu/");
+    	
+    	System.out.println("frontier queue size: " + urlFrontier.urls.size());
+    	
+//    	urlFrontier.addURL("https://www.reddit.com/");
+    	
+    	try {
+    		Config config = workerJob.getConfig();
+    		Topology topo = workerJob.getTopology();
+    		
+    		DBPath = "./db" + (config.get("workerIndex") == null? "": config.get("workerIndex"));
+    		
+    		TopologyContext context = 
+        			cluster.submitTopology("CrawlerJob", config, topo);
+			contexts.add(context);
+			synchronized (topologies) {
+				topologies.add("CrawlerJob");
+			}
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+    	
+    }
+    
+    public void start() {
+    	cluster.startTopology();
+    }
+
+	public void stop() {
+    	synchronized(topologies) {
+			for (String topo: topologies)
+				cluster.killTopology(topo);
+		}
+		cluster.shutdown();
+    }
+	
+	public void pushData(String stream, Tuple tuple) {
+		// Find the destination stream and route to it
+		StreamRouter router = cluster.getStreamRouter(stream);
+		
+		contexts.get(contexts.size() - 1).incSendOutputs(router.getKey(tuple.getValues()));
+		
+		router.executeLocally(tuple, contexts.get(contexts.size() - 1));
+	}
+
+    private static Topology configTopology(Config config) {
+
+        URLSpout URLSpout = new URLSpout();
         HTTPModuleBolt httpModule = new HTTPModuleBolt();
         ContentSeenBolt contentSeen = new ContentSeenBolt();
         LinkExtractorBolt linkExtractor = new LinkExtractorBolt();
         URLFilterBolt urlFilter = new URLFilterBolt();
-        HostSplitterBolt hostSplitter = new HostSplitterBolt();
+        // HostSplitterBolt hostSplitter = new HostSplitterBolt();
         DUEBolt due = new DUEBolt();
-        
+
         // wordSpout ==> countBolt ==> MongoInsertBolt
         TopologyBuilder builder = new TopologyBuilder();
 
         // Only one source ("spout") for the words
         builder.setSpout(URL_SPOUT, URLSpout, URL_SPOUT_NUM);
-        
+
         // Four parallel word counters, each of which gets specific words
         builder.setBolt(HTTP_MODULE_BOLT, httpModule, HTTP_MODULE_BOLT_NUM)
         .shuffleGrouping(URL_SPOUT);
@@ -92,49 +163,58 @@ public class Crawler {
         builder.setBolt(URL_FILTER_BOLT, urlFilter, URL_FILTER_BOLT_NUM)
         .shuffleGrouping(LINK_EXTRACTOR_BOLT);
         
-        // TODO: field based
-        builder.setBolt(HOST_SPLITTER_BOLT, hostSplitter, HOST_SPLITTER_BOLT_NUM)
-        .shuffleGrouping(URL_FILTER_BOLT);
-        
         builder.setBolt(DUE_BOLT, due, DUE_BOLT_NUM)
-        .shuffleGrouping(HOST_SPLITTER_BOLT);
-       
+        .fieldsGrouping(URL_FILTER_BOLT, new Fields("host"));
+        
         return builder.createTopology();
     }
-    
+
     public static void main(String[] args) throws Exception {
     	
+    	Crawler crawler = new Crawler();
+    	
+    	WorkerJob workerJob = getWorkerJob();
+    	
+    	crawler.setUp(workerJob);
+    	
+    	crawler.start();
+    	
+    	(new BufferedReader(new InputStreamReader(System.in))).readLine();
+    	
+    	crawler.stop();
+        
+        System.exit(0);
+    }
+    
+
+	public static WorkerJob getWorkerJob() {
+
     	Config config = new Config();
     	config.put("workerList", "[0:0:0:0:8000]");
     	config.put("workerIndex", "0");
-        DistributedCluster cluster = new DistributedCluster();
-//        LocalCluster cluster = new LocalCluster();
-        Topology topo = configTopology(config);
-
-        ObjectMapper mapper = new ObjectMapper();
+    	
+    	Topology topo = configTopology(config);
+    	
+    	ObjectMapper mapper = new ObjectMapper();
 		try {
 			String str = mapper.writeValueAsString(topo);
-			
 			System.out.println("The StormLite topology is:\n" + str);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-        
-        
-//        cluster.submitTopology("crawl", config, 
-//        		builder.createTopology());
-		cluster.submitTopology("crawl", config, topo);
-        cluster.startTopology();
-        
-        (new BufferedReader(new InputStreamReader(System.in))).readLine();
-        
-        cluster.killTopology("crawl");
-        cluster.shutdown();
-        System.exit(0);
+		
+		return new WorkerJob(topo, config);
+	}
+
+    public static URLFrontier getURLFrontier() {
+        return urlFrontier;
     }
 
-	public static URLFrontier getURLFrontier() {
-		return urlFrontier;
-	} 
-
+    public static RobotInfoManager getRobotManager() {
+        return robotManager;
+    }
+    
+    public static URLSet getURLSet() {
+    	return urlSet;
+    }
 }
