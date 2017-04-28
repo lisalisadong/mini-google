@@ -22,7 +22,7 @@ render() {
             <div className="two wide column" style={{textAlign:'right'}}>
                 <div className="ui red basic medium label" style={{color:'crimson',fontFamily:'Cochin',fontWeight:'bold',fontSize: 16}}><a href="/">Mini Google</a></div>
             </div>
-            <div className="six wide column">
+            <div className="eight wide column">
                 <form action="/search" method="get">
                     <div className="ui fluid category search">
                         <div className="ui fluid icon input">
@@ -36,7 +36,7 @@ render() {
                 </form>
             </div>
             <div dangerouslySetInnerHTML={this.getRawMarkup()} />
-            <div className="eight wide column"></div>
+            <div className="six wide column"></div>
         </div>
 
         <div className="ui divider"></div>
