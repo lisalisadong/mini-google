@@ -14,6 +14,7 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
 import com.sleepycat.persist.StoreConfig;
+
 import com.sleepycat.persist.EntityCursor;
 
 public class DBWrapper {
@@ -70,6 +71,19 @@ public class DBWrapper {
             myEnv.close();
         if (store != null)
             store.close();
+    }
+    
+    public void clear() {
+    	List<CrawledPage> res = new LinkedList<>();
+//		 EntityCursor<Channel> channelCursor = cIdx.entities();
+//			Iterator<Channel> iterator = channelCursor.iterator();
+//			while (iterator.hasNext())
+//				res.add(iterator.next());
+		 Map<String, CrawledPage> map = pIdx.map();
+		 for(String key: map.keySet()) {
+			 pIdx.delete(key);
+		 }
+		 sync();
     }
 
     public static void main(String[] args) {
