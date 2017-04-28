@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -36,13 +37,14 @@ public class IndexerMapWorker {
 	private InputStream in;
 	private Stemmer stemmer;
 	private int docWordsNum;
-	private Map<String, Map<String, Integer>> wordDocMap; // word : (docID, count)
+	private Map<String, Integer> wordFreq;
 	
 	public IndexerMapWorker(String docID, InputStream in, String contentType) {
 		this.docID = docID;
 		this.contentType = contentType;
         this.in = in;
         this.stemmer = new Stemmer();
+        this.wordFreq = new HashMap<String, Integer>();
 	}
 	
 	public void parse() throws IOException {
@@ -80,7 +82,25 @@ public class IndexerMapWorker {
 	}
 	
 	public void parseElement(String content) {
-		// TODO: extract word and stem
+		WordTokenizer tokenizer = new WordTokenizer(content);
+		while (tokenizer.hasMoreTokens()) {
+			String word = tokenizer.nextToken();
+			if (STOP_LIST.contains(word)) {
+				continue;
+			}
+			word = lemmatize(word);
+			if(wordFreq.containsKey(word)){
+				wordFreq.put(word, wordFreq.get(word) + 1);
+			}
+			else{
+				wordFreq.put(word, 1);
+			}
+			
+		}
+	}
+	
+	private String lemmatize(String word) {
+		return stemmer.stem(word.toLowerCase());
 	}
 
 }
