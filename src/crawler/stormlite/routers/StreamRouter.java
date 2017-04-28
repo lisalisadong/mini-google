@@ -134,8 +134,8 @@ public abstract class StreamRouter implements OutputFieldsDeclarer {
 
         if (bolt != null) {
             context.addStreamTask(new BoltTask(bolt, new Tuple(schema, tuple)));
-             System.out.println("Task queued: " + bolt.getClass().getName() +
-             " (" + bolt.getExecutorId() + "): " + tuple.toString());
+//             System.out.println("Task queued: " + bolt.getClass().getName() +
+//             " (" + bolt.getExecutorId() + "): " + tuple.toString());
         } else
             throw new RuntimeException("Unable to find a bolt for the tuple");
     }
