@@ -66,6 +66,7 @@ public class Crawler {
     public static String DBPath;
     
     public static int fileNum = -1;
+    public static int crawledPageLimit = 5000;
     
     public static URLFrontier urlFrontier = new URLFrontier();
     public static RobotInfoManager  robotManager = new RobotInfoManager();
@@ -90,6 +91,7 @@ public class Crawler {
     	Logger.configure(false, false);
     	cluster = new DistributedCluster();
     	urlFrontier.addURL("http://crawltest.cis.upenn.edu/");
+//    	urlFrontier.addURL("https://piazza.com/");
     	
     	System.out.println("frontier queue size: " + urlFrontier.urls.size());
     	

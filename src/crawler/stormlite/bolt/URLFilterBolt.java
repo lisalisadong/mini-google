@@ -3,7 +3,9 @@ package crawler.stormlite.bolt;
 import java.util.Map;
 import java.util.UUID;
 
+import crawler.Crawler;
 import crawler.client.URLInfo;
+import crawler.robots.RobotInfoManager;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.routers.StreamRouter;
@@ -47,6 +49,8 @@ public class URLFilterBolt implements IRichBolt {
      * This is where we send our output stream
      */
     private OutputCollector collector;
+    
+    private RobotInfoManager robotManager;
 
     public URLFilterBolt() {
     }
@@ -58,6 +62,7 @@ public class URLFilterBolt implements IRichBolt {
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
+        robotManager = Crawler.robotManager;
     }
 
     /**
@@ -73,8 +78,12 @@ public class URLFilterBolt implements IRichBolt {
         String host = new URLInfo(link).getHostName();
         // TODO: filter the link
 
-        this.collector.emit(new Values<Object>(host, link));
-        // System.out.println(id + " emit (" + host + ", " + link + ")");
+        if(robotManager.isAllowed(link)) {
+        	this.collector.emit(new Values<Object>(host, link));
+            // System.out.println(id + " emit (" + host + ", " + link + ")");
+        } else {
+//        	System.out.println(id + ": " + link + "--not allowed");
+        }
     }
 
     /**

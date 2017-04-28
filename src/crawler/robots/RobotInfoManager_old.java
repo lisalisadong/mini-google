@@ -58,26 +58,26 @@ public class RobotInfoManager_old {
         if (robotTxt == null)
             return true;
 
-        String filePath = new URLInfo(url).getFilePath();
-        Set<String> allowedLinks = robotTxt.getAllowedLinks();
-        for (String link : allowedLinks) {
-            if (link.charAt(link.length() - 1) == '/' && link.substring(0, link.length() - 1).equals(filePath)) {
-                return true;
-            }
-            if (filePath.startsWith(link))
-                return true;
-        }
-
-        Set<String> disallowedLinks = robotTxt.getDisallowedLinks();
-        for (String link : disallowedLinks) {
-            // System.out.println("disallowed link: " + link.length() + ", " +
-            // link);
-            if (link.charAt(link.length() - 1) == '/' && link.substring(0, link.length() - 1).equals(filePath)) {
-                return false;
-            }
-            if (filePath.startsWith(link))
-                return false;
-        }
+//        String filePath = new URLInfo(url).getFilePath();
+//        Set<String> allowedLinks = robotTxt.getAllowedLinks();
+//        for (String link : allowedLinks) {
+//            if (link.charAt(link.length() - 1) == '/' && link.substring(0, link.length() - 1).equals(filePath)) {
+//                return true;
+//            }
+//            if (filePath.startsWith(link))
+//                return true;
+//        }
+//
+//        Set<String> disallowedLinks = robotTxt.getDisallowedLinks();
+//        for (String link : disallowedLinks) {
+//            // System.out.println("disallowed link: " + link.length() + ", " +
+//            // link);
+//            if (link.charAt(link.length() - 1) == '/' && link.substring(0, link.length() - 1).equals(filePath)) {
+//                return false;
+//            }
+//            if (filePath.startsWith(link))
+//                return false;
+//        }
         return true;
     }
 

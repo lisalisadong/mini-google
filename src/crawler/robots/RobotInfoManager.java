@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import crawler.Crawler;
 import crawler.client.URLInfo;
 import crawler.utils.LRU;
 
@@ -15,13 +16,18 @@ import crawler.utils.LRU;
  */
 public class RobotInfoManager {
 
+	public int crawledPageLimit = Crawler.crawledPageLimit;
+	
     // <hostName, *>
     private LRU<String, RobotTxt> robotMap;
     private LRU<String, Long> crawlTime;
+    private ConcurrentHashMap<String, Integer> crawledPageNum;	//<host, time>
 
     public RobotInfoManager() {
         robotMap = new LRU<>(10);
         crawlTime = new LRU<>(10);
+        
+        crawledPageNum = new ConcurrentHashMap<>();
     }
 
     private String getHostName(String url) {
@@ -55,6 +61,11 @@ public class RobotInfoManager {
         String host = getHostName(url);
         if (host == null)
             return false;
+        
+        /* return false if exceed the crawl limits */
+        Integer num = crawledPageNum.get(host);
+        if(num != null && num >= crawledPageLimit) return false;
+        
         RobotTxt robotTxt = getRobotTxt(url);
         if (robotTxt == null)
             return true;
@@ -92,6 +103,15 @@ public class RobotInfoManager {
             return true;
         }
         return false;
+    }
+    
+    /**
+     * get called when the page is crawled
+     * @param url
+     */
+    public void visit(String url) {
+    	String host = getHostName(url);
+    	crawledPageNum.put(host, crawledPageNum.getOrDefault(host, 0));
     }
 
     /**

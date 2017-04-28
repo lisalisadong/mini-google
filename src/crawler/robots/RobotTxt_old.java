@@ -8,16 +8,16 @@ import java.util.Set;
 
 import crawler.client.Client;
 
-public class RobotTxt {
+public class RobotTxt_old {
 
-    private HashSet<RobotPath> allowedLinks;
-    private HashSet<RobotPath> disallowedLinks;
+    private HashSet<String> allowedLinks;
+    private HashSet<String> disallowedLinks;
     private long crawlDelay;
     private boolean empty;
     private boolean self, flag;
     private boolean haveLinks;
 
-    public RobotTxt(String url) {
+    public RobotTxt_old(String url) {
         disallowedLinks = new HashSet<>();
         allowedLinks = new HashSet<>();
         Client client = Client.getClient(url);
@@ -68,13 +68,13 @@ public class RobotTxt {
                 case "disallow":
                     if (flag) {
                         haveLinks = true;
-                        disallowedLinks.add(new RobotPath(val));
+                        disallowedLinks.add(val);
                     }
                     break;
                 case "allow":
                     if (flag) {
                         haveLinks = true;
-                        allowedLinks.add(new RobotPath(val));
+                        allowedLinks.add(val);
                     }
                     break;
                 case "crawl-delay":
@@ -85,9 +85,9 @@ public class RobotTxt {
                 }
             }
 
-//             System.out.println("=====robot========");
-//             System.out.println(toString());
-//             System.out.println("==================");
+            // System.out.println("=====robot========");
+            // System.out.println(toString());
+            // System.out.println("==================");
         } catch (IOException e) {
             e.printStackTrace();
             empty = true;
@@ -99,28 +99,31 @@ public class RobotTxt {
         return crawlDelay;
     }
 
-    public Set<RobotPath> getAllowedLinks() {
+    public Set<String> getAllowedLinks() {
         return allowedLinks;
     }
 
-    public Set<RobotPath> getDisallowedLinks() {
+    public Set<String> getDisallowedLinks() {
         return disallowedLinks;
     }
     
     public boolean match(String filePath) {
-    	RobotPath toMatch = new RobotPath(filePath);
-        for (RobotPath link : allowedLinks) {
-            if (link.match(toMatch)) {
+        for (String link : allowedLinks) {
+            if (link.charAt(link.length() - 1) == '/' && link.substring(0, link.length() - 1).equals(filePath)) {
                 return true;
             }
+            if (filePath.startsWith(link))
+                return true;
         }
 
-        for (RobotPath link : disallowedLinks) {
+        for (String link : disallowedLinks) {
             // System.out.println("disallowed link: " + link.length() + ", " +
             // link);
-            if (link.match(toMatch)) {
+            if (link.charAt(link.length() - 1) == '/' && link.substring(0, link.length() - 1).equals(filePath)) {
                 return false;
             }
+            if (filePath.startsWith(link))
+                return false;
         }
         return true;
     }
@@ -128,26 +131,26 @@ public class RobotTxt {
     public String toString() {
         StringBuilder sb = new StringBuilder("User-Agent: cis455crawler\n");
         System.out.println("Crawl delay: " + crawlDelay);
-        for (RobotPath link : allowedLinks) {
-            sb.append("Allow: " + link.toString() + "\n");
+        for (String link : allowedLinks) {
+            sb.append("Allow: " + link + "\n");
         }
-        for (RobotPath link : disallowedLinks) {
-            sb.append("Disallow: " + link.toString() + "\n");
+        for (String link : disallowedLinks) {
+            sb.append("Disallow: " + link + "\n");
         }
         return sb.toString();
     }
 
     public static void main(String[] args) {
-         RobotTxt r = new RobotTxt("https://piazza.com/robots.txt");
-         System.out.println(r);
-//         System.out.println("is allowed: " + r);
+        // RobotTxt r = new RobotTxt("https://piazza.com/robots.txt");
+        // System.out.println(r);
+        // System.out.println("is allowed: " + r);
 
-//         RobotInfoManager r = new RobotInfoManager();
-//         r.getRobotTxt("http://crawltest.cis.upenn.edu/");
-//         System.out.println("is allowed: " +
-//         r.isAllowed("http://crawltest.cis.upenn.edu/marie/private/"));
-//         System.out.println("is allowed: " +
-//         r.isAllowed("http://crawltest.cis.upenn.edu/foo/"));
+        // RobotInfoManager r = new RobotInfoManager();
+        // r.getRobotTxt("http://crawltest.cis.upenn.edu/");
+        // System.out.println("is allowed: " +
+        // r.isAllowed("http://crawltest.cis.upenn.edu/marie/private"));
+        // System.out.println("is allowed: " +
+        // r.isAllowed("http://crawltest.cis.upenn.edu/foo"));
 
         // Client c = Client.getClient("http://nba.hupu.com/robots.txt");
         // c.setMethod("GET");
