@@ -89,9 +89,9 @@ public class HTTPModuleBolt implements IRichBolt {
 	   client.setMethod("HEAD");
 	   robotManager.setHostLastAccessTime(url);
 	   
-	   System.out.println(id + ": waitng...");
+//	   System.out.println(id + ": waitng...");
 	   robotManager.waitUntilAvailable(url);
-	   System.out.println(id + ": finished waiting");
+//	   System.out.println(id + ": finished waiting");
 	   
 	   client.sendReq();
 	   
@@ -113,7 +113,7 @@ public class HTTPModuleBolt implements IRichBolt {
 		   if(page == null || page.getLastCrawled() < lastModified) 
 		   {
 			   collector.emit(new Values<Object>(url));
-			   System.out.println(id + ": emit " + url);
+//			   System.out.println(id + ": emit " + url);
 		   } else {
 			   System.out.println(id + ": " + url + " not modified");
 			   page.setLastCrawled(System.currentTimeMillis());

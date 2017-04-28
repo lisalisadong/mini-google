@@ -77,7 +77,7 @@ public class LinkExtractorBolt implements IRichBolt {
     @Override
     public void execute(Tuple input) {
         CrawledPage page = (CrawledPage) input.getObjectByField("page");
-         System.out.println(id + " got " + page.getUrl());
+//         System.out.println(id + " got " + page.getUrl());
         if ("text/html".equals(page.getContentType())) {
             byte[] content = page.getContent();
 

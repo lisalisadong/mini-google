@@ -76,8 +76,8 @@ public class DistributedCluster implements Runnable {
 	// between EOS propagation and tuple propagation!
 	ExecutorService executor = Executors.newFixedThreadPool(20);	
 	
-//	Queue<Runnable> taskQueue = new LinkedList<Runnable>();
-	Queue<Runnable> taskQueue = new ConcurrentLinkedQueue<Runnable>();
+	Queue<Runnable> taskQueue = new LinkedList<Runnable>();
+//	Queue<Runnable> taskQueue = new ConcurrentLinkedQueue<Runnable>();
 	
 
 	public TopologyContext submitTopology(String name, Config config, 
@@ -113,27 +113,34 @@ public class DistributedCluster implements Runnable {
 			
 //			System.out.println("Task queue size: " + taskQueue.size());
 			
-			Runnable task = taskQueue.poll();
-			if(task == null) Thread.yield();
-			else executor.execute(task);
+			/* busy wating */
+//			Runnable task = taskQueue.poll();
+//			if(task == null) Thread.yield();
+//			else executor.execute(task);
 			
 			
-//			synchronized(taskQueue) {
-//				
-//				while(taskQueue.isEmpty()) {
-//					
-//					try {
-//						taskQueue.wait();
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
-//					
-//				}
-//
-//				Runnable task = taskQueue.poll();
-////				System.out.println("got task");
-//				executor.execute(task);
-//			}
+			synchronized(taskQueue) {
+				
+				while(taskQueue.isEmpty()) {
+					
+					try {
+						taskQueue.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					
+				}
+
+				Runnable task = taskQueue.poll();
+				
+				if(task == null) {
+					System.out.println("*******************Null task, should not happen");
+					continue;
+				}
+				
+//				System.out.println("got task");
+				executor.execute(task);
+			}
 		}
 	}
 	

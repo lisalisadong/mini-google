@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import crawler.client.URLInfo;
+import crawler.utils.LRU;
 
 /**
  * robot manager class, taking care of the robot rules
@@ -15,12 +16,12 @@ import crawler.client.URLInfo;
 public class RobotInfoManager {
 
     // <hostName, *>
-    private ConcurrentHashMap<String, RobotTxt> robotMap;
-    private ConcurrentHashMap<String, Long> crawlTime;
+    private LRU<String, RobotTxt> robotMap;
+    private LRU<String, Long> crawlTime;
 
     public RobotInfoManager() {
-        robotMap = new ConcurrentHashMap<>();
-        crawlTime = new ConcurrentHashMap<>();
+        robotMap = new LRU<>(10);
+        crawlTime = new LRU<>(10);
     }
 
     private String getHostName(String url) {
@@ -29,19 +30,19 @@ public class RobotInfoManager {
 
     public RobotTxt getRobotTxt(String url) {
         String host = getHostName(url);
-        if (robotMap.containsKey(host))
-            return robotMap.get(host);
+        RobotTxt robotTxt =  robotMap.getValue(host);
+        if(robotTxt != null) return robotTxt;
 
         String robotUrl = host + "/robots.txt";
         if (!robotUrl.startsWith("http://") && !robotUrl.startsWith("https://")) {
             robotUrl = "http://" + robotUrl;
         }
 
-        RobotTxt robotTxt = new RobotTxt(robotUrl);
+        robotTxt = new RobotTxt(robotUrl);
         // System.out.println(robotTxt);
-        robotMap.put(host, robotTxt);
-        crawlTime.put(host, -1L);
-        return robotMap.get(host);
+        robotMap.store(host, robotTxt);
+        crawlTime.store(host, -1L);
+        return robotTxt;
     }
 
     /**
@@ -59,32 +60,35 @@ public class RobotInfoManager {
             return true;
 
         String filePath = new URLInfo(url).getFilePath();
-        Set<String> allowedLinks = robotTxt.getAllowedLinks();
-        for (String link : allowedLinks) {
-            if (link.charAt(link.length() - 1) == '/' && link.substring(0, link.length() - 1).equals(filePath)) {
-                return true;
-            }
-            if (filePath.startsWith(link))
-                return true;
-        }
-
-        Set<String> disallowedLinks = robotTxt.getDisallowedLinks();
-        for (String link : disallowedLinks) {
-            // System.out.println("disallowed link: " + link.length() + ", " +
-            // link);
-            if (link.charAt(link.length() - 1) == '/' && link.substring(0, link.length() - 1).equals(filePath)) {
-                return false;
-            }
-            if (filePath.startsWith(link))
-                return false;
-        }
-        return true;
+        
+        return robotTxt.match(filePath);
+        
+//        Set<String> allowedLinks = robotTxt.getAllowedLinks();
+//        for (String link : allowedLinks) {
+//            if (link.charAt(link.length() - 1) == '/' && link.substring(0, link.length() - 1).equals(filePath)) {
+//                return true;
+//            }
+//            if (filePath.startsWith(link))
+//                return true;
+//        }
+//
+//        Set<String> disallowedLinks = robotTxt.getDisallowedLinks();
+//        for (String link : disallowedLinks) {
+//            // System.out.println("disallowed link: " + link.length() + ", " +
+//            // link);
+//            if (link.charAt(link.length() - 1) == '/' && link.substring(0, link.length() - 1).equals(filePath)) {
+//                return false;
+//            }
+//            if (filePath.startsWith(link))
+//                return false;
+//        }
+//        return true;
     }
 
     public boolean setHostLastAccessTime(String url) {
         String host = getHostName(url);
-        if (robotMap.containsKey(host)) {
-            crawlTime.put(host, System.currentTimeMillis());
+        if (robotMap.contains(host)) {
+            crawlTime.store(host, System.currentTimeMillis());
             return true;
         }
         return false;
@@ -98,9 +102,9 @@ public class RobotInfoManager {
      */
     public long getHostLastAccessTime(String url) {
         String host = getHostName(url);
-        if (!crawlTime.containsKey(host))
+        if (!crawlTime.contains(host))
             return -1;
-        return crawlTime.get(host);
+        return crawlTime.getValue(host);
     }
 
     /**
@@ -112,9 +116,12 @@ public class RobotInfoManager {
     public boolean timeAllowed(String url) {
         String host = getHostName(url);
         RobotTxt r = robotMap.get(host);
-        if (r == null || r.getCrawlDelay() == -1 || !crawlTime.containsKey(host))
+        
+        Long t = crawlTime.getValue(host);
+        
+        if (r == null || r.getCrawlDelay() == -1 || t == null)
             return true;
-        return crawlTime.get(host) + r.getCrawlDelay() < System.currentTimeMillis();
+        return t + r.getCrawlDelay() < System.currentTimeMillis();
     }
 
     public long getCrawlDelay(String url) {
