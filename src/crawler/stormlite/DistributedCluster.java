@@ -74,9 +74,10 @@ public class DistributedCluster implements Runnable {
 	
 	//we'll do a single threaded pool to avoid races
 	// between EOS propagation and tuple propagation!
-	ExecutorService executor = Executors.newFixedThreadPool(5);	
+	ExecutorService executor = Executors.newFixedThreadPool(20);	
 	
-	Queue<Runnable> taskQueue = new LinkedList<Runnable>();
+//	Queue<Runnable> taskQueue = new LinkedList<Runnable>();
+	Queue<Runnable> taskQueue = new ConcurrentLinkedQueue<Runnable>();
 	
 
 	public TopologyContext submitTopology(String name, Config config, 
@@ -111,16 +112,28 @@ public class DistributedCluster implements Runnable {
 		while (!quit.get()) {
 			
 //			System.out.println("Task queue size: " + taskQueue.size());
-			Runnable task = null;
-//			task = taskQueue.poll();
-			synchronized(taskQueue) {
-				task = taskQueue.poll();
-			}
-			if (task == null)
-				Thread.yield();
-			else {
-				executor.execute(task);
-			}
+			
+			Runnable task = taskQueue.poll();
+			if(task == null) Thread.yield();
+			else executor.execute(task);
+			
+			
+//			synchronized(taskQueue) {
+//				
+//				while(taskQueue.isEmpty()) {
+//					
+//					try {
+//						taskQueue.wait();
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
+//					
+//				}
+//
+//				Runnable task = taskQueue.poll();
+////				System.out.println("got task");
+//				executor.execute(task);
+//			}
 		}
 	}
 	

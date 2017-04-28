@@ -83,7 +83,7 @@ public class ContentSeenBolt implements IRichBolt {
    public void execute(Tuple input) 
    {
 	   String url = input.getStringByField("url");
-//	   System.out.println(id + " got " + url);
+	   System.out.println(id + " got " + url);
 	   
 	   /* download the page*/
 	   Client client = Client.getClient(url);

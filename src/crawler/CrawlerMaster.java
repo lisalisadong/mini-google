@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import crawler.storage.DBWrapper;
 import crawler.stormlite.Config;
 import crawler.stormlite.Topology;
 import crawler.stormlite.TopologyBuilder;
@@ -29,6 +30,8 @@ public class CrawlerMaster {
 	
 //	static String workerList = "[127.0.0.1:8000,127.0.0.1:8001]";
 	static String workerList = "[127.0.0.1:8000]";
+	
+//	static DBWrapper db = new DBWrapper(Crawler.DBPath);
 	
 	
 	public static void main(String[] args) {
@@ -66,6 +69,13 @@ public class CrawlerMaster {
 					throw new RuntimeException("Job execution request failed");
 				}
 			}
+			
+			System.out.println("[Enter] to clear database...");
+			
+//			(new BufferedReader(new InputStreamReader(System.in))).readLine();
+//			
+//			db.setup();
+//			db.clear();
 			
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -65,7 +65,13 @@ public class TopologyContext {
     }
 
     public void addStreamTask(Runnable next) {
-        taskQueue.add(next);
+    	
+    	taskQueue.add(next);
+    	
+//        synchronized(taskQueue) {
+//        	taskQueue.add(next);
+//        	taskQueue.notify();
+//        }
     }
 
     public STATE getState() {
