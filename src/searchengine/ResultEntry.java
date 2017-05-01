@@ -17,4 +17,12 @@ public class ResultEntry {
     String lastModified;
     double tf;
     double idf;
+
+    /**
+     * Return the score of this result (computed using TF, IDF, PageRank, etc...)
+     * @return score of the result entry
+     */
+    public double getScore() {
+        return 0;
+    }
 }

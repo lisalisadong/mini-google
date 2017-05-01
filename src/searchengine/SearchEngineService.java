@@ -23,16 +23,24 @@ public class SearchEngineService {
      * @return sorted result entries
      */
     public static ResultEntry[] search(String query, int rank, int num) {
-        ResultEntry[] results = new ResultEntry[num];
 
         // get {word:occurrences} map from query
         Map<String, Integer> wordsOccur = decomposeQuery(query);
 
         // get all candidate results
         // TODO: get results; check cache first;
-        ResultEntry[] entries = getAllEntries(Collections.enumeration(wordsOccur.keySet()));
+        ResultEntry[] entries;
+        if (cache.containsKey(query)) {
+            entries = cache.get(query);
+        } else {
+            entries = getAllEntries(Collections.enumeration(wordsOccur.keySet()));
+        }
+        // out of bound
+        if (rank >= entries.length) {
+            return null;
+        }
 
-        return results;
+        return null;
     }
 
     /**
@@ -97,6 +105,10 @@ public class SearchEngineService {
         return entries;
     }
 
+    /******************************************
+     * Integration with PageRank and Indexing *
+     ******************************************/
+
     /**
      * Query inverted index database to get all documentIds of the documents that contains
      * the word.
@@ -115,5 +127,85 @@ public class SearchEngineService {
      */
     private static void queryDocumentDetail(String documentId, ResultEntry entry) {
         // TODO: query database: get details about a document by documentID
+    }
+
+
+    /******************************************
+     * Helper functions                       *
+     ******************************************/
+
+    /**
+     * Quick select K.
+     * @param entries result entries
+     * @param k kth element in a descending order
+     * @return index of kth element.
+     */
+    private int findKthLargest(ResultEntry[] entries, int k) {
+        int lo = 0, hi = entries.length - 1;
+        while (lo < hi) {
+            int i = partition(entries, lo, hi);
+            if (i < k) lo = i + 1;
+            else if (i > k) hi = i - 1;
+            else return i;
+        }
+        return lo;
+    }
+
+
+    private int partition(ResultEntry[] entries, int lo, int hi) {
+        double pivot = entries[lo].getScore();
+        int i = lo, j = hi + 1;
+
+        while (true) {
+            while (entries[++i].getScore() > pivot) {
+                if (i >= hi) break;
+            }
+
+            while (entries[--j].getScore() < pivot) {
+                if (j <= lo) break;
+            }
+
+            if (i >= j) break;
+
+            swap(entries, i, j);
+        }
+
+        swap(entries, lo, j);
+
+        return j;
+    }
+
+    private void swap(ResultEntry[] entries, int i, int j) {
+        ResultEntry tmp = entries[i];
+        entries[i] = entries[j];
+        entries[j] = tmp;
+    }
+
+    /**
+     * Return whether entries[start:end] is already sorted in descending order .
+     * @param entries result entries
+     * @param start start index
+     * @param end end index
+     * @return true if range is sorted in descending order.
+     */
+    private boolean sorted(ResultEntry[] entries, int start, int end) {
+        // invalid input
+        if (start > end || start < 0) {
+            throw new IllegalStateException("start: " + start + "; end: " + end);
+        }
+        // edge case
+        if (start >= entries.length) {
+            return true;
+        }
+        // end is larger than length
+        end = Math.min(end, entries.length - 1);
+
+        double prev = entries[start].getScore();
+        for (int i = start + 1; i <= end; i++) {
+            if (entries[i].getScore() > prev) {
+                return false;
+            }
+        }
+        return true;
     }
 }
