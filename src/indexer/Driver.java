@@ -25,11 +25,10 @@ public class Driver {
 		job.setMapperClass(IndexerMapper.class);
 		job.setReducerClass(IndexerReducer.class);
 
-		// TODO: 
 		job.setMapOutputKeyClass(Text.class);
-		job.setMapOutputValueClass(Text.class);
+		job.setMapOutputValueClass(InterValue.class);
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(Text.class);
+		job.setOutputValueClass(OutputValue.class);
 
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
