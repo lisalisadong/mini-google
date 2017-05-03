@@ -1,12 +1,15 @@
-package crawler.stormlite.bolt;
+package crawler.due;
 
 import java.util.Map;
 import java.util.UUID;
 
 import crawler.Crawler;
-import crawler.URLSet;
+import crawler.client.URLInfo;
+import crawler.robots.RobotInfoManager;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
+import crawler.stormlite.bolt.IRichBolt;
+import crawler.stormlite.bolt.OutputCollector;
 import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
@@ -38,6 +41,8 @@ public class DUEBolt implements IRichBolt {
     static Logger logger = new Logger(DUEBolt.class.getName());
 
     Fields schema = new Fields("url");
+    
+    RobotInfoManager robotManager;
 
     /**
      * To make it easier to debug: we have a unique ID for each instance of the
@@ -51,8 +56,8 @@ public class DUEBolt implements IRichBolt {
     private OutputCollector collector;
 
     /* URLFrotier */
-    URLFrontier urlFrontier = Crawler.getURLFrontier();
-    URLSet urlSet = Crawler.getURLSet();
+    URLFrontier urlFrontier;
+    URLSet urlSet;
     
     public DUEBolt() {
     }
@@ -64,6 +69,9 @@ public class DUEBolt implements IRichBolt {
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
+        urlFrontier = Crawler.getURLFrontier();
+        urlSet = Crawler.getURLSet();
+        robotManager = Crawler.getRobotManager();
     }
 
     /**
@@ -73,20 +81,18 @@ public class DUEBolt implements IRichBolt {
     @Override
     public void execute(Tuple input) {
         String url = input.getStringByField("url");
-        
 //        System.out.println(id + " got " + url);
-        
-//        urlFrontier.addURL(url);
         
         // add to frontier queue if set does not contain the url
         if(urlSet.addURL(url)) {
             
 //        	System.out.println(id + " add " + url);
-        	
-            urlFrontier.addURL(url);
+        	logger.debug(id + " add " + url);
+        	urlFrontier.addURL(url);
         	
         } else {
 //        	System.out.println(id +  " " + url + ": duplicate");
+        	logger.debug(id +  " " + url + ": duplicate");
         }
         
     }

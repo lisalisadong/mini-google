@@ -3,6 +3,8 @@ package crawler.utils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import crawler.storage.DBWrapper;
+
 public class LRU<K, V> extends LinkedHashMap<K, V> {
 	
 	private int capacity = 100;

@@ -105,10 +105,26 @@
         <delete file="mini-google.zip"/>
         <delete file="full_log.txt"/>
         <delete file="error_log.txt"/>
+    	<delete file="master.war"/>
     </target>
 
     <target name="build" depends="compile-utils,compile-page-rank, compile-search-engine, compile-indexer, compile-crawler, compile-tests">
     </target>
+	
+	<target name="war-master" depends="compile-crawler">
+		<copy file="${conf.dir}${file.separator}crawler.xml" 
+			tofile="target/WEB-INF/web.xml" overwrite="true" />
+	  	<copy todir="${classes.dir}/crawler/lib" overwrite="true">
+	        <fileset dir="lib/">
+	            <include name="*.jar"/>
+	        </fileset>
+	    </copy>
+	    <jar destfile="master.war">
+	      <fileset dir="target/WEB-INF/classes/crawler" includes="/**/*.class"/>
+	      <fileset dir="target/WEB-INF/classes/crawler" includes="/lib/*.jar"/>
+	      <fileset dir="target/WEB-INF/classes/crawler" includes="/*.xml"/>
+	    </jar>
+	  </target>
 
     <target name="pack" description="Create an archive for submission">
         <zip destfile="mini-google.zip">
@@ -127,6 +143,29 @@
             <arg value="8080"/>
             <arg value="."/>
             <arg value="conf/web.xml"/>
+        </java>
+    </target>
+	
+	<target name="crawler-master" depends="compile-crawler" description="Run search engine servlet">
+        <java classname="edu.upenn.cis455.webserver.HttpServer">
+            <classpath>
+                <pathelement location="lib/webserver.jar"/>
+                <pathelement location="lib/servlet-api.jar"/>
+                <pathelement location="lib/je-6.2.31.jar"/>
+                <pathelement location="${classes.dir}"/>
+            	
+            	<pathelement location="lib/jackson-annotations-2.9.0-20161011.053116-27.jar"/>
+            	<pathelement location="lib/jackson-core-2.9.0-20160930.222323-13.jar"/>
+        		<pathelement location="lib/jackson-core-asl-1.9.13.jar"/>
+        		<pathelement location="lib/jackson-databind-2.9.0-20161012.002007-91.jar"/>
+        		<pathelement location="lib/jackson-mapper-asl-1.9.13.jar"/>
+            	
+            	<pathelement location="lib/log4j-1.2.9.jar"/>
+            	
+            </classpath>
+            <arg value="8080"/>
+            <arg value="."/>
+            <arg value="conf/crawler.xml"/>
         </java>
     </target>
 

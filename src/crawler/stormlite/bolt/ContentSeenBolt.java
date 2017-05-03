@@ -15,6 +15,7 @@ import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
 import crawler.stormlite.tuple.Values;
+import crawler.worker.CrawlerWorker;
 import crawler.storage.*;
 import utils.Logger;
 
@@ -113,11 +114,13 @@ public class ContentSeenBolt implements IRichBolt {
 	   
 	   // TODO: 
 	   /* deal with the content seen */
-	   boolean contentSeen = false;
+	   boolean contentSeen = checkContentSeen(content);
 	   
 	   if(!contentSeen) {
 //		   System.out.println(id + " emit " + url);
 		   System.out.println(id + ": " + url + " downloaded ");
+		   
+		   CrawlerWorker.workerStatus.incFileNum();
 		   
 		   CrawledPage newPage = new CrawledPage(content, url, client.getResContentType());
 		   newPage.setLastCrawled(System.currentTimeMillis());
@@ -126,6 +129,15 @@ public class ContentSeenBolt implements IRichBolt {
 		   // TODO: get url via fp and increase the hit
 	   }
 	   
+   }
+   
+   /**
+    * TODO: check content seen
+    * @param content
+    * @return
+    */
+   private boolean checkContentSeen(byte[] content) {
+	   return false;
    }
 
    /**

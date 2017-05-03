@@ -68,7 +68,7 @@ public class HttpsClient extends Client {
             // }
 
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return false;
         }
         return true;

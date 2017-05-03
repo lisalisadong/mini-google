@@ -1,18 +1,17 @@
-package crawler;
+package crawler.urlfrontier;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.LinkedList;
 
-import org.apache.log4j.Logger;
-
+import crawler.Crawler;
 import crawler.stormlite.*;
 import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.spout.IRichSpout;
 import crawler.stormlite.spout.SpoutOutputCollector;
 import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Values;
-import crawler.urlfrontier.URLFrontier;
+import utils.Logger;
 
 /**
  * URLFrontier
@@ -35,7 +34,7 @@ import crawler.urlfrontier.URLFrontier;
  * the License.
  */
 public class URLSpout implements IRichSpout {
-    static Logger log = Logger.getLogger(URLSpout.class);
+    static Logger log = new Logger(URLSpout.class.getName());
 
     /**
      * To make it easier to debug: we have a unique ID for each instance of the
@@ -45,7 +44,7 @@ public class URLSpout implements IRichSpout {
 
     Fields schema = new Fields("url");
 
-    private URLFrontier URLFrontier = Crawler.getURLFrontier();
+    private URLFrontier URLFrontier;
 
     /**
      * The collector is the destination for tuples; you "emit" tuples there
@@ -66,6 +65,7 @@ public class URLSpout implements IRichSpout {
     @Override
     public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
         this.collector = collector;
+        URLFrontier = Crawler.getURLFrontier();
     }
 
     /**
@@ -86,6 +86,9 @@ public class URLSpout implements IRichSpout {
         String url = URLFrontier.getNextURL();
 
         if (url != null) {
+        	
+//        	System.out.println(id + " emit: "  + url);
+        	
             this.collector.emit(new Values<Object>(url));
         }
 

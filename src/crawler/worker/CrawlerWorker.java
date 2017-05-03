@@ -1,13 +1,15 @@
-package crawler;
+package crawler.worker;
 
-import crawler.worker.WorkerServer;
 import crawler.stormlite.tuple.Tuple;
+import crawler.Crawler;
 import crawler.stormlite.distributed.WorkerJob;
 import utils.Logger;
 
 import static spark.Spark.setPort;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import spark.Request;
 import spark.Response;
@@ -24,13 +26,21 @@ public class CrawlerWorker extends WorkerServer {
 	
 	Crawler crawler;
 	
+	public static WorkerStatus workerStatus = new WorkerStatus();
+	
 	ObjectMapper om;
+	
+	public boolean isRunning = false;
+	
+	public static int port;
+	
+	public static String cacheDir;
 	
 	public CrawlerWorker(String masterAddr, int myPort) {
 		super(masterAddr, myPort);
 		
 		crawler = new Crawler();
-		
+		port = myPort;
 		om = new ObjectMapper();
 	    om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
 	}
@@ -38,8 +48,8 @@ public class CrawlerWorker extends WorkerServer {
 	@Override
 	public void run() {
 		logger.debug("Creating server listener at socket " + myPort);
-		
-		runBackgroundThread();
+		isRunning = true;
+		startPingThread();
 		
 		setPort(myPort);
         
@@ -114,12 +124,6 @@ public class CrawlerWorker extends WorkerServer {
 			}
         });
 
-		
-	}
-
-	//TODO: background thread sending status to master
-    private void runBackgroundThread() {
-    	
 	}
 
 	@Override
@@ -127,14 +131,17 @@ public class CrawlerWorker extends WorkerServer {
 		crawler.stop();
 	}
 	
+	
+	
 	public static void main(String[] args) {
-		if(args.length != 2) {
-			System.out.println("Usage: [master addr] [port]");
+		if(args.length != 3) {
+			System.out.println("Usage: [master addr] [port] [cache root dir]");
 			return;
 		}
 		
 		String masterAddr = args[0];
 		int port = 8000;
+		CrawlerWorker.cacheDir = args[2];
 		try {
 			port = Integer.parseInt(args[1]);
 		} catch(NumberFormatException e) {
@@ -143,9 +150,54 @@ public class CrawlerWorker extends WorkerServer {
 		}
 		
 		CrawlerWorker worker = new CrawlerWorker(masterAddr, port);
-		
+	
 		worker.run();
 		
 	}
+	
+
+    private void startPingThread() {
+		Thread backgroundThread = new Thread(){
+			public void run() {
+				// TODO: 10s
+				while(isRunning) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					try {
+						ObjectMapper mapper = new ObjectMapper();
+				        mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+				        
+				        // TODO: should be /workerstatus
+						URL url = new URL("http://" + masterAddr + 
+								"/workerstatus" + getParamString());
+						HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+						conn.setDoOutput(true);
+						conn.setRequestMethod("GET");
+						conn.setRequestProperty("Content-Type", "application/json");
+						conn.getResponseCode();
+//						System.out.println(conn.getResponseCode());
+						conn.disconnect();
+					} catch (IOException e) {
+//						e.printStackTrace();
+					} 
+				}
+			}
+		};
+		backgroundThread.start();
+	}
+    
+    private static String getParamString() {
+		StringBuilder sb = new StringBuilder("?");
+		synchronized(workerStatus){
+			sb.append("port=" + port + "&");
+			sb.append("crawledFileNum=" + workerStatus.getCrawledFileNum());
+		}
+		return sb.toString();
+	}
+	
+	
 	
 }
