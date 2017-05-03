@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-public class IndexerReducer extends Reducer<Text, Text, Text, Text> { //TODO: intermediate format, output format
+public class IndexerReducer extends Reducer<Text, InterValue, Text, Text> { //TODO: intermediate format, output format
 
 	public void reduce(Text key, Iterable<Text> value, Context context) throws IOException, InterruptedException {
 		// TODO:
