@@ -3,9 +3,12 @@ package indexer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,8 +39,9 @@ public class IndexerMapWorker {
 	private String contentType;
 	private InputStream in;
 	private Stemmer stemmer;
-	private int docWordsNum;
-	private Map<String, Integer> wordFreq;
+	private Map<String, Integer> wordFreq; // word : # of the word
+	private Map<String, List<Integer>> wordPos; // word : List<word position>
+	private int position;
 	
 	public IndexerMapWorker(String docID, InputStream in, String contentType) {
 		this.docID = docID;
@@ -45,6 +49,8 @@ public class IndexerMapWorker {
         this.in = in;
         this.stemmer = new Stemmer();
         this.wordFreq = new HashMap<String, Integer>();
+        this.wordPos = new HashMap<String, List<Integer>>();
+        this.position = 0;
 	}
 	
 	public void parse() throws IOException {
@@ -89,6 +95,9 @@ public class IndexerMapWorker {
 				continue;
 			}
 			word = lemmatize(word);
+			position++;
+			
+			//update wordFreq
 			if(wordFreq.containsKey(word)){
 				wordFreq.put(word, wordFreq.get(word) + 1);
 			}
@@ -96,11 +105,31 @@ public class IndexerMapWorker {
 				wordFreq.put(word, 1);
 			}
 			
+			//update word positions
+			List<Integer> pos = wordPos.get(word);
+			if (pos == null) {
+				pos = new ArrayList<Integer>();
+				wordPos.put(word, pos);
+			}
+			pos.add(position);
 		}
 	}
+	
+	public Map<String, Integer> getWordFreq() {
+		return wordFreq;
+	}
+	
+	public Map<String, List<Integer>> getWordPos() {
+		return wordPos;
+	}
+	
 	
 	private String lemmatize(String word) {
 		return stemmer.stem(word.toLowerCase());
 	}
+	
+//	public static void main(String[] args) {
+//	
+//	}
 
 }
