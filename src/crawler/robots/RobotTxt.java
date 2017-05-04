@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import crawler.client.Client;
+import crawler.client.URLInfo;
 
 public class RobotTxt {
 
@@ -18,6 +19,7 @@ public class RobotTxt {
     private boolean haveLinks;
 
     public RobotTxt(String url) {
+    	
         disallowedLinks = new HashSet<>();
         allowedLinks = new HashSet<>();
         Client client = Client.getClient(url);
@@ -124,7 +126,7 @@ public class RobotTxt {
         }
         return true;
     }
-
+    
     public String toString() {
         StringBuilder sb = new StringBuilder("User-Agent: cis455crawler\n");
         System.out.println("Crawl delay: " + crawlDelay);

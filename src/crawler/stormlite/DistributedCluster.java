@@ -23,9 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -76,8 +78,8 @@ public class DistributedCluster implements Runnable {
 	// between EOS propagation and tuple propagation!
 	ExecutorService executor = Executors.newFixedThreadPool(20);	
 	
-	Queue<Runnable> taskQueue = new LinkedList<Runnable>();
-//	Queue<Runnable> taskQueue = new ConcurrentLinkedQueue<Runnable>();
+//	Queue<Runnable> taskQueue = new LinkedList<Runnable>();
+	Queue<Runnable> taskQueue = new ConcurrentLinkedQueue<Runnable>();
 	
 
 	public TopologyContext submitTopology(String name, Config config, 
@@ -114,33 +116,24 @@ public class DistributedCluster implements Runnable {
 //			System.out.println("Task queue size: " + taskQueue.size());
 			
 			/* busy wating */
-//			Runnable task = taskQueue.poll();
-//			if(task == null) Thread.yield();
-//			else executor.execute(task);
+			Runnable task = taskQueue.poll();
+			if(task == null) Thread.yield();
+			else executor.execute(task);
 			
+//			synchronized(taskQueue) {
+//				while(taskQueue.isEmpty()) {
+//					try {
+//						taskQueue.wait();
+//					} catch (InterruptedException e) { }
+//				}
+//				Runnable task = taskQueue.poll();
+//				if(task == null) {
+//					System.out.println("***********Null task, should not happen");
+//					System.exit(0);
+//				}
+//				executor.execute(task);
+//			}
 			
-			synchronized(taskQueue) {
-				
-				while(taskQueue.isEmpty()) {
-					
-					try {
-						taskQueue.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					
-				}
-
-				Runnable task = taskQueue.poll();
-				
-				if(task == null) {
-					System.out.println("*******************Null task, should not happen");
-					continue;
-				}
-				
-//				System.out.println("got task");
-				executor.execute(task);
-			}
 		}
 	}
 	
@@ -311,6 +304,7 @@ public class DistributedCluster implements Runnable {
 			while (!quit.get())
 				Thread.yield();
 		}
+		
 		System.out.println(context.getMapOutputs() + " local map outputs and " + 
 				context.getReduceOutputs() + " local reduce outputs.");
 		
@@ -324,7 +318,7 @@ public class DistributedCluster implements Runnable {
 	public void shutdown() {
 		closeSpoutInstances();
 		closeBoltInstances();
-
+		
 		System.out.println("Shutting down distributed cluster.");
 	}
 

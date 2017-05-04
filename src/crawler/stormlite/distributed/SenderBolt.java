@@ -77,7 +77,7 @@ public class SenderBolt implements IRichBolt {
         try {
             send(input);
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 

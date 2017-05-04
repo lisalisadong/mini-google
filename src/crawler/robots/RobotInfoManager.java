@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import crawler.Crawler;
 import crawler.client.URLInfo;
 import crawler.utils.LRU;
+import crawler.utils.LRUCache;
+import crawler.worker.CrawlerWorker;
 
 /**
  * robot manager class, taking care of the robot rules
@@ -19,13 +21,13 @@ public class RobotInfoManager {
 	public int crawledPageLimit = Crawler.crawledPageLimit;
 	
     // <hostName, *>
-    private LRU<String, RobotTxt> robotMap;
-    private LRU<String, Long> crawlTime;
+    private LRUCache<RobotTxt> robotInfo;
+    private LRUCache<Long> crawlTime;
     private ConcurrentHashMap<String, Integer> crawledPageNum;	//<host, time>
 
     public RobotInfoManager() {
-        robotMap = new LRU<>(10);
-        crawlTime = new LRU<>(10);
+        robotInfo = new LRUCache<>(65536, CrawlerWorker.cacheDir);
+        crawlTime = new LRUCache<>(65536, CrawlerWorker.cacheDir);
         
         crawledPageNum = new ConcurrentHashMap<>();
     }
@@ -36,7 +38,7 @@ public class RobotInfoManager {
 
     public RobotTxt getRobotTxt(String url) {
         String host = getHostName(url);
-        RobotTxt robotTxt =  robotMap.getValue(host);
+        RobotTxt robotTxt = robotInfo.get(host);
         if(robotTxt != null) return robotTxt;
 
         String robotUrl = host + "/robots.txt";
@@ -46,8 +48,8 @@ public class RobotInfoManager {
 
         robotTxt = new RobotTxt(robotUrl);
         // System.out.println(robotTxt);
-        robotMap.store(host, robotTxt);
-        crawlTime.store(host, -1L);
+        robotInfo.put(host, robotTxt);
+        crawlTime.put(host, -1L);
         return robotTxt;
     }
 
@@ -98,8 +100,8 @@ public class RobotInfoManager {
 
     public boolean setHostLastAccessTime(String url) {
         String host = getHostName(url);
-        if (robotMap.contains(host)) {
-            crawlTime.store(host, System.currentTimeMillis());
+        if (robotInfo.get(host) != null) {
+            crawlTime.put(host, System.currentTimeMillis());
             return true;
         }
         return false;
@@ -111,7 +113,7 @@ public class RobotInfoManager {
      */
     public void visit(String url) {
     	String host = getHostName(url);
-    	crawledPageNum.put(host, crawledPageNum.getOrDefault(host, 0));
+    	crawledPageNum.put(host, crawledPageNum.getOrDefault(host, 0) + 1);
     }
 
     /**
@@ -122,9 +124,9 @@ public class RobotInfoManager {
      */
     public long getHostLastAccessTime(String url) {
         String host = getHostName(url);
-        if (!crawlTime.contains(host))
+        if (crawlTime.get(host) == null)
             return -1;
-        return crawlTime.getValue(host);
+        return crawlTime.get(host);
     }
 
     /**
@@ -135,9 +137,9 @@ public class RobotInfoManager {
      */
     public boolean timeAllowed(String url) {
         String host = getHostName(url);
-        RobotTxt r = robotMap.get(host);
+        RobotTxt r = robotInfo.get(host);
         
-        Long t = crawlTime.getValue(host);
+        Long t = crawlTime.get(host);
         
         if (r == null || r.getCrawlDelay() == -1 || t == null)
             return true;
@@ -147,6 +149,10 @@ public class RobotInfoManager {
     public long getCrawlDelay(String url) {
         RobotTxt r = getRobotTxt(url);
         return r.getCrawlDelay();
+    }
+    
+    public long getAvailableTime(String url) {
+    	return getHostLastAccessTime(url) + getCrawlDelay(url);
     }
 
     /**
@@ -164,5 +170,37 @@ public class RobotInfoManager {
             }
         }
     }
+    
+    public static void main(String[] args) {
+    	RobotInfoManager rm = new RobotInfoManager();
+    	System.out.println("is allowed: " + rm.isAllowed("http://crawltest.cis.upenn.edu/marie/private/"));
+    	System.out.println("is allowed: " + rm.isAllowed("http://crawltest.cis.upenn.edu/foo/"));
+//    	System.out.println("is allowed: " + rm.isAllowed(url));
+//        RobotTxt r = new RobotTxt("https://piazza.com/robots.txt");
+//        System.out.println(r);
+//        System.out.println("is allowed: " + r);
+
+//        RobotInfoManager r = new RobotInfoManager();
+//        r.getRobotTxt("http://crawltest.cis.upenn.edu/");
+//        System.out.println("is allowed: " +
+//        r.isAllowed("http://crawltest.cis.upenn.edu/marie/private/"));
+//        System.out.println("is allowed: " +
+//        r.isAllowed("http://crawltest.cis.upenn.edu/foo/"));
+
+       // Client c = Client.getClient("http://nba.hupu.com/robots.txt");
+       // c.setMethod("GET");
+       // c.sendReq();
+       // BufferedReader bf = c.getBufferedReader();
+       //
+       // String line = null;
+       // try {
+       // while((line = bf.readLine()) != null) {
+       // System.out.println(line);
+       // }
+       // } catch (IOException e) {
+       // // TODO Auto-generated catch block
+       // e.printStackTrace();
+       // }
+   }
 
 }

@@ -20,6 +20,7 @@ package crawler.stormlite;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 import crawler.stormlite.routers.StreamRouter;
 
@@ -65,14 +66,13 @@ public class TopologyContext {
     }
 
     public void addStreamTask(Runnable next) {
+    	if(next == null) return;
+    	taskQueue.add(next);
     	
-//    	taskQueue.add(next);
-    	
-        synchronized(taskQueue) {
-        	taskQueue.add(next);
-        	taskQueue.notifyAll();
-        }
-    	
+//    	synchronized(taskQueue) {
+//    		taskQueue.offer(next);
+//    		taskQueue.notifyAll();
+//    	}
     }
 
     public STATE getState() {

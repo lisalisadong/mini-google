@@ -80,20 +80,21 @@ public class LinkExtractorBolt implements IRichBolt {
 //         System.out.println(id + " got " + page.getUrl());
         if ("text/html".equals(page.getContentType())) {
             byte[] content = page.getContent();
-
-            Document doc = Jsoup.parse(new String(content), page.getUrl());
+            String url = page.getUrl();
+            Document doc = Jsoup.parse(new String(content), url);
             Elements links = doc.select("a[href]");
 
             for (Element link : links) {
                 String l = link.attr("abs:href");
-                page.addLink(l);
-                if (l == null || l.length() <= 0)
-                    continue;
-                // System.out.println(id + " emit " + l);
-
-                this.collector.emit(new Values<Object>(l));
+                
+                if(url != null && !url.equals(l)) {
+                	if (l == null || l.length() == 0)
+                        continue;
+                    // System.out.println(id + " emit " + l);
+                	page.addLink(l);
+                    this.collector.emit(new Values<Object>(l));
+                }
             }
-
         }
 
         db.savePage(page);

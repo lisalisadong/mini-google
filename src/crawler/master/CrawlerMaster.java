@@ -1,4 +1,4 @@
-package crawler;
+package crawler.master;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,24 +12,26 @@ import org.apache.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import crawler.Crawler;
+import crawler.due.DUEBolt;
 import crawler.storage.DBWrapper;
 import crawler.stormlite.Config;
 import crawler.stormlite.Topology;
 import crawler.stormlite.TopologyBuilder;
 import crawler.stormlite.bolt.ContentSeenBolt;
-import crawler.stormlite.bolt.DUEBolt;
 import crawler.stormlite.bolt.HTTPModuleBolt;
 import crawler.stormlite.bolt.LinkExtractorBolt;
 import crawler.stormlite.bolt.URLFilterBolt;
 import crawler.stormlite.distributed.WorkerJob;
 import crawler.stormlite.tuple.Fields;
+import crawler.urlfrontier.URLSpout;
 import crawler.stormlite.distributed.WorkerHelper;
 
 public class CrawlerMaster {
 	static Logger logger = Logger.getLogger(CrawlerMaster.class.getName());
 	
-//	static String workerList = "[127.0.0.1:8000,127.0.0.1:8001]";
-	static String workerList = "[127.0.0.1:8000]";
+	static String workerList = "[127.0.0.1:8000,127.0.0.1:8001]";
+//	static String workerList = "[127.0.0.1:8001]";
 	
 //	static DBWrapper db = new DBWrapper(Crawler.DBPath);
 	
@@ -84,7 +86,7 @@ public class CrawlerMaster {
 		
 	}
 	
-private static Topology configTopology(Config config) {
+	private static Topology configTopology(Config config) {
     	
     	URLSpout URLSpout = new URLSpout();
         HTTPModuleBolt httpModule = new HTTPModuleBolt();
@@ -114,8 +116,8 @@ private static Topology configTopology(Config config) {
         .shuffleGrouping(Crawler.LINK_EXTRACTOR_BOLT);
         
         builder.setBolt(Crawler.DUE_BOLT, due, Crawler.DUE_BOLT_NUM)
-        .fieldsGrouping(Crawler.URL_FILTER_BOLT, new Fields("url"));
-//        .fieldsGrouping(Crawler.URL_FILTER_BOLT, new Fields("host"));
+//        .fieldsGrouping(Crawler.URL_FILTER_BOLT, new Fields("url"));
+        .fieldsGrouping(Crawler.URL_FILTER_BOLT, new Fields("host"));
        
         return builder.createTopology();
     }

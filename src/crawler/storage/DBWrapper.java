@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.LinkedList;
-import java.util.Iterator;
 
 import java.io.File;
 
@@ -15,7 +14,9 @@ import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
 import com.sleepycat.persist.StoreConfig;
 
-import com.sleepycat.persist.EntityCursor;
+import crawler.robots.RobotTxt;
+import crawler.urlfrontier.URLFrontier;
+import crawler.utils.CacheEntry;
 
 public class DBWrapper {
 
@@ -25,6 +26,9 @@ public class DBWrapper {
     private static EntityStore store;
 
     public PrimaryIndex<String, CrawledPage> pIdx;
+    
+    @SuppressWarnings("rawtypes")
+    public PrimaryIndex<String, CacheEntry> cIdx;
 
     public DBWrapper(String dir) {
         envDir = dir;
@@ -43,7 +47,9 @@ public class DBWrapper {
         // Open the environment and entity store
         myEnv = new Environment(new File(envDir), envConfig);
         store = new EntityStore(myEnv, "EntityStore", storeConfig);
+        
         pIdx = store.getPrimaryIndex(String.class, CrawledPage.class);
+        cIdx = store.getPrimaryIndex(String.class, CacheEntry.class);
     }
 
     public String getPath() {
@@ -57,6 +63,17 @@ public class DBWrapper {
 
     public CrawledPage getPage(String url) {
         return pIdx.get(url);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public void saveCacheEntry(CacheEntry r) {
+    	cIdx.put(r);
+    	sync();
+    }
+    
+    @SuppressWarnings("rawtypes")
+	public CacheEntry getCacheEntry(String key) {
+    	return cIdx.get(key);
     }
 
     public void sync() {

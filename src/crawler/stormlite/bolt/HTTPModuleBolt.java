@@ -14,6 +14,7 @@ import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
 import crawler.stormlite.tuple.Values;
+import crawler.utils.LRUCache;
 import utils.Logger;
 
 /**
@@ -39,6 +40,8 @@ public class HTTPModuleBolt implements IRichBolt {
 	
 	Fields schema = new Fields("url");
 	private RobotInfoManager robotManager;
+	
+	LRUCache<CrawledPage> pageCache;
 	DBWrapper db;
 	
    /**
@@ -66,6 +69,7 @@ public class HTTPModuleBolt implements IRichBolt {
        this.collector = collector;
        robotManager = Crawler.getRobotManager();
        
+       pageCache = new LRUCache<>(65536, Crawler.DBPath);
        db = new DBWrapper(Crawler.DBPath);
        db.setup();
        
@@ -83,7 +87,6 @@ public class HTTPModuleBolt implements IRichBolt {
 	 
 	   Client client = Client.getClient(url);
 	   if(client == null) {
-//		   System.out.println(id + ": no client found");
 		   return;
 	   }
 	   client.setMethod("HEAD");
@@ -116,8 +119,8 @@ public class HTTPModuleBolt implements IRichBolt {
 //			   System.out.println(id + ": emit " + url);
 		   } else {
 			   System.out.println(id + ": " + url + " not modified");
-			   page.setLastCrawled(System.currentTimeMillis());
-			   db.savePage(page);
+//			   page.setLastCrawled(System.currentTimeMillis());
+//			   db.savePage(page);
 		   }
 		   
 	   }
