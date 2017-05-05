@@ -2,7 +2,6 @@ package searchengine;
 
 import utils.Stemmer;
 
-import javax.xml.transform.Result;
 import java.util.*;
 
 /**
@@ -12,8 +11,7 @@ public class SearchEngineService {
 
     private static Stemmer stemmer = new Stemmer();
 
-    private static HashMap<String, ResultEntry[]> originalCache = new HashMap<>();
-    private static HashMap<String, ResultEntry[]> sortedCache = new HashMap<>();
+    private static LRUCache cache = new LRUCache(100); // LRU with 100 cached queries
 
     /**
      * Returns the number of results that are expected.
@@ -24,12 +22,11 @@ public class SearchEngineService {
         // get {word:occurrences} map from query
         Map<String, Integer> wordsOccur = decomposeQuery(query);
 
-        if (originalCache.containsKey(query)) {
-            return originalCache.get(query).length;
+        if (cache.getOriginal(query) != null) {
+            return cache.getOriginal(query).length;
         } else {
             ResultEntry[] entries = getAllEntries(Collections.enumeration(wordsOccur.keySet()));
-            originalCache.put(query, entries);
-            sortedCache.put(query, new ResultEntry[entries.length]);
+            cache.put(query, entries);
             return entries.length;
         }
     }
@@ -50,14 +47,13 @@ public class SearchEngineService {
         Map<String, Integer> wordsOccur = decomposeQuery(query);
 
         // in case this is a new search query and has not been pre-searched, should not happen
-        if (!originalCache.containsKey(query)) {
+        if (cache.getSorted(query) == null) {
             ResultEntry[] entries = getAllEntries(Collections.enumeration(wordsOccur.keySet()));
-            originalCache.put(query, entries);
-            sortedCache.put(query, new ResultEntry[entries.length]);
+            cache.put(query, entries);
         }
 
         // out of bound, should not happen
-        if (rank + num >= originalCache.get(query).length) {
+        if (rank + num >= cache.getSorted(query).length) {
             return null;
         }
 
@@ -68,28 +64,8 @@ public class SearchEngineService {
 
         // get result
         ResultEntry[] resultEntries = new ResultEntry[num];
-        System.arraycopy(originalCache.get(query), rank, resultEntries, 0, num);
+        System.arraycopy(cache.getSorted(query), rank, resultEntries, 0, num);
         return resultEntries;
-    }
-
-    /**
-     * Asynchronously search with a query. Return immediately. Must use
-     * joinAsyncSearch() to join the thread.
-     *
-     * @param query search query
-     */
-    private static void asyncSearch(String query, int rank, int num) {
-        // TODO: start new thread to search database and sort
-    }
-
-    /**
-     * Join the async searching thread.
-     *
-     * @return sorted result entries
-     */
-    private static void joinAsyncSearch() {
-        // TODO: join the search thread
-
     }
 
     /**
@@ -191,7 +167,7 @@ public class SearchEngineService {
      * @param rankEnd ending rank
      */
     private static void sortAndCache(String query, int rankStart, int rankEnd) {
-        ResultEntry[] entries = originalCache.get(query);
+        ResultEntry[] entries = cache.getOriginal(query);
         ResultEntry higherBound = findKthLargest(entries, rankStart);
         ResultEntry lowerBound = findKthLargest(entries, rankEnd);
         ResultEntry[] toSort = new ResultEntry[(rankEnd - rankStart + 1)];
@@ -202,7 +178,7 @@ public class SearchEngineService {
             }
         }
         Arrays.sort(toSort, (o1, o2) -> o2.compareTo(o1));
-        System.arraycopy(toSort, 0, sortedCache, rankStart, rankEnd - rankStart + 1);
+        System.arraycopy(toSort, 0, cache.getSorted(query), rankStart, rankEnd - rankStart + 1);
     }
 
     /**
@@ -261,7 +237,7 @@ public class SearchEngineService {
      * @return true if range is sorted and cached
      */
     private static boolean sorted(String query, int rankStart, int rankEnd) {
-        ResultEntry[] entries = sortedCache.get(query);
+        ResultEntry[] entries = cache.getSorted(query);
         for (int i = rankStart; i <= rankEnd; i++) {
             if (entries[i] == null) return false;
         }
