@@ -206,5 +206,22 @@
             <arg value="${id}"/>
 	    </java>
 	</target>
+	
+	<target name="gen-host-file" depends="compile-crawler" description="analysis hosts crawled">
+
+			<property name="dbpath" value="../db" />
+			<property name="v" value="a" />
+	        <java classname="crawler.analysis.ShowHosts">
+	            <classpath>
+	                <pathelement location="lib/webserver.jar"/>
+	                <pathelement location="lib/servlet-api.jar"/>
+	            	<pathelement location="lib/servlet-api-3.1.jar"/>
+	                <pathelement location="lib/je-6.2.31.jar"/>
+	                <pathelement location="${classes.dir}"/>
+	            </classpath>
+	        	<arg value="${dbpath}"/>
+	        	<arg value="${v}"/>
+		    </java>
+		</target>
 
 </project>
