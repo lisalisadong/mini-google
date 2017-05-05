@@ -31,10 +31,10 @@ public class Driver {
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(OutputValue.class);
 
+		job.setInputFormatClass(WholeFileInputFormat.class);
+		
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 		
-		//
-//		job.setInputFormatClass(TextInputFormat.class);
 	}
 
 }
