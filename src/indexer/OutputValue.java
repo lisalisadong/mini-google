@@ -13,15 +13,17 @@ public class OutputValue implements WritableComparable<OutputValue> {
 	private String docID;
 	private double tf;
 	private double idf;
-	private List<Integer> positions;
+	private List<Integer> titlePositions;
+	private List<Integer> contentPositions;
 	
 	public OutputValue() { }
 	
-	public OutputValue(String docID, double tf, double idf, List<Integer> pos) {
+	public OutputValue(String docID, double tf, double idf, List<Integer> tPos, List<Integer> cPos) {
 		this.docID = docID;
 		this.tf = tf;
 		this.idf = idf;
-		this.positions = pos;
+		this.titlePositions = tPos;
+		this.contentPositions = cPos;
 	}
 	
 	public String getDocID() {
@@ -32,8 +34,8 @@ public class OutputValue implements WritableComparable<OutputValue> {
 		return tf;
 	}
 	
-	public List<Integer> getPositions() {
-		return positions;
+	public List<Integer> getTitlePositions() {
+		return titlePositions;
 	}
 
 	@Override
@@ -41,10 +43,15 @@ public class OutputValue implements WritableComparable<OutputValue> {
 		this.docID = in.readUTF();
 		this.tf = in.readDouble();
 		this.idf = in.readDouble();
-		int size = in.readInt();
-		this.positions = new ArrayList<Integer>();
-		for (int i = 0; i < size; i++) {
-			positions.add(in.readInt());
+		int tSize = in.readInt();
+		this.titlePositions = new ArrayList<Integer>();
+		for (int i = 0; i < tSize; i++) {
+			titlePositions.add(in.readInt());
+		}
+		int cSize = in.readInt();
+		this.contentPositions = new ArrayList<Integer>();
+		for (int i = 0; i < cSize; i++) {
+			contentPositions.add(in.readInt());
 		}
 	}
 
@@ -53,10 +60,15 @@ public class OutputValue implements WritableComparable<OutputValue> {
 		out.writeUTF(docID);
 		out.writeDouble(tf);
 		out.writeDouble(idf);
-		int size = positions.size();
-		out.writeInt(size);
-		for (int i = 0; i < size; i++) {
-			out.writeInt(positions.get(i));
+		int tSize = titlePositions.size();
+		out.writeInt(tSize);
+		for (int i = 0; i < tSize; i++) {
+			out.writeInt(titlePositions.get(i));
+		}
+		int cSize = contentPositions.size();
+		out.writeInt(cSize);
+		for (int i = 0; i < cSize; i++) {
+			out.writeInt(contentPositions.get(i));
 		}
 	}
 
@@ -76,7 +88,7 @@ public class OutputValue implements WritableComparable<OutputValue> {
 	
 	@Override
 	public String toString() {
-		return docID + "\t" + tf + "\t" + idf + "\t" + positions.toString();
+		return docID + "\t" + tf + "\t" + idf + "\t" + titlePositions.toString() + "\t" + contentPositions.toString();
 	}
 
 }

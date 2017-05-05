@@ -12,14 +12,17 @@ public class InterValue implements WritableComparable<InterValue> {
 
 	private String docID;
 	private double tf;
-	private List<Integer> positions;
+	private List<Integer> titlePos;
+	private List<Integer> contentPos;
+	
 	
 	public InterValue() { }
 	
-	public InterValue(String docID, double tf, List<Integer> pos) { 
+	public InterValue(String docID, double tf, List<Integer> titlePos, List<Integer> contentPos) { 
 		this.docID = docID;
 		this.tf = tf;
-		this.positions = pos;
+		this.titlePos = titlePos;
+		this.contentPos = contentPos;
 	}
 	
 	public String getDocID() {
@@ -30,29 +33,44 @@ public class InterValue implements WritableComparable<InterValue> {
 		return tf;
 	}
 	
-	public List<Integer> getPositions() {
-		return positions;
+	public List<Integer> getTitlePositions() {
+		return titlePos;
+	}
+	
+	public List<Integer> getContentPositions() {
+		return contentPos;
 	}
 
 	@Override
 	public void readFields(DataInput in) throws IOException {
 		this.docID = in.readUTF();
 		this.tf = in.readDouble();
-		int size = in.readInt();
-		this.positions = new ArrayList<Integer>();
-		for (int i = 0; i < size; i++) {
-			positions.add(in.readInt());
+		int tSize = in.readInt();
+		this.titlePos = new ArrayList<Integer>();
+		for (int i = 0; i < tSize; i++) {
+			titlePos.add(in.readInt());
 		}
+		int cSize = in.readInt();
+		this.contentPos = new ArrayList<Integer>();
+		for (int i = 0; i < cSize; i++) {
+			contentPos.add(in.readInt());
+		}
+		
 	}
 
 	@Override
 	public void write(DataOutput out) throws IOException {
 		out.writeUTF(docID);
 		out.writeDouble(tf);
-		int size = positions.size();
-		out.writeInt(size);
-		for (int i = 0; i < size; i++) {
-			out.writeInt(positions.get(i));
+		int tSize = titlePos.size();
+		out.writeInt(tSize);
+		for (int i = 0; i < tSize; i++) {
+			out.writeInt(titlePos.get(i));
+		}
+		int cSize = contentPos.size();
+		out.writeInt(cSize);
+		for (int i = 0; i < cSize; i++) {
+			out.writeInt(contentPos.get(i));
 		}
 	}
 

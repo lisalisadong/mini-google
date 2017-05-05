@@ -8,7 +8,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 public class Driver {
 	
-
 	public static void main(String[] args) throws Exception {
 		if (args.length != 2) {
 			System.out.println("Args Error: [input path] [output path]");
