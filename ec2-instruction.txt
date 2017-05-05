@@ -8,7 +8,21 @@ ec2 instructions:
 3. ssh -i /pathTo/crawler-keys.pem ec2-user@ec2-198-51-100-1.compute-1.amazonaws.com
 
 ===================================================cp files=========================================================
-4. scp -i /pathTo/crawler-keys.pem -r Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google/ ec2-54-244-207-105.us-west-2.compute.amazonaws.com:~/
+scp -i /pathTo/crawler-keys.pem -r Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google/ ec2-54-244-207-105.us-west-2.compute.amazonaws.com:~/
+
+===================================================install java and javac=========================================================
+sudo yum update
+sudo yum remove java
+sudo yum install java-1.8.0
+sudo yum install java-1.8.0-openjdk
+
+===================================================install ant======================================================
+scp ant-1.10 package to ec2
+tar vxf apache-ant-1.*
+sudo cp -r ant-package /opt/
+sudo ln -s /opt/apache-ant-1.10.*** /opt/ant
+sudo ln -s /opt/ant/bin/ant /usr/bin/ant
+ 
 
 ==================================================================================================================================
 ec2:
