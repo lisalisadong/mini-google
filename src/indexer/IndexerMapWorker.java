@@ -33,21 +33,21 @@ public class IndexerMapWorker {
 			"you'll", "you're", "you've", "your", "yours", "yourself", "yourselves" };
 	public static final Set<String> STOP_LIST = new HashSet<String>(Arrays.asList(STOP_SET_VALUES));
 
-	private String docID;
 	private String contentType;
 	private InputStream in;
 	private Stemmer stemmer;
 	private Map<String, Integer> wordFreq; // word : # of the word
-	private Map<String, List<Integer>> wordPos; // word : List<word position>
+	private Map<String, List<Integer>> titlePos; // word : List<word position>
+	private Map<String, List<Integer>> contentPos;
 	private int position;
 	
-	public IndexerMapWorker(String docID, InputStream in, String contentType) {
-		this.docID = docID;
+	public IndexerMapWorker(InputStream in, String contentType) {
 		this.contentType = contentType;
         this.in = in;
         this.stemmer = new Stemmer();
         this.wordFreq = new HashMap<String, Integer>();
-        this.wordPos = new HashMap<String, List<Integer>>();
+        this.titlePos = new HashMap<String, List<Integer>>();
+        this.contentPos = new HashMap<String, List<Integer>>();
         this.position = 0;
 	}
 	
@@ -56,9 +56,8 @@ public class IndexerMapWorker {
 		switch (contentType) {
 		case "html":
 			Document doc = Jsoup.parse(in, Charset.defaultCharset().name(), "");
-			// TODO: might need to seperate title ...
-			parseElement(doc.title());
-			parseElement(doc.body().text());
+			parseElement(doc.title(), true);
+			parseElement(doc.body().text(), false);
 			break;
 		case "pdf":
 			PDDocument pdoc = PDDocument.load(in);
@@ -67,7 +66,7 @@ public class IndexerMapWorker {
 	        stripper.setEndPage(Integer.MAX_VALUE);
 	        content = stripper.getText(pdoc);
 	        pdoc.close();
-	        parseElement(content);
+	        parseElement(content, false);
 			break;
 		// xml or plain/text
 		default:
@@ -77,13 +76,13 @@ public class IndexerMapWorker {
 	            sb.append((char) ch);
 	        }
 	        content = sb.toString();
-	        parseElement(content);
+	        parseElement(content, false);
 			break;
 		}
 		
 	}
 	
-	public void parseElement(String content) {
+	public void parseElement(String content, boolean isTitle) {
 		WordTokenizer tokenizer = new WordTokenizer(content);
 		while (tokenizer.hasMoreTokens()) {
 			String word = tokenizer.nextToken().toLowerCase();
@@ -102,23 +101,34 @@ public class IndexerMapWorker {
 			}
 			
 			//update word positions
-			List<Integer> pos = wordPos.get(word);
-			if (pos == null) {
-				pos = new ArrayList<Integer>();
-				wordPos.put(word, pos);
+			if (isTitle) {
+				updatePos(word, titlePos);
+			} else {
+				updatePos(word, contentPos);
 			}
-			pos.add(position);
 		}
+	}
+	
+	private void updatePos(String word, Map<String, List<Integer>> wordPos) {
+		List<Integer> pos = wordPos.get(word);
+		if (pos == null) {
+			pos = new ArrayList<Integer>();
+			wordPos.put(word, pos);
+		}
+		pos.add(position);
 	}
 	
 	public Map<String, Integer> getWordFreq() {
 		return wordFreq;
 	}
 	
-	public Map<String, List<Integer>> getWordPos() {
-		return wordPos;
+	public Map<String, List<Integer>> getTitlePos() {
+		return titlePos;
 	}
 	
+	public Map<String, List<Integer>> getContentPos() {
+		return contentPos;
+	}
 	
 	private String lemmatize(String word) {
 		return stemmer.stem(word);
@@ -126,13 +136,15 @@ public class IndexerMapWorker {
 	
 //	public static void main(String[] args) throws IOException {
 //		InputStream is = new FileInputStream("/Users/liujue/Desktop/input/text.txt");
-//		IndexerMapWorker w = new IndexerMapWorker("1", is, "html");
+//		IndexerMapWorker w = new IndexerMapWorker(is, "html");
 //		w.parse();
 //		Map<String, Integer> map = w.getWordFreq();
-//		Map<String, List<Integer>> pos = w.getWordPos();
+//		Map<String, List<Integer>> tp = w.getTitlePos();
+//		Map<String, List<Integer>> cp = w.getContentPos();
 //		for (String key : map.keySet()) {
 //		    System.out.println(key + ": " + map.get(key));
-//		    System.out.println(pos.get(key));
+//		    System.out.println(tp.get(key));
+//		    System.out.println(cp.get(key));
 //		}
 //	}
 

@@ -2,6 +2,7 @@ package indexer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,22 +22,34 @@ public class IndexerMapper extends Mapper<LongWritable, BytesWritable, Text, Int
 		String docID = "1";
 		String contentType = "html";
 		
-		IndexerMapWorker mapWorker = new IndexerMapWorker(docID, new ByteArrayInputStream(value.getBytes()), contentType);
+		IndexerMapWorker mapWorker = new IndexerMapWorker(new ByteArrayInputStream(value.getBytes()), contentType);
 		mapWorker.parse();
 		Map<String, Integer> wordFreq = mapWorker.getWordFreq();
-		Map<String, List<Integer>> wordPos = mapWorker.getWordPos();
+//		Map<String, List<Integer>> wordPos = mapWorker.getWordPos();
+		Map<String, List<Integer>> titlePos = mapWorker.getTitlePos();
+		Map<String, List<Integer>> contentPos = mapWorker.getContentPos();
 //		for (String k : wordFreq.keySet()) {
 //		    System.out.println(k + ": " + wordFreq.get(k));
 //		    System.out.println(wordPos.get(k));
 //		}
 		
 		double tfFactor = Constants.TF_FACTOR;
+		List<Integer> tPos;
+		List<Integer> cPos;
 		if (!wordFreq.isEmpty()) {
 			int maxFreq = Collections.max(wordFreq.values());
 			for (Entry<String, Integer> wf : wordFreq.entrySet()) {
 				String word = wf.getKey();
 				double tf = tfFactor + (1 - tfFactor) * wf.getValue() / maxFreq;
-				InterValue interValue = new InterValue(docID, tf, wordPos.get(word));
+				tPos = titlePos.get(word);
+				cPos = contentPos.get(word);
+				if (tPos == null) {
+					tPos = new ArrayList<Integer>();
+				}
+				if (cPos == null) {
+					cPos = new ArrayList<Integer>();
+				}
+				InterValue interValue = new InterValue(docID, tf, tPos, cPos);
 				context.write(new Text(word), interValue);
 			}
 		}

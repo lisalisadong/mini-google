@@ -15,11 +15,11 @@ public class IndexerReducer extends Reducer<Text, InterValue, Text, OutputValue>
 	public void reduce(Text key, Iterable<InterValue> values, Context context) throws IOException, InterruptedException {
 		List<InterValue> valueList = Lists.newArrayList(values);
 		int count = valueList.size();
-		double idf = Math.log((double) Constants.TF_FACTOR / count);
+		double idf = Math.log((double) count / Constants.TOTAL_DOC_NUM);
 		
 		for (InterValue value : valueList) {
 			System.out.println("word:" + key + "docID: " + value.getDocID());
-			OutputValue outputValue = new OutputValue(value.getDocID(), value.getTf(), idf, value.getPositions());
+			OutputValue outputValue = new OutputValue(value.getDocID(), value.getTf(), idf, value.getTitlePositions(), value.getContentPositions());
 			context.write(key, outputValue);
 		}
 	}
