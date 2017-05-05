@@ -1,0 +1,6 @@
+1. Run Master:
+	ant crawler-master
+2. Run Worker:
+	ant crawler-worker -Dmaster {masteraddr} -Dport {port} -Did {id}(from 1-5)
+3. Generate host file(show all the hosts crawled so far):
+ 	ant gen-host-file -Dpath {DBPath}("./db" + worker id)

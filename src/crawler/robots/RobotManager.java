@@ -1,17 +1,36 @@
 package crawler.robots;
 
+import java.util.LinkedList;
+
 import crawler.Crawler;
 import crawler.client.URLInfo;
 import crawler.storage.DBWrapper;
-
+import java.util.HashSet;
 public class RobotManager {
+	
+	public static HashSet<String> tabooHosts 
+		= new HashSet<String>(); 
 
 	public DBWrapper db;
 	
 	public RobotManager(String DBPath) {
 		db = new DBWrapper(DBPath);
 		db.setup();
-		System.out.println("Robot info cache: " + db.rIdx.map().size());
+		System.out.println("[Robot Manager] Robot info cache: " + db.rIdx.map().size());
+	}
+	
+	/**
+	 * taboo host
+	 */
+	public void configTabooHosts() {
+		tabooHosts.add("mailto");
+		tabooHosts.add("pinayot.com");
+		tabooHosts.add("thefappening.so");
+		tabooHosts.add("jizzbo.com");
+		tabooHosts.add("bestpornpictures.com");
+		tabooHosts.add("freepornpics.net");
+		tabooHosts.add("sexhotpictures.com");
+		tabooHosts.add("pornktube.com");
 	}
 	
 	private String getHostName(String url) {
@@ -42,8 +61,10 @@ public class RobotManager {
      */
     public boolean isAllowed(String url) {
     	String host = getHostName(url);
-        if (host == null || host.startsWith("mailto"))
+        if (host == null)
             return false;
+        
+        if(isTabooHost(host)) return false;
         
 //        /* return false if exceed the crawl limits */
 //        Integer num = crawledPageNum.get(host);
@@ -61,7 +82,19 @@ public class RobotManager {
         return robotTxt.match(filePath);
     }
     
-    public void writeSnapshot() {
+    /**
+     * returns true if the host is taboo
+     * @param host
+     * @return
+     */
+    private boolean isTabooHost(String host) {
+		for(String tabooHost: tabooHosts) {
+			if(host.contains(tabooHost)) return true;
+		}
+		return false;
+	}
+
+	public void writeSnapshot() {
     	db.sync();
     	synchronized(db.rIdx) {
     		System.out.println("Robot txt size: " + db.rIdx.map().size());
