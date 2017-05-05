@@ -8,22 +8,27 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import utils.Constants;
 
-public class IndexerMapper extends Mapper<Text, BytesWritable, Text, InterValue>{ // TODO: inputformate
+public class IndexerMapper extends Mapper<LongWritable, BytesWritable, Text, InterValue>{
 
-	public void map(Text key, BytesWritable value, Context context) throws IOException, InterruptedException {
+	public void map(LongWritable key, BytesWritable value, Context context) throws IOException, InterruptedException {
 		// TODO: retrieve input info
-		String docID = "";
+		String docID = "1";
 		String contentType = "html";
 		
 		IndexerMapWorker mapWorker = new IndexerMapWorker(docID, new ByteArrayInputStream(value.getBytes()), contentType);
 		mapWorker.parse();
 		Map<String, Integer> wordFreq = mapWorker.getWordFreq();
 		Map<String, List<Integer>> wordPos = mapWorker.getWordPos();
+//		for (String k : wordFreq.keySet()) {
+//		    System.out.println(k + ": " + wordFreq.get(k));
+//		    System.out.println(wordPos.get(k));
+//		}
 		
 		double tfFactor = Constants.TF_FACTOR;
 		if (!wordFreq.isEmpty()) {

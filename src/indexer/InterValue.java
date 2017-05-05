@@ -14,6 +14,8 @@ public class InterValue implements WritableComparable<InterValue> {
 	private double tf;
 	private List<Integer> positions;
 	
+	public InterValue() { }
+	
 	public InterValue(String docID, double tf, List<Integer> pos) { 
 		this.docID = docID;
 		this.tf = tf;

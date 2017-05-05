@@ -15,6 +15,8 @@ public class OutputValue implements WritableComparable<OutputValue> {
 	private double idf;
 	private List<Integer> positions;
 	
+	public OutputValue() { }
+	
 	public OutputValue(String docID, double tf, double idf, List<Integer> pos) {
 		this.docID = docID;
 		this.tf = tf;
