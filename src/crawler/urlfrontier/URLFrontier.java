@@ -14,6 +14,7 @@ import crawler.client.URLInfo;
 import crawler.robots.RobotInfoManager;
 import crawler.storage.DBWrapper;
 import crawler.storage.URLQueue;
+import crawler.worker.CrawlerWorker;
 import utils.Logger;
 
 /**
@@ -51,11 +52,22 @@ public class URLFrontier {
     	
     	if(db.uwIdx.map().isEmpty()) {
     		System.out.println("url frontier start from fresh");
-    		addURL("https://www.facebook.com/");
-    		addURL("http://www.upenn.edu/");
-    		addURL("https://en.wikipedia.org/wiki/Main_Page/");
-    		addURL("https://www.amazon.com/");
-    		addURL("http://www.cnn.com/");
+    		
+    		if(CrawlerWorker.WORKER_ID.equals("0")) 
+    			addURL("https://www.facebook.com/");
+    		
+    		if(CrawlerWorker.WORKER_ID.equals("1")) 
+    			addURL("http://www.upenn.edu/");
+    		
+    		if(CrawlerWorker.WORKER_ID.equals("2")) 
+    			addURL("https://en.wikipedia.org/wiki/Main_Page/");
+    		
+    		if(CrawlerWorker.WORKER_ID.equals("3"))
+    			addURL("https://www.amazon.com/");
+    		
+    		if(CrawlerWorker.WORKER_ID.equals("4"))
+    			addURL("http://www.cnn.com/");
+    		
     		return;
     	}
     	

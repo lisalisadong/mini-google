@@ -22,12 +22,12 @@ public class RobotInfoManager {
 	public int crawledPageLimit = Crawler.crawledPageLimit;
 	
     // <hostName, *>
-    private RobotCache1 robotInfo;
+    private RobotCache robotInfo;
 //    private LRUCache<Long> crawlTime;
     private ConcurrentHashMap<String, Integer> crawledPageNum;	//<host, time>
 
     public RobotInfoManager() {
-        robotInfo = new RobotCache1(1000, Crawler.ROBOT_CACHE_PATH, 3000);
+        robotInfo = new RobotCache(3000, Crawler.ROBOT_CACHE_PATH, 3000);
         
         crawledPageNum = new ConcurrentHashMap<>();
     }

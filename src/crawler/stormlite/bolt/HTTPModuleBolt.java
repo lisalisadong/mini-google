@@ -99,19 +99,6 @@ public class HTTPModuleBolt implements IRichBolt {
 	   /* the page should be retrieved */
 	   if(client.getStatusCode() == 200 && validContentType) {
 		   collector.emit(new Values<Object>(url));
-////		   CrawledPage page = db.getPage(url);
-//		   CrawledPage page = pageCache.get(url);
-//		   long lastModified = client.getResLastModified();
-//		   if(page == null || page.getLastCrawled() < lastModified) 
-//		   {
-//			   
-////			   System.out.println(id + ": emit " + url);
-//		   } else {
-//			   System.out.println(id + ": " + url + " not modified");
-////			   page.setLastCrawled(System.currentTimeMillis());
-////			   db.savePage(page);
-//		   }
-		   
 	   }
    }
 

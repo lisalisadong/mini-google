@@ -113,9 +113,6 @@ public class RobotCache {
         e.prev.next = tail;
         tail.prev = e.prev;
         map.remove(e.key);
-        db.saveRobotTxt(e.val);
-//        db.sync();
-        
         System.out.println("evict: " + e.key);
     }
     
