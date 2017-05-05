@@ -24,6 +24,7 @@ public class CrawlerWorker extends WorkerServer {
 	
 	static Logger logger = new Logger(WorkerServer.class.getName());
 	
+	public static String WORKER_ID;
 	Crawler crawler;
 	
 	public static WorkerStatus workerStatus = new WorkerStatus();
@@ -33,8 +34,6 @@ public class CrawlerWorker extends WorkerServer {
 	public boolean isRunning = false;
 	
 	public static int port;
-	
-	public static String cacheDir;
 	
 	public CrawlerWorker(String masterAddr, int myPort) {
 		super(masterAddr, myPort);
@@ -120,6 +119,7 @@ public class CrawlerWorker extends WorkerServer {
 				System.out.println("received shutdown!");
         		logger.debug("Shutting down all workers");
         		shutdown();
+//        		System.exit(0);
 				return "Shutted down";
 			}
         });
@@ -135,13 +135,12 @@ public class CrawlerWorker extends WorkerServer {
 	
 	public static void main(String[] args) {
 		if(args.length != 3) {
-			System.out.println("Usage: [master addr] [port] [cache root dir]");
+			System.out.println("Usage: [master addr] [port] [id]");
 			return;
 		}
 		
 		String masterAddr = args[0];
 		int port = 8000;
-		CrawlerWorker.cacheDir = args[2];
 		try {
 			port = Integer.parseInt(args[1]);
 		} catch(NumberFormatException e) {
@@ -149,7 +148,11 @@ public class CrawlerWorker extends WorkerServer {
 			return;
 		}
 		
+		CrawlerWorker.WORKER_ID = args[2];
+		Crawler.config();
+		Logger.configure(false, false);
 		CrawlerWorker worker = new CrawlerWorker(masterAddr, port);
+		
 	
 		worker.run();
 		
@@ -162,7 +165,7 @@ public class CrawlerWorker extends WorkerServer {
 				// TODO: 10s
 				while(isRunning) {
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(5000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}

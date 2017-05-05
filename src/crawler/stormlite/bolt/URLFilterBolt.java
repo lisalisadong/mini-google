@@ -62,7 +62,7 @@ public class URLFilterBolt implements IRichBolt {
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
-        robotManager = Crawler.robotManager;
+        robotManager = Crawler.getRobotManager();
     }
 
     /**

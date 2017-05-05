@@ -27,6 +27,8 @@ import crawler.stormlite.bolt.LinkExtractorBolt;
 import crawler.stormlite.bolt.URLFilterBolt;
 import crawler.urlfrontier.URLFrontier;
 import crawler.urlfrontier.URLSpout;
+import crawler.utils.LRUCache;
+import crawler.utils.PageCache;
 import crawler.worker.CrawlerWorker;
 import crawler.worker.WorkerStatus;
 import crawler.stormlite.routers.StreamRouter;
@@ -36,7 +38,8 @@ import crawler.stormlite.tuple.Tuple;
 import crawler.due.DUEBolt;
 import crawler.due.URLSet;
 import crawler.robots.RobotInfoManager;
-import crawler.storage.StateDBWrapper;
+import crawler.storage.CrawledPage;
+import crawler.storage.DBWrapper;
 
 /**
  * The Crawler
@@ -69,24 +72,29 @@ public class Crawler {
 	public static final String DUE_BOLT = "DUE_BOLT";
 	public static final int DUE_BOLT_NUM = 3;
 	
-	public static final long SNAP_SHOT_UPDATE_FREQ = 5000;
-    public static final int URL_SET_SIZE = 65536;
-	
     public static final String ROBOT_MANAGER = "ROBOT_MANAGER";
     public static final String FRONTIER_QUEUE = "FRONTIER_QUEUE";
+   
+    public static int PAGE_CACHE_SIZE = 65536;
+    public static int NUM_TO_WRITE_SNAPSHOT_FOR_PAGE = 1000;
     
-    public static String DBPath;
+    public static String PAGEDB_Path = "./page_db";
+    public static DBWrapper pageDB;
     
+    public static String ROBOT_CACHE_PATH = "./robot_db";
+    public static RobotInfoManager robotManager;
+    
+    public static String FRONTIER_DB_PATH = "./frontier_db";
+    public static DBWrapper frontierDB;
+    public static URLFrontier urlFrontier;
+    
+    public static String URL_SET_CACHE_PATH = "./url_cache";
+    public static int NUM_TO_WRITE_SNAPSHOT_FOR_URL = 10000;
+    public static int URL_SET_SIZE = 10000;
+    public static URLSet urlSet;
+     
     public static int fileNum = -1;
     public static int crawledPageLimit = 5000;
-   
-    public static RobotInfoManager robotManager = new RobotInfoManager();
-    public static URLFrontier urlFrontier = new URLFrontier();
-    
-//    public static StateDBWrapper stateDB = new StateDBWrapper("./states");
-    
-    // TODO: write to disk?
-    public static URLSet urlSet;
     
     public boolean isRunning;
     
@@ -95,10 +103,10 @@ public class Crawler {
     private List<TopologyContext> contexts;
      
     public Crawler() {
+    	
     	cluster = new DistributedCluster();
     	topologies = new ArrayList<>();
     	contexts = new ArrayList<>();
-    	urlSet = new URLSet();
     	
 //    	stateDB.setup();
 //    	urlFrontier = stateDB.getURLFrontier();
@@ -113,20 +121,35 @@ public class Crawler {
 //		}
     }
     
-    public void setUp(WorkerJob workerJob) {
+    public static void config() {
+    	/* init page cache */
+    	PAGEDB_Path += CrawlerWorker.WORKER_ID;
+		pageDB = new DBWrapper(PAGEDB_Path);
+		pageDB.setup();
+		
+		/* init robot cache */
+		ROBOT_CACHE_PATH += CrawlerWorker.WORKER_ID;
+		robotManager = new RobotInfoManager();
+		
+		/* init frontier */
+		FRONTIER_DB_PATH += CrawlerWorker.WORKER_ID;
+		urlFrontier = new URLFrontier(4096, FRONTIER_DB_PATH);
+		urlFrontier.config();
+		
+		/* init url set */
+		URL_SET_CACHE_PATH += CrawlerWorker.WORKER_ID;
+		urlSet = new URLSet(URL_SET_SIZE, URL_SET_CACHE_PATH, NUM_TO_WRITE_SNAPSHOT_FOR_URL);
     	
-    	Logger.configure(false, false);
+    }
+    
+    public void setUp(WorkerJob workerJob) {
     	cluster = new DistributedCluster();
-    	urlFrontier.addURL("http://crawltest.cis.upenn.edu/");
-//    	urlFrontier.addURL("https://piazza.com/");
-//    	urlFrontier.addURL("https://www.reddit.com/");
-//    	urlFrontier.addURL("http://www.cnn.com/");
     	
     	try {
     		Config config = workerJob.getConfig();
     		Topology topo = workerJob.getTopology();
     		
-    		DBPath = "./db" + (config.get("workerIndex") == null? "": config.get("workerIndex"));
+    		String suffix = (config.get("workerIndex") == null? "": config.get("workerIndex"));
     		
     		TopologyContext context = 
         			cluster.submitTopology("CrawlerJob", config, topo);
@@ -142,37 +165,22 @@ public class Crawler {
     
     public void start() {
     	isRunning = true;
-//    	startSnapshotThread();
     	logger.debug("crwaler starts");
     	cluster.startTopology();
     }
-    
-    private void startSnapshotThread() {
-		Thread backgroundThread = new Thread(){
-			public void run() {
-				while(isRunning) {
-					try {
-						Thread.sleep(SNAP_SHOT_UPDATE_FREQ);
-					} catch (Exception e) { }
-					
-					writeSnapShot();
-				}
-			}
-		};
-		backgroundThread.start();
-	}
 
 	public void stop() {
 		isRunning = false;
+		
+		writeSnapShot();
     	synchronized(topologies) {
 			for (String topo: topologies)
 				cluster.killTopology(topo);
 		}
 		cluster.shutdown();
 		
+		System.out.println("Crawler stopped");
 		logger.debug("Crawler stopped");
-//		stateDB.sync();
-//		stateDB.close();
     }
 	
 	public void pushData(String stream, Tuple tuple) {
@@ -196,10 +204,17 @@ public class Crawler {
     	return urlSet;
     }
     
+    public static DBWrapper getPageDB() {
+    	return pageDB;
+    }
+    
     /*******************methods for snapshot***************/
     public void writeSnapShot() {
     	
-//    	urlFrontier.writeSnapshot(stateDB);
+//    	urlFrontier.writeSnapshot(Crawler.frontierDB);
+    	Crawler.robotManager.writeSnapshot();
+    	Crawler.urlSet.writeSnapshot();
+    	urlFrontier.writeSnapshot();
 //    	
 //    	stateDB.sync();
     }

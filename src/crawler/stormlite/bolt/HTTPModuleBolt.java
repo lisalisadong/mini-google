@@ -39,10 +39,6 @@ public class HTTPModuleBolt implements IRichBolt {
 	static Logger logger = new Logger(HTTPModuleBolt.class.getName());
 	
 	Fields schema = new Fields("url");
-	private RobotInfoManager robotManager;
-	
-	LRUCache<CrawledPage> pageCache;
-	DBWrapper db;
 	
    /**
     * To make it easier to debug: we have a unique ID for each
@@ -67,12 +63,6 @@ public class HTTPModuleBolt implements IRichBolt {
    		TopologyContext context, OutputCollector collector) 
    {
        this.collector = collector;
-       robotManager = Crawler.getRobotManager();
-       
-       pageCache = new LRUCache<>(65536, Crawler.DBPath);
-       db = new DBWrapper(Crawler.DBPath);
-       db.setup();
-       
    }
 
    /**
@@ -90,12 +80,10 @@ public class HTTPModuleBolt implements IRichBolt {
 		   return;
 	   }
 	   client.setMethod("HEAD");
-	   robotManager.setHostLastAccessTime(url);
-	   
+//	   robotManager.setHostLastAccessTime(url); 
 //	   System.out.println(id + ": waitng...");
-	   robotManager.waitUntilAvailable(url);
+//	   robotManager.waitUntilAvailable(url);
 //	   System.out.println(id + ": finished waiting");
-	   
 	   client.sendReq();
 	   
 	   //TODO: HANDLE 3XX
@@ -110,18 +98,19 @@ public class HTTPModuleBolt implements IRichBolt {
 	   // TODO: only support xml & html now
 	   /* the page should be retrieved */
 	   if(client.getStatusCode() == 200 && validContentType) {
-		   
-		   CrawledPage page = db.getPage(url);
-		   long lastModified = client.getResLastModified();
-		   if(page == null || page.getLastCrawled() < lastModified) 
-		   {
-			   collector.emit(new Values<Object>(url));
-//			   System.out.println(id + ": emit " + url);
-		   } else {
-			   System.out.println(id + ": " + url + " not modified");
-//			   page.setLastCrawled(System.currentTimeMillis());
-//			   db.savePage(page);
-		   }
+		   collector.emit(new Values<Object>(url));
+////		   CrawledPage page = db.getPage(url);
+//		   CrawledPage page = pageCache.get(url);
+//		   long lastModified = client.getResLastModified();
+//		   if(page == null || page.getLastCrawled() < lastModified) 
+//		   {
+//			   
+////			   System.out.println(id + ": emit " + url);
+//		   } else {
+//			   System.out.println(id + ": " + url + " not modified");
+////			   page.setLastCrawled(System.currentTimeMillis());
+////			   db.savePage(page);
+//		   }
 		   
 	   }
    }

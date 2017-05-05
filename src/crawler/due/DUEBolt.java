@@ -15,6 +15,7 @@ import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
 import crawler.stormlite.tuple.Values;
 import crawler.urlfrontier.URLFrontier;
+import crawler.utils.LRUCache;
 import utils.Logger;
 
 /**
@@ -85,14 +86,13 @@ public class DUEBolt implements IRichBolt {
         
         // add to frontier queue if set does not contain the url
         if(urlSet.addURL(url)) {
-            
 //        	System.out.println(id + " add " + url);
-        	logger.debug(id + " add " + url);
+        	logger.debug(" add " + url);
         	urlFrontier.addURL(url);
         	
         } else {
 //        	System.out.println(id +  " " + url + ": duplicate");
-        	logger.debug(id +  " " + url + ": duplicate");
+        	logger.debug(" " + url + ": duplicate");
         }
         
     }
