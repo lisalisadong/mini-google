@@ -3,22 +3,36 @@ package crawler.robots;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
+
+import com.sleepycat.persist.model.Entity;
+import com.sleepycat.persist.model.Persistent;
+import com.sleepycat.persist.model.PrimaryKey;
 
 import crawler.client.Client;
 import crawler.client.URLInfo;
 
+@Entity
 public class RobotTxt {
-
+	
+	@PrimaryKey
+	String host;
+	
     private HashSet<RobotPath> allowedLinks;
     private HashSet<RobotPath> disallowedLinks;
     private long crawlDelay;
     private boolean empty;
     private boolean self, flag;
     private boolean haveLinks;
+    
+    public RobotTxt() { }
 
     public RobotTxt(String url) {
+    	host = new URLInfo(url).getHostName();
     	
         disallowedLinks = new HashSet<>();
         allowedLinks = new HashSet<>();
@@ -70,13 +84,13 @@ public class RobotTxt {
                 case "disallow":
                     if (flag) {
                         haveLinks = true;
-                        disallowedLinks.add(new RobotPath(val));
+                        disallowedLinks.add(new RobotPath(host, val));
                     }
                     break;
                 case "allow":
                     if (flag) {
                         haveLinks = true;
-                        allowedLinks.add(new RobotPath(val));
+                        allowedLinks.add(new RobotPath(host, val));
                     }
                     break;
                 case "crawl-delay":
@@ -110,7 +124,7 @@ public class RobotTxt {
     }
     
     public boolean match(String filePath) {
-    	RobotPath toMatch = new RobotPath(filePath);
+    	RobotPath toMatch = new RobotPath("", filePath);
         for (RobotPath link : allowedLinks) {
             if (link.match(toMatch)) {
                 return true;
@@ -167,3 +181,4 @@ public class RobotTxt {
         // }
     }
 }
+

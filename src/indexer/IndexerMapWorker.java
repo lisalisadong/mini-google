@@ -1,11 +1,11 @@
 package indexer;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,8 +16,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import utils.Stemmer;
 
 public class IndexerMapWorker {
@@ -59,10 +57,8 @@ public class IndexerMapWorker {
 		case "html":
 			Document doc = Jsoup.parse(in, Charset.defaultCharset().name(), "");
 			// TODO: might need to seperate title ...
-			Elements eles = doc.select("*");
-			for (Element ele : eles) {
-				parseElement(ele.text());
-			}
+			parseElement(doc.title());
+			parseElement(doc.body().text());
 			break;
 		case "pdf":
 			PDDocument pdoc = PDDocument.load(in);
@@ -90,7 +86,7 @@ public class IndexerMapWorker {
 	public void parseElement(String content) {
 		WordTokenizer tokenizer = new WordTokenizer(content);
 		while (tokenizer.hasMoreTokens()) {
-			String word = tokenizer.nextToken();
+			String word = tokenizer.nextToken().toLowerCase();
 			if (STOP_LIST.contains(word)) {
 				continue;
 			}
@@ -125,11 +121,19 @@ public class IndexerMapWorker {
 	
 	
 	private String lemmatize(String word) {
-		return stemmer.stem(word.toLowerCase());
+		return stemmer.stem(word);
 	}
 	
-//	public static void main(String[] args) {
-//	
+//	public static void main(String[] args) throws IOException {
+//		InputStream is = new FileInputStream("/Users/liujue/Desktop/input/text.txt");
+//		IndexerMapWorker w = new IndexerMapWorker("1", is, "html");
+//		w.parse();
+//		Map<String, Integer> map = w.getWordFreq();
+//		Map<String, List<Integer>> pos = w.getWordPos();
+//		for (String key : map.keySet()) {
+//		    System.out.println(key + ": " + map.get(key));
+//		    System.out.println(pos.get(key));
+//		}
 //	}
 
 }

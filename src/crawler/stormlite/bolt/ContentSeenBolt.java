@@ -7,8 +7,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import crawler.Crawler;
+import crawler.utils.LRUCache;
 import crawler.client.Client;
 import crawler.robots.RobotInfoManager;
+import crawler.robots.RobotInfoManager_old;
+import crawler.robots.RobotManager;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.routers.StreamRouter;
@@ -44,9 +47,6 @@ public class ContentSeenBolt implements IRichBolt {
 	
 	long maxSize = Long.MAX_VALUE;
 	
-	DBWrapper db;
-	
-	
    /**
     * To make it easier to debug: we have a unique ID for each
     * instance of the WordCounter, aka each "executor"
@@ -58,7 +58,7 @@ public class ContentSeenBolt implements IRichBolt {
     */
    private OutputCollector collector;
    
-   private RobotInfoManager robotManager;
+   private RobotManager robotManager;
    
    public ContentSeenBolt() {
    }
@@ -73,7 +73,7 @@ public class ContentSeenBolt implements IRichBolt {
    {
        this.collector = collector;
        robotManager = Crawler.getRobotManager();
-       db = new DBWrapper(Crawler.DBPath);
+       
    }
 
    /**
@@ -89,13 +89,14 @@ public class ContentSeenBolt implements IRichBolt {
 	   /* download the page*/
 	   Client client = Client.getClient(url);
 	   client.setMethod("GET");
-	   robotManager.waitUntilAvailable(url);	
-	   /* set last access time */
-	   robotManager.setHostLastAccessTime(url);
+//	   robotManager.waitUntilAvailable(url);	
+//	   /* set last access time */
+//	   robotManager.setHostLastAccessTime(url);
 	   client.sendReq();
 	   
 	   byte[] content = null;
 	   InputStream in = client.getInputStream();
+	   if(in == null) return;
 	   ByteArrayOutputStream bos = new ByteArrayOutputStream();	
 	   int next;
 	   try {
@@ -118,12 +119,11 @@ public class ContentSeenBolt implements IRichBolt {
 	   
 	   if(!contentSeen) {
 //		   System.out.println(id + " emit " + url);
-		   System.out.println(id + ": " + url + " downloaded ");
 		   
 		   CrawlerWorker.workerStatus.incFileNum();
 		   
 		   CrawledPage newPage = new CrawledPage(content, url, client.getResContentType());
-		   newPage.setLastCrawled(System.currentTimeMillis());
+//		   newPage.setLastCrawled(System.currentTimeMillis());
 		   this.collector.emit(new Values<Object>(newPage));
 	   } else {
 		   // TODO: get url via fp and increase the hit

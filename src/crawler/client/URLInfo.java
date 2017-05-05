@@ -14,6 +14,12 @@ public class URLInfo {
     public URLInfo(String docURL) {
         if (docURL == null || docURL.equals(""))
             return;
+        
+        int idx = docURL.indexOf('?');
+        if(idx != -1) {
+        	docURL = docURL.substring(0, idx);
+        }
+        
         docURL = docURL.trim();
 
         // Stripping off 'http://'

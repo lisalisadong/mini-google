@@ -3,12 +3,15 @@ package crawler.worker;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sleepycat.persist.model.Entity;
+import com.sleepycat.persist.model.PrimaryKey;
 
 /**
  * wrapper class for workers
  * @author xiaofandou
  *
  */
+@Entity
 public class WorkerStatus implements Serializable {
 	
 	/**
@@ -16,10 +19,20 @@ public class WorkerStatus implements Serializable {
 	 */
 	private static final long serialVersionUID = 496826026898565263L;
 	
-//	private String[] states = {"idle", "mapping", "waiting", "reducing"}; 
+	@PrimaryKey
+	public String id;
+	
 	public String ip;
 	public int port;
 	long crawledFileNum;
+	
+	public WorkerStatus () {
+		
+	}
+	
+	public WorkerStatus (String id) {
+		this.id = id;
+	}
 	
 	@JsonIgnore
 	public void setParams(String ip, int port, long crawledFileNum) 

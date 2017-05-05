@@ -17,6 +17,10 @@
     <property name="src.test.dir"  location="${build.dir}${file.separator}src${file.separator}test"/>
     <property name="resources.dir" location="${build.dir}${file.separator}resources"/>
     <property name="conf.dir"      location="${build.dir}${file.separator}conf"/>
+	
+	<property name="master" value="127.0.0.1:8080/master" />
+	<property name="port" value="8000" />
+	<property name="id" value="0" />
 
     <target name="compile-utils" description="Compiles the utils">
         <mkdir dir="${classes.dir}"/>
@@ -146,7 +150,7 @@
         </java>
     </target>
 	
-	<target name="crawler-master" depends="compile-crawler" description="Run search engine servlet">
+	<target name="crawler-master" depends="compile-crawler" description="Run crawler master">
         <java classname="edu.upenn.cis455.webserver.HttpServer">
             <classpath>
                 <pathelement location="lib/webserver.jar"/>
@@ -168,5 +172,37 @@
             <arg value="conf/crawler.xml"/>
         </java>
     </target>
+	
+	<target name="crawler-worker" depends="compile-crawler" description="Run crawler worker">
+	        <java classname="crawler.worker.CrawlerWorker">
+	            <classpath>
+	                <pathelement location="lib/webserver.jar"/>
+	                <pathelement location="lib/servlet-api.jar"/>
+	            	<pathelement location="lib/servlet-api-3.1.jar"/>
+	                <pathelement location="lib/je-6.2.31.jar"/>
+	                <pathelement location="${classes.dir}"/>
+	            	
+	            	<pathelement location="lib/jackson-annotations-2.9.0-20161011.053116-27.jar"/>
+	            	<pathelement location="lib/jackson-core-2.9.0-20160930.222323-13.jar"/>
+	        		<pathelement location="lib/jackson-core-asl-1.9.13.jar"/>
+	        		<pathelement location="lib/jackson-databind-2.9.0-20161012.002007-91.jar"/>
+	        		<pathelement location="lib/jackson-mapper-asl-1.9.13.jar"/>
+	            	<pathelement location="lib/spark-core-1.1.1.jar"/>
+	            	
+	            	<pathelement location="lib/log4j-1.2.9.jar"/>
+	            	<pathelement location="lib/slf4j-api-1.7.21.jar"/>
+	            	<pathelement location="lib/slf4j-log4j12-1.7.21.jar"/>
+	            	
+	            	<pathelement location="lib/jetty-http-9.3.13.v20161014.jar"/>
+	            	<pathelement location="lib/jetty-io-9.3.13.v20161014.jar"/>
+	            	<pathelement location="lib/jetty-server-9.3.13.v20161014.jar"/>
+	            	<pathelement location="lib/jetty-util-9.3.13.v20161014.jar"/>
+	            	<pathelement location="lib/jetty-webapp-9.3.13.v20161014.jar"/>
+	            </classpath>
+	        	<arg value="${masteraddr}"/>
+	        	<arg value="${port}"/>
+	            <arg value="${id}"/>
+	        </java>
+	    </target>
 
 </project>

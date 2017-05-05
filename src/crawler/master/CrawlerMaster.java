@@ -30,8 +30,8 @@ import crawler.stormlite.distributed.WorkerHelper;
 public class CrawlerMaster {
 	static Logger logger = Logger.getLogger(CrawlerMaster.class.getName());
 	
-	static String workerList = "[127.0.0.1:8000,127.0.0.1:8001]";
-//	static String workerList = "[127.0.0.1:8001]";
+//	static String workerList = "[127.0.0.1:8000,127.0.0.1:8001]";
+	static String workerList = "[127.0.0.1:8001]";
 	
 //	static DBWrapper db = new DBWrapper(Crawler.DBPath);
 	
@@ -72,12 +72,12 @@ public class CrawlerMaster {
 				}
 			}
 			
-			System.out.println("[Enter] to clear database...");
-			
-//			(new BufferedReader(new InputStreamReader(System.in))).readLine();
-//			
-//			db.setup();
-//			db.clear();
+			System.out.println("[Enter] to stop crawling...");
+			(new BufferedReader(new InputStreamReader(System.in))).readLine();
+
+			for (String dest: workers) {
+				sendJob(dest, "POST", config, "shutdown", "").getResponseCode();
+			}
 			
 		} catch (IOException e) {
 			e.printStackTrace();

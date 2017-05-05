@@ -6,7 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import crawler.Crawler;
 import crawler.client.URLInfo;
-import crawler.utils.LRU;
+import crawler.utils.RobotCache;
+import crawler.utils.RobotCache1;
 import crawler.utils.LRUCache;
 import crawler.worker.CrawlerWorker;
 
@@ -21,13 +22,12 @@ public class RobotInfoManager {
 	public int crawledPageLimit = Crawler.crawledPageLimit;
 	
     // <hostName, *>
-    private LRUCache<RobotTxt> robotInfo;
-    private LRUCache<Long> crawlTime;
+    private RobotCache robotInfo;
+//    private LRUCache<Long> crawlTime;
     private ConcurrentHashMap<String, Integer> crawledPageNum;	//<host, time>
 
     public RobotInfoManager() {
-        robotInfo = new LRUCache<>(65536, CrawlerWorker.cacheDir);
-        crawlTime = new LRUCache<>(65536, CrawlerWorker.cacheDir);
+        robotInfo = new RobotCache(3000, Crawler.ROBOT_CACHE_PATH, 3000);
         
         crawledPageNum = new ConcurrentHashMap<>();
     }
@@ -49,7 +49,7 @@ public class RobotInfoManager {
         robotTxt = new RobotTxt(robotUrl);
         // System.out.println(robotTxt);
         robotInfo.put(host, robotTxt);
-        crawlTime.put(host, -1L);
+//        crawlTime.put(host, -1L);
         return robotTxt;
     }
 
@@ -71,7 +71,10 @@ public class RobotInfoManager {
         RobotTxt robotTxt = getRobotTxt(url);
         if (robotTxt == null)
             return true;
-
+        
+        /* not crawl the host with delay */
+        if(robotTxt.getCrawlDelay() > 0) return false;
+        	
         String filePath = new URLInfo(url).getFilePath();
         
         return robotTxt.match(filePath);
@@ -99,11 +102,11 @@ public class RobotInfoManager {
     }
 
     public boolean setHostLastAccessTime(String url) {
-        String host = getHostName(url);
-        if (robotInfo.get(host) != null) {
-            crawlTime.put(host, System.currentTimeMillis());
-            return true;
-        }
+//        String host = getHostName(url);
+//        if (robotInfo.get(host) != null) {
+//            crawlTime.put(host, System.currentTimeMillis());
+//            return true;
+//        }
         return false;
     }
     
@@ -123,10 +126,12 @@ public class RobotInfoManager {
      * @return
      */
     public long getHostLastAccessTime(String url) {
-        String host = getHostName(url);
-        if (crawlTime.get(host) == null)
-            return -1;
-        return crawlTime.get(host);
+//        String host = getHostName(url);
+//        if (crawlTime.get(host) == null)
+//            return -1;
+//        return crawlTime.get(host);
+    	
+    	return -1;
     }
 
     /**
@@ -136,14 +141,15 @@ public class RobotInfoManager {
      * @return
      */
     public boolean timeAllowed(String url) {
-        String host = getHostName(url);
-        RobotTxt r = robotInfo.get(host);
-        
-        Long t = crawlTime.get(host);
-        
-        if (r == null || r.getCrawlDelay() == -1 || t == null)
-            return true;
-        return t + r.getCrawlDelay() < System.currentTimeMillis();
+//        String host = getHostName(url);
+//        RobotTxt r = robotInfo.get(host);
+//        
+//        Long t = crawlTime.get(host);
+//        
+//        if (r == null || r.getCrawlDelay() == -1 || t == null)
+//            return true;
+//        return t + r.getCrawlDelay() < System.currentTimeMillis();
+    	return true;
     }
 
     public long getCrawlDelay(String url) {
@@ -169,6 +175,11 @@ public class RobotInfoManager {
                 e.printStackTrace();
             }
         }
+    }
+    
+    public void writeSnapshot() {
+    	robotInfo.writeSnapshot();
+//    	crawlTime.writeSnapshot();
     }
     
     public static void main(String[] args) {

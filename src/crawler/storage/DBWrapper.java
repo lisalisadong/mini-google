@@ -2,7 +2,10 @@ package crawler.storage;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import java.io.File;
@@ -14,10 +17,14 @@ import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
 import com.sleepycat.persist.StoreConfig;
 
+import crawler.Crawler;
+import crawler.robots.RobotInfoManager;
 import crawler.robots.RobotTxt;
 import crawler.urlfrontier.URLFrontier;
 import crawler.utils.CacheEntry;
+import crawler.worker.WorkerStatus;
 
+@SuppressWarnings("rawtypes")
 public class DBWrapper {
 
     public static String envDir = null;
@@ -26,10 +33,14 @@ public class DBWrapper {
     private static EntityStore store;
 
     public PrimaryIndex<String, CrawledPage> pIdx;
+    public PrimaryIndex<String, RobotTxt> rIdx;
     
-    @SuppressWarnings("rawtypes")
-    public PrimaryIndex<String, CacheEntry> cIdx;
-
+	public PrimaryIndex<String, URLQueue> qIdx;
+    public PrimaryIndex<String, VisitedURL> vIdx;
+    public PrimaryIndex<String, URLWrapper> uwIdx;
+    
+    public PrimaryIndex<String, WorkerStatus> wIdx;
+	
     public DBWrapper(String dir) {
         envDir = dir;
         File f = new File(envDir);
@@ -49,7 +60,11 @@ public class DBWrapper {
         store = new EntityStore(myEnv, "EntityStore", storeConfig);
         
         pIdx = store.getPrimaryIndex(String.class, CrawledPage.class);
-        cIdx = store.getPrimaryIndex(String.class, CacheEntry.class);
+        rIdx = store.getPrimaryIndex(String.class, RobotTxt.class);
+        qIdx = store.getPrimaryIndex(String.class, URLQueue.class);
+        vIdx = store.getPrimaryIndex(String.class, VisitedURL.class);
+        uwIdx = store.getPrimaryIndex(String.class, URLWrapper.class);
+        wIdx = store.getPrimaryIndex(String.class, WorkerStatus.class);
     }
 
     public String getPath() {
@@ -58,24 +73,71 @@ public class DBWrapper {
 
     public void savePage(CrawledPage page) {
         pIdx.put(page);
-        sync();
     }
 
     public CrawledPage getPage(String url) {
         return pIdx.get(url);
     }
     
-    @SuppressWarnings("rawtypes")
-    public void saveCacheEntry(CacheEntry r) {
-    	cIdx.put(r);
+    public RobotTxt getRobotTxt(String id) {
+    	synchronized(rIdx) {
+    		return rIdx.get(id);
+    	}
+    }
+    
+    public void saveRobotTxt(RobotTxt r) {
+    	synchronized (rIdx) {
+    		rIdx.put(r);
+    	}
+    }
+    
+    public VisitedURL getVisitedURL(String url) {
+    	return vIdx.get(url);
+    }
+    
+    public void saveVisitedURL(VisitedURL url) {
+//    	System.out.println("[DB] save: " + url.getUrl());
+    	vIdx.put(url);
+    }
+    
+    public void saveURL(String url) {
+    	uwIdx.put(new URLWrapper(url));
+    }
+    
+    public void deleteURL(String url) {
+    	uwIdx.delete(url);
+    }
+    
+    // for url frontier
+    public void saveURL(Queue<String> queue) {
+    	synchronized(uwIdx) {
+    		while(!queue.isEmpty()) {
+        		String url = queue.poll();
+        		uwIdx.put(new URLWrapper(url));
+//        		System.out.println("[DB] save url: " + url);
+        	}
+    	}
     	sync();
     }
     
-    @SuppressWarnings("rawtypes")
-	public CacheEntry getCacheEntry(String key) {
-    	return cIdx.get(key);
+    public void pullURL(int num, Queue<String> outQueue) {
+		synchronized(uwIdx) {
+			for(String url: uwIdx.map().keySet()) {
+				outQueue.offer(url);
+				uwIdx.delete(url);
+			}
+		}
+		sync();
+	}
+    
+    public WorkerStatus getWorkerStatus(String id) {
+    	return wIdx.get(id);
     }
-
+    
+    public void saveWorkerStatus(WorkerStatus w) {
+    	wIdx.put(w);
+    }
+    
     public void sync() {
         if (myEnv != null)
             myEnv.sync();
@@ -89,23 +151,24 @@ public class DBWrapper {
         if (store != null)
             store.close();
     }
-    
-    public void clear() {
-    	List<CrawledPage> res = new LinkedList<>();
-//		 EntityCursor<Channel> channelCursor = cIdx.entities();
-//			Iterator<Channel> iterator = channelCursor.iterator();
-//			while (iterator.hasNext())
-//				res.add(iterator.next());
-		 Map<String, CrawledPage> map = pIdx.map();
-		 for(String key: map.keySet()) {
-			 pIdx.delete(key);
-		 }
-		 sync();
-    }
 
     public static void main(String[] args) {
-        // DBWrapper db = new DBWrapper("./db");
-        // db.setup();
+         DBWrapper db = new DBWrapper("./db1");
+         db.setup();
+         System.out.println(db.rIdx.map().size());
+         int i = 0;
+         for(String s: db.rIdx.map().keySet()) {
+        	 System.out.println(s);
+        	 i++;
+        	 if(i == 100) break;
+         }
+         
+//         RobotInfoManager rm = new RobotInfoManager();
+//         
+//         RobotTxt r = rm.getRobotTxt("http://crawltest.cis.upenn.edu/");
+//         db.saveRobotTxt(r);
+         
+         
         // List<Channel> channels = db.getAllChannels();
         // for(Channel c: channels) {
         // System.out.println("Channel: " + c.getName());
@@ -132,4 +195,5 @@ public class DBWrapper {
         // System.out.println("get user1: " + db.getUser("user1"));
         // System.out.println("get user2: " + db.getUser("user2"));
     }
+
 }

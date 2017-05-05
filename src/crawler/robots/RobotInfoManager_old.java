@@ -57,7 +57,7 @@ public class RobotInfoManager_old {
         RobotTxt robotTxt = getRobotTxt(url);
         if (robotTxt == null)
             return true;
-
+        if(robotTxt.getCrawlDelay() > 0) return false;
 //        String filePath = new URLInfo(url).getFilePath();
 //        Set<String> allowedLinks = robotTxt.getAllowedLinks();
 //        for (String link : allowedLinks) {

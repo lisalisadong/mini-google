@@ -15,6 +15,8 @@ public class OutputValue implements WritableComparable<OutputValue> {
 	private double idf;
 	private List<Integer> positions;
 	
+	public OutputValue() { }
+	
 	public OutputValue(String docID, double tf, double idf, List<Integer> pos) {
 		this.docID = docID;
 		this.tf = tf;
@@ -70,6 +72,11 @@ public class OutputValue implements WritableComparable<OutputValue> {
 			result = (tf < o.getTf() ? -1 : (tf == o.getTf() ? 0 : 1));
 		}
 		return result;
+	}
+	
+	@Override
+	public String toString() {
+		return docID + "\t" + tf + "\t" + idf + "\t" + positions.toString();
 	}
 
 }

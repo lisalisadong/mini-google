@@ -2,6 +2,7 @@ package crawler.worker;
 
 import crawler.stormlite.tuple.Tuple;
 import crawler.Crawler;
+import crawler.storage.DBWrapper;
 import crawler.stormlite.distributed.WorkerJob;
 import utils.Logger;
 
@@ -24,17 +25,19 @@ public class CrawlerWorker extends WorkerServer {
 	
 	static Logger logger = new Logger(WorkerServer.class.getName());
 	
+	public static String WORKER_ID;
 	Crawler crawler;
 	
-	public static WorkerStatus workerStatus = new WorkerStatus();
+	public static DBWrapper db;
+	
+	public static String STATUS_ID = "ID";
+	public static WorkerStatus workerStatus;
 	
 	ObjectMapper om;
 	
 	public boolean isRunning = false;
 	
 	public static int port;
-	
-	public static String cacheDir;
 	
 	public CrawlerWorker(String masterAddr, int myPort) {
 		super(masterAddr, myPort);
@@ -120,6 +123,7 @@ public class CrawlerWorker extends WorkerServer {
 				System.out.println("received shutdown!");
         		logger.debug("Shutting down all workers");
         		shutdown();
+//        		System.exit(0);
 				return "Shutted down";
 			}
         });
@@ -128,20 +132,33 @@ public class CrawlerWorker extends WorkerServer {
 
 	@Override
 	public void shutdown() {
+		db.saveWorkerStatus(workerStatus);
+		db.sync();
 		crawler.stop();
 	}
 	
-	
+	public static void config() {
+		STATUS_ID += WORKER_ID;
+		db = new DBWrapper(Crawler.DBPath + WORKER_ID);
+		db.setup();
+		
+		workerStatus = db.getWorkerStatus(STATUS_ID);
+		if(workerStatus == null) {
+			workerStatus = new WorkerStatus(STATUS_ID);
+			System.out.println("new status");
+		} else {
+			System.out.println("Pages crawled previously: " + workerStatus.getCrawledFileNum());
+		}
+	}
 	
 	public static void main(String[] args) {
 		if(args.length != 3) {
-			System.out.println("Usage: [master addr] [port] [cache root dir]");
+			System.out.println("Usage: [master addr] [port] [id]");
 			return;
 		}
 		
 		String masterAddr = args[0];
 		int port = 8000;
-		CrawlerWorker.cacheDir = args[2];
 		try {
 			port = Integer.parseInt(args[1]);
 		} catch(NumberFormatException e) {
@@ -149,7 +166,12 @@ public class CrawlerWorker extends WorkerServer {
 			return;
 		}
 		
+		CrawlerWorker.WORKER_ID = args[2];
+		CrawlerWorker.config();
+		Crawler.config();
+		Logger.configure(false, false);
 		CrawlerWorker worker = new CrawlerWorker(masterAddr, port);
+		
 	
 		worker.run();
 		
@@ -159,10 +181,9 @@ public class CrawlerWorker extends WorkerServer {
     private void startPingThread() {
 		Thread backgroundThread = new Thread(){
 			public void run() {
-				// TODO: 10s
 				while(isRunning) {
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(10000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
