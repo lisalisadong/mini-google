@@ -99,20 +99,69 @@ public class HttpClient extends Client {
     }
 
     public static void main(String[] args) {
-        Client client = new HttpClient("http://linkedin.com/");
-        // System.out.println(client.toString());
+    	
+    	String url = "https://www.facebook.com/";
+        Client client = Client.getClient(url);
         client.sendReq();
-        InputStream in = client.getInputStream();
-        String line = null;
-        try {
-            while ((line = Client.readLine(in)) != null) {
-                line = line.trim();
-                if (line.length() == 0)
-                    break;
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println(url + ": " + client.getStatusCode());
+        
+        url = "https://www.youtube.com/";
+        client = Client.getClient(url);
+        client.sendReq();
+        System.out.println(url + ": " + client.getStatusCode());
+        
+        url = "http://www.upenn.edu/";
+        client = Client.getClient(url);
+        client.sendReq();
+        System.out.println(url + ": " + client.getStatusCode());
+        
+        url = "https://www.reddit.com/";
+        client = Client.getClient(url);
+        client.sendReq();
+        System.out.println(url + ": " + client.getStatusCode());
+        
+        url = "https://en.wikipedia.org/wiki/Main_Page/";
+        client = Client.getClient(url);
+        client.sendReq();
+        System.out.println(url + ": " + client.getStatusCode());
+        
+        url = "https://www.google.com/";
+        client = Client.getClient(url);
+        client.sendReq();
+        System.out.println(url + ": " + client.getStatusCode());
+        
+        url = "https://www.amazon.com/";
+        client = Client.getClient(url);
+        client.sendReq();
+        System.out.println(url + ": " + client.getStatusCode());
+        
+        url = "http://www.ebay.com/";
+        client = Client.getClient(url);
+        client.sendReq();
+        System.out.println(url + ": " + client.getStatusCode());
+        
+        url = "https://www.bloomberg.com/";
+        client = Client.getClient(url);
+        client.sendReq();
+        System.out.println(url + ": " + client.getStatusCode());
+        
+        url = "http://www.cnn.com/";
+        client = Client.getClient(url);
+        client.sendReq();
+        System.out.println(url + ": " + client.getStatusCode());
+        
+        
+//        InputStream in = client.getInputStream();
+//        String line = null;
+//        try {
+//            while ((line = Client.readLine(in)) != null) {
+//                line = line.trim();
+//                if (line.length() == 0)
+//                    break;
+//                System.out.println(line);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 }

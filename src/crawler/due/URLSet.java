@@ -20,7 +20,7 @@ public class URLSet {
     public URLSet (int capacity, String DBPath, int numToWriteSnapshot) {
     	db = new DBWrapper(DBPath);
     	db.setup();
-    	System.out.println("url set size: " + db.vIdx.map().size());
+    	System.out.println("[URL Set] size of last crawl: " + db.vIdx.map().size());
     }
     
     public URLSet(int capacity, String DBPath) {
@@ -40,7 +40,7 @@ public class URLSet {
     
     public static void main(String[] args) {
     	
-    	URLSet us = new URLSet(10, Crawler.URL_SET_CACHE_PATH, 1000);
+//    	URLSet us = new URLSet(10, Crawler.URL_SET_CACHE_PATH, 1000);
 //    	us.addURL("a");
 //    	us.addURL("b");
 //    	us.addURL("c");

@@ -142,7 +142,7 @@ public class URLSetCopy {
     
     public static void main(String[] args) {
     	
-    	URLSet us = new URLSet(10, Crawler.URL_SET_CACHE_PATH, 1000);
+//    	URLSet us = new URLSet(10, Crawler.URL_SET_CACHE_PATH, 1000);
 //    	us.addURL("a");
 //    	us.addURL("b");
 //    	us.addURL("c");

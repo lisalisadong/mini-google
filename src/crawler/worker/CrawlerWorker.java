@@ -8,7 +8,9 @@ import utils.Logger;
 
 import static spark.Spark.setPort;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -52,8 +54,8 @@ public class CrawlerWorker extends WorkerServer {
 	public void run() {
 		logger.debug("Creating server listener at socket " + myPort);
 		isRunning = true;
-		startPingThread();
 		
+		startPingThread();
 		setPort(myPort);
         
         Spark.post(new Route("/setup") {
@@ -145,9 +147,9 @@ public class CrawlerWorker extends WorkerServer {
 		workerStatus = db.getWorkerStatus(STATUS_ID);
 		if(workerStatus == null) {
 			workerStatus = new WorkerStatus(STATUS_ID);
-			System.out.println("new status");
+			System.out.println("[status] new status");
 		} else {
-			System.out.println("Pages crawled previously: " + workerStatus.getCrawledFileNum());
+			System.out.println("[status] Pages crawled previously: " + workerStatus.getCrawledFileNum());
 		}
 	}
 	
@@ -159,6 +161,7 @@ public class CrawlerWorker extends WorkerServer {
 		
 		String masterAddr = args[0];
 		int port = 8000;
+		System.out.println("[Crawler worker]: master in " + masterAddr);
 		try {
 			port = Integer.parseInt(args[1]);
 		} catch(NumberFormatException e) {
@@ -174,6 +177,11 @@ public class CrawlerWorker extends WorkerServer {
 		
 	
 		worker.run();
+		try {
+			(new BufferedReader(new InputStreamReader(System.in))).readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -199,7 +207,6 @@ public class CrawlerWorker extends WorkerServer {
 						conn.setRequestMethod("GET");
 						conn.setRequestProperty("Content-Type", "application/json");
 						conn.getResponseCode();
-//						System.out.println(conn.getResponseCode());
 						conn.disconnect();
 					} catch (IOException e) {
 //						e.printStackTrace();

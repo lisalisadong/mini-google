@@ -27,7 +27,7 @@ public class RobotInfoManager {
     private ConcurrentHashMap<String, Integer> crawledPageNum;	//<host, time>
 
     public RobotInfoManager() {
-        robotInfo = new RobotCache(3000, Crawler.ROBOT_CACHE_PATH, 3000);
+        robotInfo = new RobotCache(3000, Crawler.DBPath, 3000);
         
         crawledPageNum = new ConcurrentHashMap<>();
     }
