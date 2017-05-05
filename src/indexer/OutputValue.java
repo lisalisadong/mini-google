@@ -73,5 +73,10 @@ public class OutputValue implements WritableComparable<OutputValue> {
 		}
 		return result;
 	}
+	
+	@Override
+	public String toString() {
+		return docID + "\t" + tf + "\t" + idf + "\t" + positions.toString();
+	}
 
 }

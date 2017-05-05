@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import utils.Constants;
@@ -14,7 +13,6 @@ import utils.Constants;
 public class IndexerReducer extends Reducer<Text, InterValue, Text, OutputValue> {
 
 	public void reduce(Text key, Iterable<InterValue> values, Context context) throws IOException, InterruptedException {
-//		int count = Iterables.size(values);
 		List<InterValue> valueList = Lists.newArrayList(values);
 		int count = valueList.size();
 		double idf = Math.log((double) Constants.TF_FACTOR / count);
