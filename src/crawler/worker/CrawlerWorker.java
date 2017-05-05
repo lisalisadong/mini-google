@@ -191,7 +191,7 @@ public class CrawlerWorker extends WorkerServer {
 			public void run() {
 				while(isRunning) {
 					try {
-						Thread.sleep(10000);
+						Thread.sleep(30000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
