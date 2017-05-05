@@ -100,10 +100,13 @@ public class DBWrapper {
     	vIdx.put(url);
     }
     
+    public void saveURL(String url) {
+    	uwIdx.put(new URLWrapper(url));
+    }
+    
     public void deleteURL(String url) {
     	uwIdx.delete(url);
     }
-    
     
     // for url frontier
     public void saveURL(Queue<String> queue) {
@@ -152,9 +155,9 @@ public class DBWrapper {
     public static void main(String[] args) {
          DBWrapper db = new DBWrapper("./db1");
          db.setup();
-         System.out.println(db.vIdx.map().size());
+         System.out.println(db.rIdx.map().size());
          int i = 0;
-         for(String s: db.pIdx.map().keySet()) {
+         for(String s: db.rIdx.map().keySet()) {
         	 System.out.println(s);
         	 i++;
         	 if(i == 100) break;

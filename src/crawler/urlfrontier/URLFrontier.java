@@ -50,31 +50,30 @@ public class URLFrontier {
     /* RESTORE FROM DB */
     public void config() {
     	
-    	synchronized(db.uwIdx) {
-    		if(db.uwIdx.map().isEmpty()) {
-        		System.out.println("url frontier start from fresh");
-//        		addURL("https://www.facebook.com/");
-        		if(CrawlerWorker.WORKER_ID.equals("0")) 
-        			addURL("https://www.facebook.com/");
-        		
-        		if(CrawlerWorker.WORKER_ID.equals("1")) 
-        			addURL("http://www.upenn.edu/");
-        		
-        		if(CrawlerWorker.WORKER_ID.equals("2")) 
-        			addURL("https://en.wikipedia.org/wiki/Main_Page/");
-        		
-        		if(CrawlerWorker.WORKER_ID.equals("3"))
-        			addURL("https://www.amazon.com/");
-        		
-        		if(CrawlerWorker.WORKER_ID.equals("4"))
-        			addURL("http://www.cnn.com/");
-        		
-        		return;
-        	}
+    	if(db.uwIdx.map().isEmpty()) {
+    		System.out.println("url frontier start from fresh");
+    		addURL("https://www.facebook.com/");
+//    		if(CrawlerWorker.WORKER_ID.equals("0")) 
+//    			addURL("https://www.facebook.com/");
+//    		
+//    		if(CrawlerWorker.WORKER_ID.equals("1")) 
+//    			addURL("http://www.upenn.edu/");
+//    		
+//    		if(CrawlerWorker.WORKER_ID.equals("2")) 
+//    			addURL("https://en.wikipedia.org/wiki/Main_Page/");
+//    		
+//    		if(CrawlerWorker.WORKER_ID.equals("3"))
+//    			addURL("https://www.amazon.com/");
+//    		
+//    		if(CrawlerWorker.WORKER_ID.equals("4"))
+//    			addURL("http://www.cnn.com/");
+    		
+    		return;
     	}
     	
     	logger.debug("restore from db");
-    	System.out.println("url frontier restore from db");
+    	System.out.println("url frontier size from last time: " 
+    			+ db.uwIdx.map().size());
     	
     	
     }
@@ -85,29 +84,35 @@ public class URLFrontier {
      * @return next available url, null if empty
      */
     public String getNextURL() {
-    	synchronized(outQueue) {
-    		if(outQueue.isEmpty()) {
-        		readFromDB();
-        	}
-        	return outQueue.poll();	
+    	if(outQueue.isEmpty()) {
+    		readFromDB();
     	}
+    	return outQueue.poll();	
     }
     
     private void readFromDB() {
-    	synchronized(inQueue) {
-    		if(!inQueue.isEmpty()) writeInQueueToDB();
-    	}
+    	writeQueueToDB(inQueue);
     	
     	synchronized(outQueue) {
-    		db.pullURL(1000, outQueue);
+    		int i = 0;
+    		for(String url: db.uwIdx.map().keySet()) {
+    			db.deleteURL(url);
+    			outQueue.add(url);
+    			i++;
+    			if(i == 1000) break;
+    		}
     	}
     }
     
-    private void writeInQueueToDB() {
-		synchronized(inQueue) {
-			db.saveURL(inQueue);
-		}
-		db.sync();
+    private void writeQueueToDB(LinkedBlockingQueue<String> queue) {
+    	synchronized(queue) {
+    		String url = "";
+    		while(!queue.isEmpty()) {
+    			url = queue.poll();
+    			db.saveURL(url);
+    		}
+        	db.sync();
+    	}
 	}
 
 	/**
@@ -116,22 +121,16 @@ public class URLFrontier {
      * @param url
      */
     public void addURL(String url) {
-    	synchronized(inQueue) {
-    		inQueue.offer(url);
-        	if(inQueue.size() > maxSize) {
-        		writeInQueueToDB();
-        	}
+    	inQueue.offer(url);
+    	if(inQueue.size() > maxSize) {
+    		writeQueueToDB(inQueue);
     	}
     }
     
-    public synchronized void writeSnapshot() {
+    public void writeSnapshot() {
     	System.out.println("[URL Frontier]: write snapshot");
-    	synchronized(inQueue) {
-    		db.saveURL(inQueue);
-    	}
-    	synchronized(outQueue) {
-    		db.saveURL(outQueue);
-    	}
+    	writeQueueToDB(inQueue);
+    	writeQueueToDB(outQueue);
     	db.sync();
     	System.out.println(db.getPath() + ": " + db.uwIdx.map().size());
     }
