@@ -22,6 +22,7 @@ import crawler.robots.RobotInfoManager;
 import crawler.robots.RobotTxt;
 import crawler.urlfrontier.URLFrontier;
 import crawler.utils.CacheEntry;
+import crawler.worker.WorkerStatus;
 
 @SuppressWarnings("rawtypes")
 public class DBWrapper {
@@ -37,6 +38,8 @@ public class DBWrapper {
 	public PrimaryIndex<String, URLQueue> qIdx;
     public PrimaryIndex<String, VisitedURL> vIdx;
     public PrimaryIndex<String, URLWrapper> uwIdx;
+    
+    public PrimaryIndex<String, WorkerStatus> wIdx;
 	
     public DBWrapper(String dir) {
         envDir = dir;
@@ -61,6 +64,7 @@ public class DBWrapper {
         qIdx = store.getPrimaryIndex(String.class, URLQueue.class);
         vIdx = store.getPrimaryIndex(String.class, VisitedURL.class);
         uwIdx = store.getPrimaryIndex(String.class, URLWrapper.class);
+        wIdx = store.getPrimaryIndex(String.class, WorkerStatus.class);
     }
 
     public String getPath() {
@@ -76,12 +80,15 @@ public class DBWrapper {
     }
     
     public RobotTxt getRobotTxt(String id) {
-    	return rIdx.get(id);
+    	synchronized(rIdx) {
+    		return rIdx.get(id);
+    	}
     }
     
     public void saveRobotTxt(RobotTxt r) {
-    	rIdx.put(r);
-//    	sync();
+    	synchronized (rIdx) {
+    		rIdx.put(r);
+    	}
     }
     
     public VisitedURL getVisitedURL(String url) {
@@ -91,7 +98,6 @@ public class DBWrapper {
     public void saveVisitedURL(VisitedURL url) {
 //    	System.out.println("[DB] save: " + url.getUrl());
     	vIdx.put(url);
-    	sync();
     }
     
     public void deleteURL(String url) {
@@ -101,20 +107,33 @@ public class DBWrapper {
     
     // for url frontier
     public void saveURL(Queue<String> queue) {
-    	while(!queue.isEmpty()) {
-    		String url = queue.poll();
-    		uwIdx.put(new URLWrapper(url));
-//    		System.out.println("[DB] save url: " + url);
+    	synchronized(uwIdx) {
+    		while(!queue.isEmpty()) {
+        		String url = queue.poll();
+        		uwIdx.put(new URLWrapper(url));
+//        		System.out.println("[DB] save url: " + url);
+        	}
     	}
+    	sync();
     }
     
     public void pullURL(int num, Queue<String> outQueue) {
-		for(String url: uwIdx.map().keySet()) {
-			outQueue.offer(url);
-			uwIdx.delete(url);
+		synchronized(uwIdx) {
+			for(String url: uwIdx.map().keySet()) {
+				outQueue.offer(url);
+				uwIdx.delete(url);
+			}
 		}
 		sync();
 	}
+    
+    public WorkerStatus getWorkerStatus(String id) {
+    	return wIdx.get(id);
+    }
+    
+    public void saveWorkerStatus(WorkerStatus w) {
+    	wIdx.put(w);
+    }
     
     public void sync() {
         if (myEnv != null)
@@ -131,11 +150,14 @@ public class DBWrapper {
     }
 
     public static void main(String[] args) {
-         DBWrapper db = new DBWrapper("./url_cache");
+         DBWrapper db = new DBWrapper("./db1");
          db.setup();
-         
-         for(String s: db.vIdx.map().keySet()) {
+         System.out.println(db.vIdx.map().size());
+         int i = 0;
+         for(String s: db.pIdx.map().keySet()) {
         	 System.out.println(s);
+        	 i++;
+        	 if(i == 100) break;
          }
          
 //         RobotInfoManager rm = new RobotInfoManager();

@@ -42,8 +42,6 @@ public class DUEBolt implements IRichBolt {
     static Logger logger = new Logger(DUEBolt.class.getName());
 
     Fields schema = new Fields("url");
-    
-    RobotInfoManager robotManager;
 
     /**
      * To make it easier to debug: we have a unique ID for each instance of the
@@ -72,7 +70,6 @@ public class DUEBolt implements IRichBolt {
         this.collector = collector;
         urlFrontier = Crawler.getURLFrontier();
         urlSet = Crawler.getURLSet();
-        robotManager = Crawler.getRobotManager();
     }
 
     /**

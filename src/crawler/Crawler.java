@@ -37,7 +37,10 @@ import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
 import crawler.due.DUEBolt;
 import crawler.due.URLSet;
+import crawler.due.URLSet_old;
 import crawler.robots.RobotInfoManager;
+import crawler.robots.RobotInfoManager_old;
+import crawler.robots.RobotManager;
 import crawler.storage.CrawledPage;
 import crawler.storage.DBWrapper;
 
@@ -78,11 +81,14 @@ public class Crawler {
     public static int PAGE_CACHE_SIZE = 65536;
     public static int NUM_TO_WRITE_SNAPSHOT_FOR_PAGE = 1000;
     
+    public static String DBPath = "./db";
+    
     public static String PAGEDB_Path = "./page_db";
     public static DBWrapper pageDB;
     
     public static String ROBOT_CACHE_PATH = "./robot_db";
-    public static RobotInfoManager robotManager;
+//    public static RobotInfoManager robotManager;
+    public static RobotManager robotManager;
     
     public static String FRONTIER_DB_PATH = "./frontier_db";
     public static DBWrapper frontierDB;
@@ -91,6 +97,7 @@ public class Crawler {
     public static String URL_SET_CACHE_PATH = "./url_cache";
     public static int NUM_TO_WRITE_SNAPSHOT_FOR_URL = 1000;
     public static int URL_SET_SIZE = 1000;
+//    public static URLSet urlSet;
     public static URLSet urlSet;
      
     public static int fileNum = -1;
@@ -122,23 +129,27 @@ public class Crawler {
     }
     
     public static void config() {
+    	
+    	DBPath += CrawlerWorker.WORKER_ID;
+    	
     	/* init page cache */
     	PAGEDB_Path += CrawlerWorker.WORKER_ID;
-		pageDB = new DBWrapper(PAGEDB_Path);
+		pageDB = new DBWrapper(DBPath);
 		pageDB.setup();
 		
 		/* init robot cache */
 		ROBOT_CACHE_PATH += CrawlerWorker.WORKER_ID;
-		robotManager = new RobotInfoManager();
+//		robotManager = new RobotInfoManager();
+		robotManager = new RobotManager(DBPath);
 		
 		/* init frontier */
 		FRONTIER_DB_PATH += CrawlerWorker.WORKER_ID;
-		urlFrontier = new URLFrontier(1000, FRONTIER_DB_PATH);
+		urlFrontier = new URLFrontier(1000, DBPath);
 		
 		/* init url set */
 		URL_SET_CACHE_PATH += CrawlerWorker.WORKER_ID;
-		urlSet = new URLSet(1000, URL_SET_CACHE_PATH, NUM_TO_WRITE_SNAPSHOT_FOR_URL);
-    	
+//		urlSet = new URLSet(1000, URL_SET_CACHE_PATH, NUM_TO_WRITE_SNAPSHOT_FOR_URL);
+    	urlSet = new URLSet(1000, DBPath, NUM_TO_WRITE_SNAPSHOT_FOR_URL);
     }
     
     public void setUp(WorkerJob workerJob) {
@@ -195,7 +206,7 @@ public class Crawler {
         return urlFrontier;
     }
 
-    public static RobotInfoManager getRobotManager() {
+    public static RobotManager getRobotManager() {
         return robotManager;
     }
     
@@ -212,7 +223,6 @@ public class Crawler {
     	
 //    	urlFrontier.writeSnapshot(Crawler.frontierDB);
     	Crawler.urlSet.writeSnapshot();
-    	
     	Crawler.robotManager.writeSnapshot();
     	
     	urlFrontier.writeSnapshot();

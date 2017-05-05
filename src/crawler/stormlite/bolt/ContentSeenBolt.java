@@ -10,6 +10,8 @@ import crawler.Crawler;
 import crawler.utils.LRUCache;
 import crawler.client.Client;
 import crawler.robots.RobotInfoManager;
+import crawler.robots.RobotInfoManager_old;
+import crawler.robots.RobotManager;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.routers.StreamRouter;
@@ -56,7 +58,7 @@ public class ContentSeenBolt implements IRichBolt {
     */
    private OutputCollector collector;
    
-   private RobotInfoManager robotManager;
+   private RobotManager robotManager;
    
    public ContentSeenBolt() {
    }
@@ -94,6 +96,7 @@ public class ContentSeenBolt implements IRichBolt {
 	   
 	   byte[] content = null;
 	   InputStream in = client.getInputStream();
+	   if(in == null) return;
 	   ByteArrayOutputStream bos = new ByteArrayOutputStream();	
 	   int next;
 	   try {

@@ -69,7 +69,7 @@ public class LinkExtractorBolt implements IRichBolt {
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
         
-        db = new DBWrapper(Crawler.PAGEDB_Path);
+        db = new DBWrapper(Crawler.DBPath);
         db.setup();
     }
 

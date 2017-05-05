@@ -2,6 +2,7 @@ package crawler.worker;
 
 import crawler.stormlite.tuple.Tuple;
 import crawler.Crawler;
+import crawler.storage.DBWrapper;
 import crawler.stormlite.distributed.WorkerJob;
 import utils.Logger;
 
@@ -27,7 +28,10 @@ public class CrawlerWorker extends WorkerServer {
 	public static String WORKER_ID;
 	Crawler crawler;
 	
-	public static WorkerStatus workerStatus = new WorkerStatus();
+	public static DBWrapper db;
+	
+	public static String STATUS_ID = "ID";
+	public static WorkerStatus workerStatus;
 	
 	ObjectMapper om;
 	
@@ -128,10 +132,24 @@ public class CrawlerWorker extends WorkerServer {
 
 	@Override
 	public void shutdown() {
+		db.saveWorkerStatus(workerStatus);
+		db.sync();
 		crawler.stop();
 	}
 	
-	
+	public static void config() {
+		STATUS_ID += WORKER_ID;
+		db = new DBWrapper(Crawler.DBPath + WORKER_ID);
+		db.setup();
+		
+		workerStatus = db.getWorkerStatus(STATUS_ID);
+		if(workerStatus == null) {
+			workerStatus = new WorkerStatus(STATUS_ID);
+			System.out.println("new status");
+		} else {
+			System.out.println("Pages crawled previously: " + workerStatus.getCrawledFileNum());
+		}
+	}
 	
 	public static void main(String[] args) {
 		if(args.length != 3) {
@@ -149,6 +167,7 @@ public class CrawlerWorker extends WorkerServer {
 		}
 		
 		CrawlerWorker.WORKER_ID = args[2];
+		CrawlerWorker.config();
 		Crawler.config();
 		Logger.configure(false, false);
 		CrawlerWorker worker = new CrawlerWorker(masterAddr, port);
