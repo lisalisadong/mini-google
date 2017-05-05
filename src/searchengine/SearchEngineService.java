@@ -11,11 +11,30 @@ public class SearchEngineService {
 
     private static Stemmer stemmer = new Stemmer();
 
-    private static HashMap<String, ResultEntry[]> cache;
+    private static LRUCache cache = new LRUCache(100); // LRU with 100 cached queries
+
+    /**
+     * Returns the number of results that are expected.
+     * @param query query string
+     * @return total number of results that are expected.
+     */
+    public static int preSearch(String query) {
+        // get {word:occurrences} map from query
+        Map<String, Integer> wordsOccur = decomposeQuery(query);
+
+        if (cache.getOriginal(query) != null) {
+            return cache.getOriginal(query).length;
+        } else {
+            ResultEntry[] entries = getAllEntries(Collections.enumeration(wordsOccur.keySet()));
+            cache.put(query, entries);
+            return entries.length;
+        }
+    }
 
     /**
      * Search with a query. Return NUM results starting from RANK-th.
-     * For example rank = 1, num = 10 will return first 10 results.
+     * The rank is 0-indexed.
+     * For example rank = 0, num = 10 will return first 10 results.
      *
      * @param query search query
      * @param rank rank of the first result to be returned
@@ -27,40 +46,26 @@ public class SearchEngineService {
         // get {word:occurrences} map from query
         Map<String, Integer> wordsOccur = decomposeQuery(query);
 
-        // get all candidate results
-        // TODO: get results; check cache first;
-        ResultEntry[] entries;
-        if (cache.containsKey(query)) {
-            entries = cache.get(query);
-        } else {
-            entries = getAllEntries(Collections.enumeration(wordsOccur.keySet()));
+        // in case this is a new search query and has not been pre-searched, should not happen
+        if (cache.getSorted(query) == null) {
+            ResultEntry[] entries = getAllEntries(Collections.enumeration(wordsOccur.keySet()));
+            cache.put(query, entries);
         }
-        // out of bound
-        if (rank >= entries.length) {
+
+        // out of bound, should not happen
+        if (rank + num >= cache.getSorted(query).length) {
             return null;
         }
 
-        return null;
-    }
+        // cache sorted result
+        if (!sorted(query, rank, rank + num - 1)) {
+            sortAndCache(query, rank, rank + num - 1);
+        }
 
-    /**
-     * Asynchronously search with a query. Return immediately. Must use
-     * joinAsyncSearch() to join the thread.
-     *
-     * @param query search query
-     */
-    private static void asyncSearch(String query, int rank, int num) {
-        // TODO: start new thread to search database and sort
-    }
-
-    /**
-     * Join the async searching thread.
-     *
-     * @return sorted result entries
-     */
-    private static void joinAsyncSearch() {
-        // TODO: join the search thread
-
+        // get result
+        ResultEntry[] resultEntries = new ResultEntry[num];
+        System.arraycopy(cache.getSorted(query), rank, resultEntries, 0, num);
+        return resultEntries;
     }
 
     /**
@@ -100,6 +105,9 @@ public class SearchEngineService {
         ResultEntry[] entries = new ResultEntry[documentIds.size()];
         int i = 0;
         for (String id : documentIds) {
+            entries[i] = new ResultEntry();
+            queryPageRank(entries[i]);
+            queryTfIdf(entries[i], words);
             queryDocumentDetail(id, entries[i++]);
         }
         return entries;
@@ -121,6 +129,23 @@ public class SearchEngineService {
     }
 
     /**
+     * Query inverted index database to get TF/IDF scores.
+     * @param words words to be searched
+     * @param entry the result entry where the scores will be stored
+     */
+    private static void queryTfIdf(ResultEntry entry, Enumeration<String> words) {
+        // TODO: query inverted index database (TF/IDF..)
+    }
+
+    /**
+     * Query page rank database to get page rank score.
+     * @param entry the result entry where the score will be stored
+     */
+    private static void queryPageRank(ResultEntry entry) {
+        // TODO: query page rank database
+    }
+
+    /**
      * Query database by documentID. Store details about the document in result entry.
      * @param documentId document id
      * @param entry result entry that is going to store the details about the document
@@ -135,34 +160,56 @@ public class SearchEngineService {
      ******************************************/
 
     /**
+     * Sort and cache entries from rankStart-th to rankEnd-th.
+     * The rank is 0-indexed.
+     * @param query query string
+     * @param rankStart starting rank
+     * @param rankEnd ending rank
+     */
+    private static void sortAndCache(String query, int rankStart, int rankEnd) {
+        ResultEntry[] entries = cache.getOriginal(query);
+        ResultEntry higherBound = findKthLargest(entries, rankStart);
+        ResultEntry lowerBound = findKthLargest(entries, rankEnd);
+        ResultEntry[] toSort = new ResultEntry[(rankEnd - rankStart + 1)];
+        int i = 0;
+        for (ResultEntry entry : entries) {
+            if (entry.compareTo(higherBound) <= 0 && entry.compareTo(lowerBound) >= 0) {
+                toSort[i++] = entry;
+            }
+        }
+        Arrays.sort(toSort, (o1, o2) -> o2.compareTo(o1));
+        System.arraycopy(toSort, 0, cache.getSorted(query), rankStart, rankEnd - rankStart + 1);
+    }
+
+    /**
      * Quick select K.
      * @param entries result entries
      * @param k kth element in a descending order
      * @return index of kth element.
      */
-    private int findKthLargest(ResultEntry[] entries, int k) {
-        int lo = 0, hi = entries.length - 1;
-        while (lo < hi) {
-            int i = partition(entries, lo, hi);
-            if (i < k) lo = i + 1;
-            else if (i > k) hi = i - 1;
-            else return i;
+    private static ResultEntry findKthLargest(ResultEntry[] entries, int k) {
+        int start = 0, end = entries.length - 1;
+        while (start < end) {
+            int i = partition(entries, start, end);
+            if (i < k) start = i + 1;
+            else if (i > k) end = i - 1;
+            else return entries[i];
         }
-        return lo;
+        return entries[start];
     }
 
 
-    private int partition(ResultEntry[] entries, int lo, int hi) {
-        double pivot = entries[lo].getScore();
-        int i = lo, j = hi + 1;
+    private static int partition(ResultEntry[] entries, int start, int end) {
+        ResultEntry pivot = entries[start];
+        int i = start, j = end + 1;
 
         while (true) {
-            while (entries[++i].getScore() > pivot) {
-                if (i >= hi) break;
+            while (entries[++i].compareTo(pivot) > 0) {
+                if (i >= end) break;
             }
 
-            while (entries[--j].getScore() < pivot) {
-                if (j <= lo) break;
+            while (entries[--j].compareTo(pivot) < 0) {
+                if (j <= start) break;
             }
 
             if (i >= j) break;
@@ -170,41 +217,29 @@ public class SearchEngineService {
             swap(entries, i, j);
         }
 
-        swap(entries, lo, j);
+        swap(entries, start, j);
 
         return j;
     }
 
-    private void swap(ResultEntry[] entries, int i, int j) {
+    private static void swap(ResultEntry[] entries, int i, int j) {
         ResultEntry tmp = entries[i];
         entries[i] = entries[j];
         entries[j] = tmp;
     }
 
     /**
-     * Return whether entries[start:end] is already sorted in descending order .
-     * @param entries result entries
-     * @param start start index
-     * @param end end index
-     * @return true if range is sorted in descending order.
+     * Return whether entries from rankStart-th to rankEnd-th are already sorted and cached.
+     * The rank is 0-indexed.
+     * @param query query string
+     * @param rankStart starting rank
+     * @param rankEnd ending rank
+     * @return true if range is sorted and cached
      */
-    private boolean sorted(ResultEntry[] entries, int start, int end) {
-        // invalid input
-        if (start > end || start < 0) {
-            throw new IllegalStateException("start: " + start + "; end: " + end);
-        }
-        // edge case
-        if (start >= entries.length) {
-            return true;
-        }
-        // end is larger than length
-        end = Math.min(end, entries.length - 1);
-
-        double prev = entries[start].getScore();
-        for (int i = start + 1; i <= end; i++) {
-            if (entries[i].getScore() > prev) {
-                return false;
-            }
+    private static boolean sorted(String query, int rankStart, int rankEnd) {
+        ResultEntry[] entries = cache.getSorted(query);
+        for (int i = rankStart; i <= rankEnd; i++) {
+            if (entries[i] == null) return false;
         }
         return true;
     }
