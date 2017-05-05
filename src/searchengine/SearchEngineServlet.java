@@ -6,8 +6,6 @@ import utils.Logger;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -31,13 +29,7 @@ public class SearchEngineServlet extends HttpServlet {
             writer.println(contents);
             break;
         case "/search":
-            if (request.getParameter("query") == null) {
-                response.sendError(404, "Page Not Found");
-            } else {
-//                writer.println("This is the result page");
-//                writer.println("query is: " + request.getParameter("query"));
-                response.sendRedirect("/result");
-            }
+            handleSearch(request, response);
             break;
         case "/result":
             contents = new String(Files.readAllBytes(Paths.get("resources/sites/result.html")));
@@ -62,6 +54,20 @@ public class SearchEngineServlet extends HttpServlet {
             break;
         default:
             break;
+        }
+    }
+
+    private void handleSearch(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (request.getParameter("query") == null) {
+            response.sendError(404, "Page Not Found");
+        } else {
+            String query = request.getParameter("query");
+            logger.warn("The query is {}", query);
+            int numResults = SearchEngineService.preSearch(query);
+            String contents = new String(Files.readAllBytes(Paths.get("resources/sites/result.html")));
+            PrintWriter writer = response.getWriter();
+            writer.println(contents);
+            response.sendRedirect("/result");
         }
     }
 }

@@ -11,21 +11,23 @@ package searchengine;
  *      - scores associated with the page (tf-idf...)
  */
 public class ResultEntry {
-    String title = "";
-    String location = "";
+    String documentId;
+    String title;
+    String location;
     String digest;
     String lastModified;
     double tf;
     double idf;
+    double pageRank;
     public double score;
+
+    public ResultEntry(String id) {
+        documentId = id;
+    }
 
     public int compareTo(ResultEntry other) {
         if (getScore() == other.getScore()) {
-            if (title.equals(other.title)) {
-                return location.compareTo(other.location);
-            } else {
-                return title.compareTo(other.title);
-            }
+            return documentId.compareTo(other.documentId);
         } else {
             return getScore() < other.getScore() ? -1 : 1;
         }
