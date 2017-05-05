@@ -20,18 +20,6 @@ public class LRU<K, V> extends LinkedHashMap<K, V> {
         return size() > capacity;  
     } 
 	
-	public synchronized boolean contains(K key) {
-		return containsKey(key);
-	}
-	
-	public synchronized V getValue(K key) {
-		return get(key);
-	}
-	
-	public synchronized void store(K key, V value) {
-		put(key, value);
-	}
-	
 	public static void main(String[] args) {
 		LRU<String, String> lru = new LRU<>(2);
 		

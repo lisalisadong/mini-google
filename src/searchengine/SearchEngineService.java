@@ -47,15 +47,16 @@ public class SearchEngineService {
         Map<String, Integer> wordsOccur = decomposeQuery(query);
 
         // in case this is a new search query and has not been pre-searched, should not happen
-        if (cache.getSorted(query) == null) {
+        if (cache.getOriginal(query) == null) {
             ResultEntry[] entries = getAllEntries(Collections.enumeration(wordsOccur.keySet()));
             cache.put(query, entries);
         }
 
         // out of bound, should not happen
-        if (rank + num >= cache.getSorted(query).length) {
+        if (rank >= cache.getOriginal(query).length) {
             return null;
         }
+        num = Math.min(num, cache.getOriginal(query).length - rank);
 
         // cache sorted result
         if (!sorted(query, rank, rank + num - 1)) {
@@ -99,18 +100,30 @@ public class SearchEngineService {
     private static ResultEntry[] getAllEntries(Enumeration<String> words) {
         HashSet<String> documentIds = new HashSet<>();
         while (words.hasMoreElements()) {
+            // get all document ids related to the queried words
             ArrayList<String> ids = queryInvertedIndex(words.nextElement());
             documentIds.addAll(ids);
         }
         ResultEntry[] entries = new ResultEntry[documentIds.size()];
         int i = 0;
         for (String id : documentIds) {
-            entries[i] = new ResultEntry();
+            entries[i] = new ResultEntry(id);
             queryPageRank(entries[i]);
             queryTfIdf(entries[i], words);
-            queryDocumentDetail(id, entries[i++]);
+            processScore(entries[i]);
+            queryDocumentDetail(entries[i]);
+            i++;
         }
         return entries;
+    }
+
+    /**
+     * Scoring algorithm. Use page rank, TF, IDF, and so on...
+     * @param entry result entry
+     */
+    private static void processScore(ResultEntry entry) {
+        // TODO: TUNE THE ALGORITHM!!!
+        entry.score = entry.pageRank * entry.tf * entry.idf;
     }
 
     /******************************************
@@ -125,7 +138,13 @@ public class SearchEngineService {
      */
     private static ArrayList<String> queryInvertedIndex(String word) {
         // TODO: query inverted index database
-        return null;
+        // fake data!!!
+        Random rand = new Random();
+        ArrayList<String> res = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            res.add(String.valueOf(rand.nextInt(1000000)));
+        }
+        return res;
     }
 
     /**
@@ -135,6 +154,9 @@ public class SearchEngineService {
      */
     private static void queryTfIdf(ResultEntry entry, Enumeration<String> words) {
         // TODO: query inverted index database (TF/IDF..)
+        // fake data!!!
+        entry.tf = 1.0 * new Random().nextInt(2000) / 1000;
+        entry.idf = 1.0 * new Random().nextInt(2000) / 1000;
     }
 
     /**
@@ -143,15 +165,24 @@ public class SearchEngineService {
      */
     private static void queryPageRank(ResultEntry entry) {
         // TODO: query page rank database
+        String documentId = entry.documentId;
+        // fake data!!!
+        entry.pageRank = 1.0 * new Random().nextInt(10000) / 1000;
     }
 
     /**
      * Query database by documentID. Store details about the document in result entry.
-     * @param documentId document id
      * @param entry result entry that is going to store the details about the document
      */
-    private static void queryDocumentDetail(String documentId, ResultEntry entry) {
+    private static void queryDocumentDetail(ResultEntry entry) {
         // TODO: query database: get details about a document by documentID
+        // fake data!!!
+        entry.title = "This is a fake title";
+        entry.location = "https://this/is/a/fake/location";
+        entry.digest = "This is a fake digest. The page rank is [" + entry.pageRank + "]. " +
+                "The TF score is [" + entry.tf + "]. " + "The IDF score is [" + entry.idf + "]. " +
+                "The total score is [" + entry.score + "].";
+        entry.lastModified = "Apr 1, 2017";
     }
 
 

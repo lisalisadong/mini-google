@@ -3,6 +3,8 @@ package crawler.urlfrontier;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
+import java.util.Random;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -11,40 +13,88 @@ import crawler.Crawler;
 import crawler.client.URLInfo;
 import crawler.robots.RobotInfoManager;
 import crawler.storage.DBWrapper;
-import crawler.storage.StateDBWrapper;
+import crawler.storage.URLQueue;
+import crawler.worker.CrawlerWorker;
+import utils.Logger;
 
 /**
  * the url frontier, takes care of the synchronization
  * @author xiaofandou
  *
  */
-@Entity
 public class URLFrontier {
 	
-	public static final String ID = "URL_FRONTIER";
+	public static Logger logger = new Logger(URLFrontier.class.getName());
 	
-    @PrimaryKey
-    private String id = ID;
+	public Long id = 0L;
+	public int maxSize = 4096;
     
-    private int size;
+    public LinkedBlockingQueue<String> inQueue;
+    public LinkedBlockingQueue<String> outQueue;
     
-    public RobotInfoManager robotManager;
-    
-//    <HOST, url list>
-    HashMap<String, LinkedList<String>> frontendQueues;
-    HashMap<String, LinkedList<String>> backendQueues;
-    PriorityQueue<HostWrapper> backendSelector;
+    private DBWrapper db;
 
-    public URLFrontier() {
-    	size = 0;
-    	robotManager = Crawler.getRobotManager();
-    	frontendQueues = new HashMap<>();
-    	backendQueues = new HashMap<>();
-    	backendSelector = new PriorityQueue<>(5000, (w1, w2) -> {
-    		if(w1.availableTime - w2.availableTime > 0) return 1;
-    		if(w1.availableTime - w2.availableTime < 0) return -1;
-    		return 0;
-    	});
+    public URLFrontier(int maxSize, String DBPath) {
+    	this.maxSize = maxSize;
+    	
+    	db = new DBWrapper(DBPath);
+//    	db = new DBWrapper("./tmp");
+    	db.setup();
+    	
+    	inQueue = new LinkedBlockingQueue<String>();
+    	outQueue = new LinkedBlockingQueue<String>();
+    	
+    	config();
+    }
+    
+    /* RESTORE FROM DB */
+    public void config() {
+    	
+    	if(db.uwIdx.map().isEmpty()) {
+    		System.out.println("[URL Frontier] new crawl");
+    		
+    		if(CrawlerWorker.WORKER_ID.equals("1")) {
+    			addURL("https://www.facebook.com/");
+    			addURL("https://www.youtube.com/");
+    			
+    			System.out.println("[seed]: https://www.facebook.com/");
+    			System.out.println("[seed]: https://www.youtube.com/");
+    		} else if(CrawlerWorker.WORKER_ID.equals("2")) {
+    			addURL("http://www.upenn.edu/");
+    			addURL("https://www.reddit.com/");
+    			
+    			System.out.println("[seed]: http://www.upenn.edu/");
+    			System.out.println("[seed]: https://www.reddit.com/");
+    		} else if(CrawlerWorker.WORKER_ID.equals("3")) {
+    			addURL("https://en.wikipedia.org/wiki/Main_Page/");
+    			addURL("https://www.google.com/");
+    			
+    			System.out.println("[seed]: https://en.wikipedia.org/wiki/Main_Page/");
+    			System.out.println("[seed]: https://www.google.com/");
+    		} else if(CrawlerWorker.WORKER_ID.equals("4")) {
+    			addURL("https://www.amazon.com/");
+    			addURL("http://www.ebay.com/");
+    			
+    			System.out.println("[seed]: https://www.amazon.com/");
+    			System.out.println("[seed]: http://www.ebay.com/");
+    		} else if(CrawlerWorker.WORKER_ID.equals("5")) {
+    			addURL("https://www.bloomberg.com/");
+    			addURL("http://www.cnn.com/");
+    			
+    			System.out.println("[seed]: https://www.bloomberg.com/");
+    			System.out.println("[seed]: http://www.cnn.com/");
+    		} else {
+    			addURL("https://www.facebook.com/");
+    		}
+    		
+    		return;
+    	}
+    	
+    	logger.debug("restore from db");
+    	System.out.println("[URL Frontier] restore from last crawl: " 
+    			+ db.uwIdx.map().size());
+    	
+    	
     }
 
     /**
@@ -52,56 +102,74 @@ public class URLFrontier {
      * 
      * @return next available url, null if empty
      */
-    public synchronized String getNextURL() {
-    	if(backendSelector.isEmpty()) return null;
-    	size--;
-    	HostWrapper hw = backendSelector.poll();
-    	
-    	LinkedList<String> ll = backendQueues.get(hw.host);
-    	String url = ll.poll();
-    	
-    	// no url left, delete the queue
-    	if(ll.isEmpty()) {
-    		backendQueues.remove(hw.host);
-    		return url;
+    public String getNextURL() {
+    	if(outQueue.isEmpty()) {
+    		readFromDB();
     	}
-    	
-    	// update available time for host;
-    	hw.availableTime = robotManager.getAvailableTime(url);
-    	backendSelector.offer(hw);
-    	return url;
+    	return outQueue.poll();	
     }
+    
+    private void readFromDB() {
+    	writeQueueToDB(inQueue);
+    	
+    	synchronized(outQueue) {
+    		int i = 0;
+    		for(String url: db.uwIdx.map().keySet()) {
+    			db.deleteURL(url);
+    			outQueue.add(url);
+    			i++;
+    			if(i == 1000) break;
+    		}
+    	}
+    }
+    
+    private void writeQueueToDB(LinkedBlockingQueue<String> queue) {
+    	synchronized(queue) {
+    		String url = "";
+    		while(!queue.isEmpty()) {
+    			url = queue.poll();
+    			db.saveURL(url);
+    		}
+        	db.sync();
+    	}
+	}
 
-    /**
+	/**
      * add an url to frontier
      * 
      * @param url
      */
-    public synchronized void addURL(String url) {
-    	String host = new URLInfo(url).getHostName();
-    	if(!backendQueues.containsKey(host)) {
-    		backendQueues.put(host, new LinkedList<>());
-    		backendSelector.offer(new HostWrapper(host, robotManager.getAvailableTime(url)));
+    public void addURL(String url) {
+    	inQueue.offer(url);
+    	if(inQueue.size() > maxSize) {
+    		writeQueueToDB(inQueue);
     	}
-    	backendQueues.get(host).offer(url);
-    	size++;
     }
     
-    public synchronized int size() {
-    	return size;
+    public void writeSnapshot() {
+    	System.out.println("[URL Frontier]: write snapshot");
+    	writeQueueToDB(inQueue);
+    	writeQueueToDB(outQueue);
+    	db.sync();
+    	System.out.println(db.getPath() + ": " + db.uwIdx.map().size());
     }
     
-    public void writeSnapshot(StateDBWrapper db) {
-    	
+    public static void main(String[] args) {
+    	URLFrontier uf = new URLFrontier(1, "./tmp");
+    	String url = "";
+    	while(url != null) {
+    		System.out.println(url);
+    		url = uf.getNextURL();
+    	}
+//    	uf.addURL("abc1");
+//    	uf.addURL("abc2");
+//    	uf.addURL("abc3");
+//    	uf.addURL("abc4");
+//    	uf.addURL("abc5");
+//    	uf.writeSnapshot();
     }
 }
 
-class HostWrapper {
-	String host;
-	long availableTime;
-	
-	HostWrapper(String host, long availableTime) {
-		this.host = host;
-		this.availableTime = availableTime;
-	}
-}
+
+
+

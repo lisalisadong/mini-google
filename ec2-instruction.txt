@@ -1,0 +1,47 @@
+ec2 instructions:
+
+===================================================Connect to ec2=========================================================
+1. get .pem and put it in an INVISIBLE folder(e.g, ./.ec2).
+
+2. chmod 400 /pathTo/crawler-keys.pem
+
+3. ssh -i /pathTo/crawler-keys.pem ec2-user@ec2-198-51-100-1.compute-1.amazonaws.com
+
+===================================================cp files=========================================================
+4. scp -i /pathTo/crawler-keys.pem -r Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google/ ec2-54-244-207-105.us-west-2.compute.amazonaws.com:~/
+
+==================================================================================================================================
+ec2:
+(1): ec2-user@ec2-54-202-120-77.us-west-2.compute.amazonaws.com
+ssh -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem ec2-user@ec2-54-202-120-77.us-west-2.compute.amazonaws.com
+
+scp -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem -r /Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google ec2-user@ec2-54-202-120-77.us-west-2.compute.amazonaws.com:~/
+
+(2): ec2-user@ec2-54-244-206-228.us-west-2.compute.amazonaws.com
+ssh -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem ec2-user@ec2-54-244-206-228.us-west-2.compute.amazonaws.com
+
+scp -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem -r /Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google ec2-user@ec2-54-244-206-228.us-west-2.compute.amazonaws.com:~/
+
+(3): ec2-user@ec2-54-213-62-148.us-west-2.compute.amazonaws.com
+ssh -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem ec2-user@ec2-54-213-62-148.us-west-2.compute.amazonaws.com
+
+scp -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem -r /Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google ec2-user@ec2-54-213-62-148.us-west-2.compute.amazonaws.com:~/
+
+(4): ec2-user@ec2-54-244-3-179.us-west-2.compute.amazonaws.com
+ssh -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem ec2-user@ec2-54-244-3-179.us-west-2.compute.amazonaws.com
+
+scp -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem -r /Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google ec2-user@ec2-54-244-3-179.us-west-2.compute.amazonaws.com:~/
+
+(5): ec2-user@ec2-54-244-207-105.us-west-2.compute.amazonaws.com
+ssh -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem ec2-user@ec2-54-244-207-105.us-west-2.compute.amazonaws.com
+
+scp -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem -r /Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google ec2-user@ec2-54-244-207-105.us-west-2.compute.amazonaws.com:~/
+
+==================================================================================================================================
+chmod 400 /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem
+
+ssh -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem ec2-user@ec2-198-51-100-1.compute-1.amazonaws.com
+
+scp -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem -r Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google dest
+
+scp -i ~/Users/xiaofandou/Desktop/CIS555/SharedFolder/crawler-keys.pem Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google/README ec2-54-244-207-105.us-west-2.compute.amazonaws.com:~/

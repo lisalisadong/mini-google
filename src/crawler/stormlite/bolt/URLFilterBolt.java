@@ -6,6 +6,7 @@ import java.util.UUID;
 import crawler.Crawler;
 import crawler.client.URLInfo;
 import crawler.robots.RobotInfoManager;
+import crawler.robots.RobotManager;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.routers.StreamRouter;
@@ -50,7 +51,7 @@ public class URLFilterBolt implements IRichBolt {
      */
     private OutputCollector collector;
     
-    private RobotInfoManager robotManager;
+    private RobotManager robotManager;
 
     public URLFilterBolt() {
     }
@@ -62,7 +63,7 @@ public class URLFilterBolt implements IRichBolt {
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
-        robotManager = Crawler.robotManager;
+        robotManager = Crawler.getRobotManager();
     }
 
     /**

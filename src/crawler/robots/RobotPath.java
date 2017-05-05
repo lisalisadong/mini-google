@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import com.sleepycat.persist.model.Persistent;
+import com.sleepycat.persist.model.PrimaryKey;
+
+@Persistent
 public class RobotPath {
 	
 	public LinkedList<String> path;
@@ -12,7 +16,9 @@ public class RobotPath {
 	
 	public boolean hasParam;
 	
-	public RobotPath(String link) {
+	public RobotPath() { }
+	
+	public RobotPath(String host, String link) {
 		
 		path = new LinkedList<>();
 		params = new HashMap<>();
@@ -159,10 +165,10 @@ public class RobotPath {
 	
 	public static void main(String[] args) {
 		
-		RobotPath p = new RobotPath("/r/*/comments/*/*/c*");
-		
-		System.out.println("Match: ");
-		System.out.println(p.match(new RobotPath("/r/sadasadas/comments/a/c/cia")));
+//		RobotPath p = new RobotPath("/r/*/comments/*/*/c*");
+//		
+//		System.out.println("Match: ");
+//		System.out.println(p.match(new RobotPath("/r/sadasadas/comments/a/c/cia")));
 //		System.out.println(p.matchPath(new RobotPath("/fish")));
 //		System.out.println(p.matchPath(new RobotPath("/fish.html")));
 //		System.out.println(p.matchPath(new RobotPath("/fish/salmon.html")));

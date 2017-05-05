@@ -14,6 +14,8 @@ import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
 import crawler.stormlite.tuple.Values;
+import crawler.utils.LRUCache;
+import crawler.utils.PageCache;
 import utils.Logger;
 
 import org.jsoup.Jsoup;
@@ -43,6 +45,7 @@ public class LinkExtractorBolt implements IRichBolt {
 
     Fields schema = new Fields("link");
     DBWrapper db;
+    LRUCache<CrawledPage> pageCache;
 
     /**
      * To make it easier to debug: we have a unique ID for each instance of the
@@ -65,7 +68,7 @@ public class LinkExtractorBolt implements IRichBolt {
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
-
+        
         db = new DBWrapper(Crawler.DBPath);
         db.setup();
     }
@@ -78,9 +81,9 @@ public class LinkExtractorBolt implements IRichBolt {
     public void execute(Tuple input) {
         CrawledPage page = (CrawledPage) input.getObjectByField("page");
 //         System.out.println(id + " got " + page.getUrl());
+        String url = page.getUrl();
         if ("text/html".equals(page.getContentType())) {
             byte[] content = page.getContent();
-            String url = page.getUrl();
             Document doc = Jsoup.parse(new String(content), url);
             Elements links = doc.select("a[href]");
 
@@ -96,8 +99,11 @@ public class LinkExtractorBolt implements IRichBolt {
                 }
             }
         }
-
+        
+//        pageCache.put(page.getUrl(), page);
         db.savePage(page);
+        db.sync();
+//		System.out.println(id + ": " + url + " downloaded ");
     }
 
     /**
@@ -139,19 +145,4 @@ public class LinkExtractorBolt implements IRichBolt {
     public Fields getSchema() {
         return schema;
     }
-
-    public List<String> extractLinks(String webpage, String url) {
-        Document doc = Jsoup.parse(webpage, url);
-        Elements links = doc.select("a[href]");
-
-        List<String> res = new LinkedList<>();
-
-        for (Element link : links) {
-            String l = link.attr("abs:href");
-            res.add(l);
-        }
-
-        return res;
-    }
-
 }

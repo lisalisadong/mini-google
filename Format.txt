@@ -1,0 +1,5 @@
+PageRank: (all things in one file)
+url@link1@link2@link3...
+
+Indexer: (one file per page)
+url(docId) "\t" contentType "\t" content

@@ -1,6 +1,7 @@
 package crawler.storage;
 
 import com.sleepycat.persist.model.Entity;
+import com.sleepycat.persist.model.Persistent;
 import com.sleepycat.persist.model.PrimaryKey;
 
 import crawler.client.Client;
