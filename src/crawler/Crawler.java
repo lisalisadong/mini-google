@@ -89,8 +89,8 @@ public class Crawler {
     public static URLFrontier urlFrontier;
     
     public static String URL_SET_CACHE_PATH = "./url_cache";
-    public static int NUM_TO_WRITE_SNAPSHOT_FOR_URL = 10000;
-    public static int URL_SET_SIZE = 10000;
+    public static int NUM_TO_WRITE_SNAPSHOT_FOR_URL = 1000;
+    public static int URL_SET_SIZE = 1000;
     public static URLSet urlSet;
      
     public static int fileNum = -1;
@@ -133,12 +133,11 @@ public class Crawler {
 		
 		/* init frontier */
 		FRONTIER_DB_PATH += CrawlerWorker.WORKER_ID;
-		urlFrontier = new URLFrontier(4096, FRONTIER_DB_PATH);
-		urlFrontier.config();
+		urlFrontier = new URLFrontier(1000, FRONTIER_DB_PATH);
 		
 		/* init url set */
 		URL_SET_CACHE_PATH += CrawlerWorker.WORKER_ID;
-		urlSet = new URLSet(URL_SET_SIZE, URL_SET_CACHE_PATH, NUM_TO_WRITE_SNAPSHOT_FOR_URL);
+		urlSet = new URLSet(1000, URL_SET_CACHE_PATH, NUM_TO_WRITE_SNAPSHOT_FOR_URL);
     	
     }
     
@@ -212,8 +211,10 @@ public class Crawler {
     public void writeSnapShot() {
     	
 //    	urlFrontier.writeSnapshot(Crawler.frontierDB);
-    	Crawler.robotManager.writeSnapshot();
     	Crawler.urlSet.writeSnapshot();
+    	
+    	Crawler.robotManager.writeSnapshot();
+    	
     	urlFrontier.writeSnapshot();
 //    	
 //    	stateDB.sync();

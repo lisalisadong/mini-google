@@ -7,7 +7,7 @@ import crawler.robots.RobotTxt;
 import crawler.storage.DBWrapper;
 import utils.Logger;
 
-public class RobotCache {
+public class RobotCache1 {
 	
 	static Logger logger = new Logger(RobotCache.class.getName());
 	
@@ -20,7 +20,7 @@ public class RobotCache {
 	public int opNum;
 	public int numToWriteSnapshot;
     
-    public RobotCache (int capacity, String DBPath, int numToWriteSnapshot) {
+    public RobotCache1 (int capacity, String DBPath, int numToWriteSnapshot) {
     	
     	opNum = 0;
     	this.numToWriteSnapshot = numToWriteSnapshot;
@@ -50,27 +50,16 @@ public class RobotCache {
         }
     }
     
-    public RobotCache(int capacity, String DBPath) {
+    public RobotCache1(int capacity, String DBPath) {
     	this(capacity, DBPath, 1000);
     }
     
 	public synchronized RobotTxt get(String key) {
-    	if(map.containsKey(key)) {
-    		Node<RobotTxt> n = map.get(key);
-            detach(n);
-            moveToHead(n);
-            return n.val;
-    	}
-    	
-    	// in DB
-    	RobotTxt r = db.getRobotTxt(key);
-    	if(r != null) {
-    		if(cap == map.size()) evict();
-    		Node<RobotTxt> n = new Node<>(key, r);
-    		map.put(key, n);
-    		moveToHead(n);
-    	}
-        return r;
+    	if(!map.containsKey(key)) return null;
+    	Node<RobotTxt> n = map.get(key);
+        detach(n);
+        moveToHead(n);
+        return n.val;
     }
     
     public synchronized void put(String key, RobotTxt value) {
@@ -88,11 +77,6 @@ public class RobotCache {
         }
         moveToHead(n);
         map.put(key, n);
-        
-        if(opNum == numToWriteSnapshot) {
-        	opNum = 0;
-        	writeSnapshot();
-        }
     }
     
     private void detach(Node<RobotTxt> e) {
@@ -113,9 +97,6 @@ public class RobotCache {
         e.prev.next = tail;
         tail.prev = e.prev;
         map.remove(e.key);
-        db.saveRobotTxt(e.val);
-//        db.sync();
-        
         System.out.println("evict: " + e.key);
     }
     

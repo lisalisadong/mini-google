@@ -104,7 +104,7 @@ public class DBWrapper {
     	while(!queue.isEmpty()) {
     		String url = queue.poll();
     		uwIdx.put(new URLWrapper(url));
-    		System.out.println("[DB] save url: " + url);
+//    		System.out.println("[DB] save url: " + url);
     	}
     }
     

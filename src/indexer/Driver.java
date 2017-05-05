@@ -7,6 +7,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 public class Driver {
+	
 
 	public static void main(String[] args) throws Exception {
 		if (args.length != 2) {
@@ -31,6 +32,9 @@ public class Driver {
 		job.setOutputValueClass(OutputValue.class);
 
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
+		
+		//
+//		job.setInputFormatClass(TextInputFormat.class);
 	}
 
 }

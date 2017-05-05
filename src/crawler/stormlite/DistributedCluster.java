@@ -305,11 +305,11 @@ public class DistributedCluster implements Runnable {
 				Thread.yield();
 		}
 		
-		System.out.println(context.getMapOutputs() + " local map outputs and " + 
-				context.getReduceOutputs() + " local reduce outputs.");
+//		System.out.println(context.getMapOutputs() + " local map outputs and " + 
+//				context.getReduceOutputs() + " local reduce outputs.");
 		
-		for (String key: context.getSendOutputs().keySet())
-			System.out.println("Sent " + context.getSendOutputs().get(key) + " to " + key);
+//		for (String key: context.getSendOutputs().keySet())
+//			System.out.println("Sent " + context.getSendOutputs().get(key) + " to " + key);
 	}
 
 	/**

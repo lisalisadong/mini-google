@@ -162,10 +162,9 @@ public class CrawlerWorker extends WorkerServer {
     private void startPingThread() {
 		Thread backgroundThread = new Thread(){
 			public void run() {
-				// TODO: 10s
 				while(isRunning) {
 					try {
-						Thread.sleep(5000);
+						Thread.sleep(10000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}

@@ -102,7 +102,8 @@ public class LinkExtractorBolt implements IRichBolt {
         
 //        pageCache.put(page.getUrl(), page);
         db.savePage(page);
-		System.out.println(id + ": " + url + " downloaded ");
+        db.sync();
+//		System.out.println(id + ": " + url + " downloaded ");
     }
 
     /**

@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import crawler.Crawler;
 import crawler.client.URLInfo;
 import crawler.utils.RobotCache;
+import crawler.utils.RobotCache1;
 import crawler.utils.LRUCache;
 import crawler.worker.CrawlerWorker;
 
@@ -21,13 +22,12 @@ public class RobotInfoManager {
 	public int crawledPageLimit = Crawler.crawledPageLimit;
 	
     // <hostName, *>
-    private RobotCache robotInfo;
+    private RobotCache1 robotInfo;
 //    private LRUCache<Long> crawlTime;
     private ConcurrentHashMap<String, Integer> crawledPageNum;	//<host, time>
 
     public RobotInfoManager() {
-        robotInfo = new RobotCache(3000, "./tmp_robot_cache", 3000);
-//        crawlTime = new LRUCache<>(65536, Crawler.ROBOT_CACHE_PATH);
+        robotInfo = new RobotCache1(1000, Crawler.ROBOT_CACHE_PATH, 3000);
         
         crawledPageNum = new ConcurrentHashMap<>();
     }

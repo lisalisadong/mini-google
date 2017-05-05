@@ -35,21 +35,23 @@ public class URLSet {
         tail.prev = head;
         map = new HashMap<>();
         
-//        db = new DBWrapper(DBPath);
-        db = new DBWrapper("./url_cache");
+        db = new DBWrapper(DBPath);
         db.setup();
         
-        System.out.println("[URL SET] restore from " + DBPath);
+        if(!db.vIdx.map().isEmpty()) {
+        	System.out.println("url set restores from db");
+        } else  {
+        	System.out.println("url set starts fresh");
+        }
         int loadSize = (int)(cap * 0.75);
         int num = 0;
         for(String id: db.vIdx.map().keySet()) {
-        	System.out.println("[URL SET] got " + id);
+//        	System.out.println("[URL SET] got " + id);
         	num++;
         	VisitedURL vu = db.getVisitedURL(id);
         	put(vu.getUrl(), vu.getTime());
         	if(num == loadSize) break;
         }
-        System.out.println("[URL SET] finish restore from " + DBPath);
     }
     
     public URLSet(int capacity, String DBPath) {
@@ -118,7 +120,7 @@ public class URLSet {
         map.remove(e.key);
         db.saveVisitedURL(new VisitedURL(e.key, e.val));
 //        db.sync();
-        System.out.println("evict: " + e.key);
+//        System.out.println("evict: " + e.key);
     }
     
     public synchronized boolean addURL(String url) {
@@ -141,12 +143,12 @@ public class URLSet {
     public static void main(String[] args) {
     	
     	URLSet us = new URLSet(10, Crawler.URL_SET_CACHE_PATH, 1000);
-    	us.addURL("a");
-    	us.addURL("b");
-    	us.addURL("c");
-    	us.addURL("d");
-    	us.addURL("e");
-    	us.writeSnapshot();
+//    	us.addURL("a");
+//    	us.addURL("b");
+//    	us.addURL("c");
+//    	us.addURL("d");
+//    	us.addURL("e");
+//    	us.writeSnapshot();
     	
     }
 
