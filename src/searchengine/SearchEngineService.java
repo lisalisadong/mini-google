@@ -181,7 +181,7 @@ public class SearchEngineService {
         entry.location = "https://this/is/a/fake/location";
         entry.digest = "This is a fake digest. The page rank is [" + entry.pageRank + "]. " +
                 "The TF score is [" + entry.tf + "]. " + "The IDF score is [" + entry.idf + "]. " +
-                "The total score is [" + entry.tf + "].";
+                "The total score is [" + entry.score + "].";
         entry.lastModified = "Apr 1, 2017";
     }
 
