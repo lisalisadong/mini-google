@@ -15,7 +15,7 @@ render() {
             <div className="row"></div>
             <div className="row">
                 <div className="two wide column" style={{textAlign:'right'}}>
-                    <div className="ui red basic medium label" style={{color:'crimson',fontFamily:'Cochin',fontWeight:'bold',fontSize: 16}}><a href="/">Mini Google</a></div>
+                    <div className="ui red basic medium label" style={{color:'crimson',fontFamily:'Cochin',fontWeight:'bold',fontSize: 16}}><a href="/">Less is More</a></div>
                 </div>
                 <div className="eight wide column">
                     <form action="/search" method="get">

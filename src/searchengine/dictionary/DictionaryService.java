@@ -62,6 +62,51 @@ public class DictionaryService {
     }
 
     /**
+     * Correct possible typos in query string.
+     * @param query query string
+     * @return corrected string or null
+     */
+    public static String correct(String query) {
+        if (query == null) return null;
+        String[] words = query.split("\\s+");
+        if (words.length == 0) return null;
+        String[] correction = new String[words.length];
+        boolean corrected = false;
+        for (int i = 0; i < words.length; i++) {
+            if (freq.containsKey(words[i])) {
+                correction[i] = words[i];
+                continue;
+            }
+            int distance = words[i].length();
+            String corrWord = words[i];
+            for (String word : freq.keySet()) {
+                int dist = editDistance(word, words[i]);
+                if (dist < distance) {
+                    distance = dist;
+                    corrWord = word;
+                } else if (dist == distance) {
+                    if (!freq.containsKey(corrWord) || freq.get(word) > freq.get(corrWord)) {
+                        corrWord = word;
+                    }
+                }
+            }
+            if (distance > 0) {
+                correction[i] = corrWord;
+                corrected = true;
+            }
+        }
+        if (corrected) {
+            StringBuilder sb = new StringBuilder(correction[0]);
+            for (int i = 1; i < correction.length; i++) {
+                sb.append(" ").append(correction[i]);
+            }
+            return sb.toString();
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Write cache to file.
      * @param cache cache file
      */
@@ -123,8 +168,34 @@ public class DictionaryService {
         return jsonObject.toJSONString();
     }
 
+    /**
+     * Compute edit distance of two words.
+     * @param word1 word 1
+     * @param word2 word 2
+     * @return edit distance of two words
+     */
+    private static int editDistance(String word1, String word2) {
+        int[][] dp = new int[word1.length() + 1][word2.length() + 1];
+        for (int i = 0; i <= word1.length(); i++) {
+            dp[i][0] = i;
+        }
+        for (int i = 0; i <= word2.length(); i++) {
+            dp[0][i] = i;
+        }
+        for (int i = 1; i <= word1.length(); i++) {
+            for (int j = 1; j <= word2.length(); j++) {
+                int k = 1;
+                if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                    k = 0;
+                }
+                dp[i][j] = Math.min(dp[i - 1][j - 1] + k, Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1));
+            }
+        }
+        return dp[word1.length()][word2.length()];
+    }
+
     public static void main(String[] args) {
         DictionaryService.init("queries", "words.txt");
-        System.out.println(DictionaryService.search("prio"));
+        System.out.println(DictionaryService.correct("priority queue"));
     }
 }

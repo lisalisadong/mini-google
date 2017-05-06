@@ -16,7 +16,7 @@ class MarkdownEditor extends React.Component {
           <div className="row">
               <div className="four wide column"></div>
               <div className="eight wide column">
-                <h1 style={{textAlign:"center",color:'crimson',fontFamily:'Cochin',fontWeight:'bold',fontSize: 50}}>Mini Google</h1>
+                <h1 style={{textAlign:"center",color:'crimson',fontFamily:'Cochin',fontWeight:'bold',fontSize: 50}}>Less is More</h1>
                 <div className="row"><br/></div>
                 <form action="/search" method="get">
                     <div className="ui fluid category search">
