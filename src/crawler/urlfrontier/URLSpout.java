@@ -11,6 +11,7 @@ import crawler.stormlite.spout.IRichSpout;
 import crawler.stormlite.spout.SpoutOutputCollector;
 import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Values;
+import crawler.worker.CrawlerWorker;
 import utils.Logger;
 
 /**
@@ -83,8 +84,10 @@ public class URLSpout implements IRichSpout {
      */
     @Override
     public void nextTuple() {
-        String url = URLFrontier.getNextURL();
-
+        long start = System.currentTimeMillis();
+    	String url = URLFrontier.getNextURL();
+    	CrawlerWorker.logTime("fetch url", start);
+    	
         if (url != null) {
         	
 //        	System.out.println(id + " emit: "  + url);

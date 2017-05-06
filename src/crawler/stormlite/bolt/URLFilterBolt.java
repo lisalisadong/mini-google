@@ -13,6 +13,7 @@ import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
 import crawler.stormlite.tuple.Values;
+import crawler.worker.CrawlerWorker;
 import utils.Logger;
 
 /**
@@ -79,12 +80,14 @@ public class URLFilterBolt implements IRichBolt {
         String host = new URLInfo(link).getHostName();
         // TODO: filter the link
 
+        long start = System.currentTimeMillis();
         if(robotManager.isAllowed(link)) {
         	this.collector.emit(new Values<Object>(host, link));
-            // System.out.println(id + " emit (" + host + ", " + link + ")");
+             System.out.println(id + " emit (" + host + ", " + link + ")");
         } else {
-//        	System.out.println(id + ": " + link + "--not allowed");
+        	System.out.println(id + ": " + link + "--not allowed");
         }
+        CrawlerWorker.logTime("filter " + link, start);
     }
 
     /**
