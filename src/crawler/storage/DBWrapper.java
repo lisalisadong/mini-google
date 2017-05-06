@@ -38,8 +38,8 @@ public class DBWrapper {
 	public PrimaryIndex<String, URLQueue> qIdx;
     public PrimaryIndex<String, VisitedURL> vIdx;
     public PrimaryIndex<String, URLWrapper> uwIdx;
-    
     public PrimaryIndex<String, WorkerStatus> wIdx;
+    public PrimaryIndex<String, PageLinks> pgIdx;
 	
     public DBWrapper(String dir) {
         envDir = dir;
@@ -65,6 +65,7 @@ public class DBWrapper {
         vIdx = store.getPrimaryIndex(String.class, VisitedURL.class);
         uwIdx = store.getPrimaryIndex(String.class, URLWrapper.class);
         wIdx = store.getPrimaryIndex(String.class, WorkerStatus.class);
+        pgIdx = store.getPrimaryIndex(String.class, PageLinks.class);
     }
 
     public String getPath() {
@@ -136,6 +137,14 @@ public class DBWrapper {
     
     public void saveWorkerStatus(WorkerStatus w) {
     	wIdx.put(w);
+    }
+    
+    public void savePageLinks(PageLinks pl) {
+    	pgIdx.put(pl);
+    }
+    
+    public PageLinks getPageLinks(String url) {
+    	return pgIdx.get(url);
     }
     
     public void sync() {

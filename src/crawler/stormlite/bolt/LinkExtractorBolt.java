@@ -25,6 +25,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import crawler.Crawler;
 import crawler.storage.CrawledPage;
 import crawler.storage.DBWrapper;
+import crawler.storage.PageLinks;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.routers.StreamRouter;
@@ -65,11 +66,6 @@ public class LinkExtractorBolt implements IRichBolt {
     Fields schema = new Fields("link");
     DBWrapper db;
     LRUCache<CrawledPage> pageCache;
-    AmazonS3 awsClient;
-    String BUCKET = "crawler-cis555-g02";
-
-    String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
-    String secretKey = "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";
 
     /**
      * To make it easier to debug: we have a unique ID for each instance of the
@@ -95,31 +91,6 @@ public class LinkExtractorBolt implements IRichBolt {
         
         db = new DBWrapper(Crawler.DBPath);
         db.setup();
-
-        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-
-        ClientConfiguration clientConfig = new ClientConfiguration();
-        clientConfig.setProtocol(Protocol.HTTP);
-
-        try {
-            awsClient = new AmazonS3Client(credentials, clientConfig);
-        } catch (Exception e) {
-
-        }
-    }
-
-    private String hashUrl(String url) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("MD5");
-            digest.reset();
-            digest.update(url.getBytes("utf-8"));
-            return DatatypeConverter.printHexBinary(digest.digest());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**
@@ -131,11 +102,12 @@ public class LinkExtractorBolt implements IRichBolt {
         CrawledPage page = (CrawledPage) input.getObjectByField("page");
 //         System.out.println(id + " got " + page.getUrl());
         String url = page.getUrl();
+        PageLinks pl = new PageLinks(url);
         if ("text/html".equals(page.getContentType())) {
             byte[] content = page.getContent();
             Document doc = Jsoup.parse(new String(content), url);
             Elements links = doc.select("a[href]");
-
+            if(links.size() == 0) return;
             for (Element link : links) {
                 String l = link.attr("abs:href");
                 
@@ -143,20 +115,14 @@ public class LinkExtractorBolt implements IRichBolt {
                 	if (l == null || l.length() == 0)
                         continue;
                     // System.out.println(id + " emit " + l);
-                	page.addLink(l);
+                	pl.addLink(l);
                     this.collector.emit(new Values<Object>(l));
                 }
             }
         }
         
-//        pageCache.put(page.getUrl(), page);
-        ObjectMetadata meta = new ObjectMetadata();
-        meta.setContentType(page.getContentType());
-        meta.setContentLength(page.getContent().length);
-        awsClient.putObject(new PutObjectRequest(BUCKET, hashUrl(url), new ByteArrayInputStream(page.getContent()), meta).withCannedAcl(CannedAccessControlList.PublicRead));
-        db.savePage(page);
-        db.sync();
-//		System.out.println(id + ": " + url + " downloaded ");
+       db.savePageLinks(pl);
+       db.sync();
     }
 
     /**
