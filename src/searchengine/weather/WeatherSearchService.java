@@ -104,8 +104,7 @@ public class WeatherSearchService {
                 infos[i] = weatherInfo;
             }
 
-
-            return null;
+            return infos;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
