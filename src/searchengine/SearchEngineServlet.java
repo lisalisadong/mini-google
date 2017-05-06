@@ -88,8 +88,8 @@ public class SearchEngineServlet extends HttpServlet {
                         "Did you mean " + "<a href=\"/search?query=" + correction + "\">" + correction + "</a>?</p>");
             } else {
                 contents = contents.replace("${correction}", "");
+                DictionaryService.put(query);
             }
-            DictionaryService.put(query);
 
             String results = "";
             for (ResultEntry entry : entries) {

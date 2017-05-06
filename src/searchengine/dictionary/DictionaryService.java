@@ -84,10 +84,6 @@ public class DictionaryService {
                 if (dist < distance) {
                     distance = dist;
                     corrWord = word;
-                } else if (dist == distance) {
-                    if (!freq.containsKey(corrWord) || freq.get(word) > freq.get(corrWord)) {
-                        corrWord = word;
-                    }
                 }
             }
             if (distance > 0) {
