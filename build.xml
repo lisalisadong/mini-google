@@ -167,7 +167,7 @@
             	<pathelement location="lib/log4j-1.2.9.jar"/>
             	
             </classpath>
-        	<arg value="${port}"/>
+        	<arg value="10000"/>
             <arg value="."/>
             <arg value="conf/crawler.xml"/>
         </java>
