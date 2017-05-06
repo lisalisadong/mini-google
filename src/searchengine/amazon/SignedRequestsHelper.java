@@ -1,24 +1,3 @@
-/**********************************************************************************************
- * Copyright 2009 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file 
- * except in compliance with the License. A copy of the License is located at
- *
- *       http://aws.amazon.com/apache2.0/
- *
- * or in the "LICENSE.txt" file accompanying this file. This file is distributed on an "AS IS"
- * BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under the License. 
- *
- * ********************************************************************************************
- *
- *  Amazon Product Advertising API
- *  Signed Requests Sample Code
- *
- *  API Version: 2009-03-31
- *
- */
-
 package searchengine.amazon;
 
 import java.io.UnsupportedEncodingException;
@@ -46,6 +25,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 
 /**
+ * Created by QingxiaoDong on 5/5/17.
  * This class contains all the logic for signing requests
  * to the Amazon Product Advertising API.
  */
