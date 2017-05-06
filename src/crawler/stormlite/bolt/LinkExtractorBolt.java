@@ -1,10 +1,27 @@
 package crawler.stormlite.bolt;
 
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.Protocol;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import crawler.Crawler;
 import crawler.storage.CrawledPage;
 import crawler.storage.DBWrapper;
@@ -22,6 +39,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -46,6 +65,11 @@ public class LinkExtractorBolt implements IRichBolt {
     Fields schema = new Fields("link");
     DBWrapper db;
     LRUCache<CrawledPage> pageCache;
+    AmazonS3 awsClient;
+    String BUCKET = "crawler-cis555-g02";
+
+    String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
+    String secretKey = "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";
 
     /**
      * To make it easier to debug: we have a unique ID for each instance of the
@@ -71,6 +95,31 @@ public class LinkExtractorBolt implements IRichBolt {
         
         db = new DBWrapper(Crawler.DBPath);
         db.setup();
+
+        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+
+        ClientConfiguration clientConfig = new ClientConfiguration();
+        clientConfig.setProtocol(Protocol.HTTP);
+
+        try {
+            awsClient = new AmazonS3Client(credentials, clientConfig);
+        } catch (Exception e) {
+
+        }
+    }
+
+    private String hashUrl(String url) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            digest.reset();
+            digest.update(url.getBytes("utf-8"));
+            return DatatypeConverter.printHexBinary(digest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -101,6 +150,10 @@ public class LinkExtractorBolt implements IRichBolt {
         }
         
 //        pageCache.put(page.getUrl(), page);
+        ObjectMetadata meta = new ObjectMetadata();
+        meta.setContentType(page.getContentType());
+        meta.setContentLength(page.getContent().length);
+        awsClient.putObject(new PutObjectRequest(BUCKET, hashUrl(url), new ByteArrayInputStream(page.getContent()), meta).withCannedAcl(CannedAccessControlList.PublicRead));
         db.savePage(page);
         db.sync();
 //		System.out.println(id + ": " + url + " downloaded ");
