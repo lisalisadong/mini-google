@@ -7,6 +7,7 @@ import java.util.ArrayList;
  * @author Qingxiao Dong
  */
 public class Trie {
+
     private TrieNode root;
 
     /**
