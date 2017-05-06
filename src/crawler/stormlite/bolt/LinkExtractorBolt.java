@@ -34,6 +34,7 @@ import crawler.stormlite.tuple.Tuple;
 import crawler.stormlite.tuple.Values;
 import crawler.utils.LRUCache;
 import crawler.utils.PageCache;
+import crawler.worker.CrawlerWorker;
 import utils.Logger;
 
 import org.jsoup.Jsoup;
@@ -102,6 +103,8 @@ public class LinkExtractorBolt implements IRichBolt {
         CrawledPage page = (CrawledPage) input.getObjectByField("page");
 //         System.out.println(id + " got " + page.getUrl());
         String url = page.getUrl();
+        
+        long start = System.currentTimeMillis();
         PageLinks pl = new PageLinks(url);
         if ("text/html".equals(page.getContentType())) {
             byte[] content = page.getContent();
@@ -120,9 +123,12 @@ public class LinkExtractorBolt implements IRichBolt {
                 }
             }
         }
+        CrawlerWorker.logTime("extract links", start);
         
-       db.savePageLinks(pl);
-       db.sync();
+        start = System.currentTimeMillis();
+        db.savePageLinks(pl);
+        db.sync();
+        CrawlerWorker.logTime("store extract links", start);
     }
 
     /**

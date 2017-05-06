@@ -62,11 +62,11 @@ public class ContentSeenBolt implements IRichBolt {
 	Fields schema = new Fields("page");
 	
 	long maxSize = Long.MAX_VALUE;
-	AmazonS3 awsClient;
-    String BUCKET = "crawler-indexer-g02";
-
-    String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
-    String secretKey = "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";
+//	AmazonS3 awsClient;
+//    String BUCKET = "crawler-indexer-g02";
+//
+//    String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
+//    String secretKey = "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";
 	
    /**
     * To make it easier to debug: we have a unique ID for each
@@ -95,31 +95,31 @@ public class ContentSeenBolt implements IRichBolt {
        this.collector = collector;
        robotManager = Crawler.getRobotManager();
        
-       AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-
-       ClientConfiguration clientConfig = new ClientConfiguration();
-       clientConfig.setProtocol(Protocol.HTTP);
-
-       try {
-           awsClient = new AmazonS3Client(credentials, clientConfig);
-       } catch (Exception e) {
-
-       }
+//       AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+//
+//       ClientConfiguration clientConfig = new ClientConfiguration();
+//       clientConfig.setProtocol(Protocol.HTTP);
+//
+//       try {
+//           awsClient = new AmazonS3Client(credentials, clientConfig);
+//       } catch (Exception e) {
+//
+//       }
    }
    
-   private String hashUrl(String url) {
-       try {
-           MessageDigest digest = MessageDigest.getInstance("MD5");
-           digest.reset();
-           digest.update(url.getBytes("utf-8"));
-           return DatatypeConverter.printHexBinary(digest.digest());
-       } catch (NoSuchAlgorithmException e) {
-           e.printStackTrace();
-       } catch (UnsupportedEncodingException e) {
-           e.printStackTrace();
-       }
-       return null;
-   }
+//   private String hashUrl(String url) {
+//       try {
+//           MessageDigest digest = MessageDigest.getInstance("MD5");
+//           digest.reset();
+//           digest.update(url.getBytes("utf-8"));
+//           return DatatypeConverter.printHexBinary(digest.digest());
+//       } catch (NoSuchAlgorithmException e) {
+//           e.printStackTrace();
+//       } catch (UnsupportedEncodingException e) {
+//           e.printStackTrace();
+//       }
+//       return null;
+//   }
 
    /**
     * Process a tuple received from the stream, incrementing our
@@ -131,7 +131,7 @@ public class ContentSeenBolt implements IRichBolt {
 	   String url = input.getStringByField("url");
 //	   System.out.println(id + " got " + url);
 	   
-	   long startReq = System.currentTimeMillis();
+	   long start = System.currentTimeMillis();
 	   /* download the page*/
 	   Client client = Client.getClient(url);
 	   client.setMethod("GET");
@@ -139,7 +139,9 @@ public class ContentSeenBolt implements IRichBolt {
 //	   /* set last access time */
 //	   robotManager.setHostLastAccessTime(url);
 	   client.sendReq();
+	   CrawlerWorker.logTime("GET " + url, start);
 	   
+	   start = System.currentTimeMillis();
 	   byte[] content = null;
 	   InputStream in = client.getInputStream();
 	   if(in == null) return;
@@ -155,8 +157,7 @@ public class ContentSeenBolt implements IRichBolt {
 	   } catch (IOException e) {
 			e.printStackTrace();
 	   }
-	   System.out.println("sent GET to " + url + ": " + (System.currentTimeMillis() - startReq) + "ms");
-	   
+	   CrawlerWorker.logTime("parse " + url, start);
 	   client.close();
 	   
 	   // TODO: 
@@ -164,28 +165,30 @@ public class ContentSeenBolt implements IRichBolt {
 	   boolean contentSeen = checkContentSeen(content);
 	   
 	   if(!contentSeen) {
-		   CrawlerWorker.workerStatus.incFileNum();
 		   
+		   start = System.currentTimeMillis();
+		   CrawlerWorker.workerStatus.incFileNum();
+		   CrawlerWorker.logTime("update status", start);
 		   CrawledPage newPage = new CrawledPage(content, url, client.getResContentType());
 //		   newPage.setLastCrawled(System.currentTimeMillis());
 		   this.collector.emit(new Values<Object>(newPage));
 		   
-		   System.out.println("start uploading to s3");
-		   /* upload to s3 */
-		   ObjectMetadata meta = new ObjectMetadata();
-		   byte[] b1 = (hashUrl(url) + "\t" + newPage.getContentType() + "\t").getBytes();
-		   byte[] b2 = newPage.getContent();
-		   byte[] bytes = new byte[b1.length + b2.length];
-		   System.arraycopy(b1, 0, bytes, 0, b1.length);
-		   System.arraycopy(b2, 0, bytes, b1.length, b2.length);
-	       meta.setContentType("text/plain");
-	       meta.setContentLength(b1.length + b2.length);
-	       ByteArrayInputStream contentToWrite = new ByteArrayInputStream(bytes);
-
-		   long start = System.currentTimeMillis();
-		   awsClient.putObject(new PutObjectRequest(BUCKET, hashUrl(url), contentToWrite, meta)
-				   .withCannedAcl(CannedAccessControlList.PublicRead));
-		   System.out.println("Finished uploading " + url + ":  " + (System.currentTimeMillis() - start) + " ms");
+//		   System.out.println("start uploading to s3");
+//		   /* upload to s3 */
+//		   ObjectMetadata meta = new ObjectMetadata();
+//		   byte[] b1 = (hashUrl(url) + "\t" + newPage.getContentType() + "\t").getBytes();
+//		   byte[] b2 = newPage.getContent();
+//		   byte[] bytes = new byte[b1.length + b2.length];
+//		   System.arraycopy(b1, 0, bytes, 0, b1.length);
+//		   System.arraycopy(b2, 0, bytes, b1.length, b2.length);
+//	       meta.setContentType("text/plain");
+//	       meta.setContentLength(b1.length + b2.length);
+//	       ByteArrayInputStream contentToWrite = new ByteArrayInputStream(bytes);
+//
+//		   long start = System.currentTimeMillis();
+//		   awsClient.putObject(new PutObjectRequest(BUCKET, hashUrl(url), contentToWrite, meta)
+//				   .withCannedAcl(CannedAccessControlList.PublicRead));
+//		   System.out.println("Finished uploading " + url + ":  " + (System.currentTimeMillis() - start) + " ms");
 	   } else {
 		   // TODO: get url via fp and increase the hit
 	   }

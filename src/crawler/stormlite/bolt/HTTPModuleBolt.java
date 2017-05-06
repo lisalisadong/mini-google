@@ -15,6 +15,7 @@ import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
 import crawler.stormlite.tuple.Values;
 import crawler.utils.LRUCache;
+import crawler.worker.CrawlerWorker;
 import utils.Logger;
 
 /**
@@ -86,7 +87,7 @@ public class HTTPModuleBolt implements IRichBolt {
 //	   robotManager.waitUntilAvailable(url);
 //	   System.out.println(id + ": finished waiting");
 	   client.sendReq();
-	   System.out.println("sent HEAD to " + url + ": " + (System.currentTimeMillis() - start) + "ms");
+	   CrawlerWorker.logTime("HEAD" + url, start);
 	   //TODO: HANDLE 3XX
 	   String contentType = client.getResContentType();
 //	   System.out.println(id + " content type: " + contentType);

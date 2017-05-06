@@ -8,24 +8,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import utils.Constants;
 
-public class IndexerMapper extends Mapper<LongWritable, BytesWritable, Text, InterValue>{
+public class IndexerMapper extends Mapper<LongWritable, Text, Text, InterValue>{
 
-	public void map(LongWritable key, BytesWritable value, Context context) throws IOException, InterruptedException {
-		// TODO: retrieve input info
-		String docID = "1";
-		String contentType = "html";
+	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+		String[] info = value.toString().split("\t", 3);
+		String docID = info[0];
+		String contentType = info[1];
 		
-		IndexerMapWorker mapWorker = new IndexerMapWorker(new ByteArrayInputStream(value.getBytes()), contentType);
+		IndexerMapWorker mapWorker = new IndexerMapWorker(new ByteArrayInputStream(info[2].getBytes()), contentType);
 		mapWorker.parse();
 		Map<String, Integer> wordFreq = mapWorker.getWordFreq();
-//		Map<String, List<Integer>> wordPos = mapWorker.getWordPos();
 		Map<String, List<Integer>> titlePos = mapWorker.getTitlePos();
 		Map<String, List<Integer>> contentPos = mapWorker.getContentPos();
 //		for (String k : wordFreq.keySet()) {

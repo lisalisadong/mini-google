@@ -32,7 +32,8 @@ public class HttpClient extends Client {
         try {
             // send request
             // System.out.println("host: " + host);
-            soc.connect(new InetSocketAddress(host, portNum), 10000);
+            soc.connect(new InetSocketAddress(host, portNum), 2000);
+            soc.setSoTimeout(2000);
             in = soc.getInputStream();
             PrintWriter out = new PrintWriter(soc.getOutputStream());
             out.print(this.toString());

@@ -30,7 +30,7 @@ public class IndexerMapWorker {
 			"so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these",
 			"they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was",
 			"wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "won't", "would", "wouldn't", "you", "you'd",
-			"you'll", "you're", "you've", "your", "yours", "yourself", "yourselves" };
+			"you'll", "you're", "you've", "your", "yours", "yourself", "yourselves", "ll", "s", "m", "ve", "d", "t" };
 	public static final Set<String> STOP_LIST = new HashSet<String>(Arrays.asList(STOP_SET_VALUES));
 
 	private String contentType;

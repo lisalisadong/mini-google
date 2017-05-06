@@ -6,27 +6,28 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-public class WholeFileRecordReader extends RecordReader<LongWritable, BytesWritable>{
+public class WholeFileRecordReader extends RecordReader<LongWritable, Text>{
 
 	private FileSplit fileSplit;
     private Configuration conf;
     private LongWritable key;
-    private BytesWritable value;
+    private Text value;
     private boolean fileProcessed = false;
     
 	@Override
 	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
 		this.fileSplit = (FileSplit) split;
 		this.conf = context.getConfiguration();
-		this.value = new BytesWritable();
+		this.key = new LongWritable();
+		this.value = new Text();
 	}
 
 	@Override
@@ -35,7 +36,7 @@ public class WholeFileRecordReader extends RecordReader<LongWritable, BytesWrita
 	}
 
 	@Override
-	public BytesWritable getCurrentValue() throws IOException, InterruptedException {
+	public Text getCurrentValue() throws IOException, InterruptedException {
 		return value;
 	}
 
