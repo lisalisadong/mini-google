@@ -147,6 +147,7 @@
     </target>
 	
 	<target name="crawler-master" depends="compile-crawler" description="Run crawler master">
+		<property name="port" value="8080" />
         <java classname="edu.upenn.cis455.webserver.HttpServer">
             <classpath>
                 <fileset dir="./lib">
@@ -166,7 +167,7 @@
             	<pathelement location="lib/log4j-1.2.9.jar"/>
             	
             </classpath>
-            <arg value="8080"/>
+        	<arg value="10000"/>
             <arg value="."/>
             <arg value="conf/crawler.xml"/>
         </java>

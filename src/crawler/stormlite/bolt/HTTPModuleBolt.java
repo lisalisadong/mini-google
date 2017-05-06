@@ -75,6 +75,7 @@ public class HTTPModuleBolt implements IRichBolt {
 	   String url = input.getStringByField("url");
 //	   System.out.println(id + " got " + url);
 	 
+	   long start = System.currentTimeMillis();
 	   Client client = Client.getClient(url);
 	   if(client == null) {
 		   return;
@@ -85,7 +86,7 @@ public class HTTPModuleBolt implements IRichBolt {
 //	   robotManager.waitUntilAvailable(url);
 //	   System.out.println(id + ": finished waiting");
 	   client.sendReq();
-	   
+	   System.out.println("sent HEAD to " + url + ": " + (System.currentTimeMillis() - start) + "ms");
 	   //TODO: HANDLE 3XX
 	   String contentType = client.getResContentType();
 //	   System.out.println(id + " content type: " + contentType);
@@ -100,6 +101,8 @@ public class HTTPModuleBolt implements IRichBolt {
 	   if(client.getStatusCode() == 200 && validContentType) {
 		   collector.emit(new Values<Object>(url));
 	   }
+	   
+	   
    }
 
    /**

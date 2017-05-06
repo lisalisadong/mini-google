@@ -1,10 +1,26 @@
 package crawler.stormlite.bolt;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.xml.bind.DatatypeConverter;
+
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.Protocol;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 
 import crawler.Crawler;
 import crawler.utils.LRUCache;
@@ -46,6 +62,11 @@ public class ContentSeenBolt implements IRichBolt {
 	Fields schema = new Fields("page");
 	
 	long maxSize = Long.MAX_VALUE;
+	AmazonS3 awsClient;
+    String BUCKET = "crawler-indexer-g02";
+
+    String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
+    String secretKey = "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";
 	
    /**
     * To make it easier to debug: we have a unique ID for each
@@ -74,6 +95,30 @@ public class ContentSeenBolt implements IRichBolt {
        this.collector = collector;
        robotManager = Crawler.getRobotManager();
        
+       AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+
+       ClientConfiguration clientConfig = new ClientConfiguration();
+       clientConfig.setProtocol(Protocol.HTTP);
+
+       try {
+           awsClient = new AmazonS3Client(credentials, clientConfig);
+       } catch (Exception e) {
+
+       }
+   }
+   
+   private String hashUrl(String url) {
+       try {
+           MessageDigest digest = MessageDigest.getInstance("MD5");
+           digest.reset();
+           digest.update(url.getBytes("utf-8"));
+           return DatatypeConverter.printHexBinary(digest.digest());
+       } catch (NoSuchAlgorithmException e) {
+           e.printStackTrace();
+       } catch (UnsupportedEncodingException e) {
+           e.printStackTrace();
+       }
+       return null;
    }
 
    /**
@@ -86,6 +131,7 @@ public class ContentSeenBolt implements IRichBolt {
 	   String url = input.getStringByField("url");
 //	   System.out.println(id + " got " + url);
 	   
+	   long startReq = System.currentTimeMillis();
 	   /* download the page*/
 	   Client client = Client.getClient(url);
 	   client.setMethod("GET");
@@ -109,7 +155,7 @@ public class ContentSeenBolt implements IRichBolt {
 	   } catch (IOException e) {
 			e.printStackTrace();
 	   }
-	   
+	   System.out.println("sent GET to " + url + ": " + (System.currentTimeMillis() - startReq) + "ms");
 	   
 	   client.close();
 	   
@@ -118,13 +164,28 @@ public class ContentSeenBolt implements IRichBolt {
 	   boolean contentSeen = checkContentSeen(content);
 	   
 	   if(!contentSeen) {
-//		   System.out.println(id + " emit " + url);
-		   
 		   CrawlerWorker.workerStatus.incFileNum();
 		   
 		   CrawledPage newPage = new CrawledPage(content, url, client.getResContentType());
 //		   newPage.setLastCrawled(System.currentTimeMillis());
 		   this.collector.emit(new Values<Object>(newPage));
+		   
+//		   System.out.println("start uploading to s3");
+//		   /* upload to s3 */
+//		   ObjectMetadata meta = new ObjectMetadata();
+//		   byte[] b1 = (hashUrl(url) + "\t" + newPage.getContentType() + "\t").getBytes();
+//		   byte[] b2 = newPage.getContent();
+//		   byte[] bytes = new byte[b1.length + b2.length];
+//		   System.arraycopy(b1, 0, bytes, 0, b1.length);
+//		   System.arraycopy(b2, 0, bytes, b1.length, b2.length);
+//	       meta.setContentType("text/plain");
+//	       meta.setContentLength(b1.length + b2.length);
+//	       ByteArrayInputStream contentToWrite = new ByteArrayInputStream(bytes);
+//
+//		   long start = System.currentTimeMillis();
+//		   awsClient.putObject(new PutObjectRequest(BUCKET, hashUrl(url), contentToWrite, meta)
+//				   .withCannedAcl(CannedAccessControlList.PublicRead));
+//		   System.out.println("Finished uploading " + url + ":  " + (System.currentTimeMillis() - start) + " ms");
 	   } else {
 		   // TODO: get url via fp and increase the hit
 	   }
