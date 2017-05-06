@@ -170,22 +170,22 @@ public class ContentSeenBolt implements IRichBolt {
 //		   newPage.setLastCrawled(System.currentTimeMillis());
 		   this.collector.emit(new Values<Object>(newPage));
 		   
-		   System.out.println("start uploading to s3");
-		   /* upload to s3 */
-		   ObjectMetadata meta = new ObjectMetadata();
-		   byte[] b1 = (hashUrl(url) + "\t" + newPage.getContentType() + "\t").getBytes();
-		   byte[] b2 = newPage.getContent();
-		   byte[] bytes = new byte[b1.length + b2.length];
-		   System.arraycopy(b1, 0, bytes, 0, b1.length);
-		   System.arraycopy(b2, 0, bytes, b1.length, b2.length);
-	       meta.setContentType("text/plain");
-	       meta.setContentLength(b1.length + b2.length);
-	       ByteArrayInputStream contentToWrite = new ByteArrayInputStream(bytes);
-
-		   long start = System.currentTimeMillis();
-		   awsClient.putObject(new PutObjectRequest(BUCKET, hashUrl(url), contentToWrite, meta)
-				   .withCannedAcl(CannedAccessControlList.PublicRead));
-		   System.out.println("Finished uploading " + url + ":  " + (System.currentTimeMillis() - start) + " ms");
+//		   System.out.println("start uploading to s3");
+//		   /* upload to s3 */
+//		   ObjectMetadata meta = new ObjectMetadata();
+//		   byte[] b1 = (hashUrl(url) + "\t" + newPage.getContentType() + "\t").getBytes();
+//		   byte[] b2 = newPage.getContent();
+//		   byte[] bytes = new byte[b1.length + b2.length];
+//		   System.arraycopy(b1, 0, bytes, 0, b1.length);
+//		   System.arraycopy(b2, 0, bytes, b1.length, b2.length);
+//	       meta.setContentType("text/plain");
+//	       meta.setContentLength(b1.length + b2.length);
+//	       ByteArrayInputStream contentToWrite = new ByteArrayInputStream(bytes);
+//
+//		   long start = System.currentTimeMillis();
+//		   awsClient.putObject(new PutObjectRequest(BUCKET, hashUrl(url), contentToWrite, meta)
+//				   .withCannedAcl(CannedAccessControlList.PublicRead));
+//		   System.out.println("Finished uploading " + url + ":  " + (System.currentTimeMillis() - start) + " ms");
 	   } else {
 		   // TODO: get url via fp and increase the hit
 	   }
