@@ -1,6 +1,7 @@
 package searchengine;
 
 import edu.upenn.cis455.webserver.HttpEnum;
+import searchengine.dictionary.DictionaryService;
 import utils.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -35,10 +36,6 @@ public class SearchEngineServlet extends HttpServlet {
         case "/search":
             handleSearch(request, response);
             break;
-        case "/result":
-            contents = new String(Files.readAllBytes(Paths.get("resources/sites/result.html")));
-            writer.println(contents);
-            break;
         case "/scripts":
             try {
                 contents = new String(Files.readAllBytes(Paths.get("resources/scripts" + request.getPathInfo())));
@@ -72,7 +69,9 @@ public class SearchEngineServlet extends HttpServlet {
             if (page != null) {
                 p = Integer.parseInt(page) - 1;
             }
+            query = query.trim().toLowerCase();
             logger.warn("The query is {}", query);
+            DictionaryService.put(query);
             int numResults = SearchEngineService.preSearch(query);
             ResultEntry[] entries = SearchEngineService.search(query, p * 10, 10);
             double seconds = 1.0 * (System.nanoTime() - time) / 1000000000;

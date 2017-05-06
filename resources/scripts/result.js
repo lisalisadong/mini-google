@@ -9,11 +9,6 @@ handleChange(e) {
     this.setState({value: e.target.value});
 }
 
-getRawMarkup() {
-    var md = new Remarkable();
-    return { __html: md.render(this.state.value) };
-}
-
 render() {
     return (
         <div className="ui grid">
@@ -35,7 +30,6 @@ render() {
                         </div>
                     </form>
                 </div>
-                <div dangerouslySetInnerHTML={this.getRawMarkup()} />
                 <div className="six wide column"></div>
             </div>
             <div className="ui divider"></div>
@@ -48,30 +42,24 @@ ReactDOM.render(<MarkdownEditor />, document.getElementById('root'));
 
 $('.ui.search')
   .search({
-    type          : 'category',
     apiSettings: {
       onResponse: function(githubResponse) {
               var
                 response = {
-                  results : {}
+                  results : []
                 }
               ;
-              response.results["Github"] = {
-                name    : "Github",
-                results : []
-              };
               // translate GitHub API response to work with search
-              $.each(githubResponse.items, function(index, item) {
+              $.each(githubResponse.predictions, function(index, item) {
                 // add result to category
-                response.results["Github"].results.push({
-                  title       : item.name,
-                  description : item.description,
-                  url         : item.html_url
+                response.results.push({
+                  description : item,
+                  url         : '/search?query=' + item
                 });
               });
               return response;
             },
-            url: '//api.github.com/search/repositories?q={query}'
+            url: '/api/predict?q={query}'
     },
     minCharacters : 3
   })

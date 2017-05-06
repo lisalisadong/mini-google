@@ -69,6 +69,7 @@
                 <fileset dir="${inputlib.dir}">
                     <include name="*.jar"/>
                 </fileset>
+                <pathelement location="lib/json-simple-1.1.1.jar"/>
             </classpath>
         </javac>
     </target>
@@ -109,6 +110,11 @@
     </target>
 
     <target name="build" depends="compile-utils,compile-page-rank, compile-search-engine, compile-indexer, compile-crawler, compile-tests">
+        <copy todir="${web-inf.lib.dir}" overwrite="true">
+            <fileset dir="${inputlib.dir}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
     </target>
 	
 	<target name="war-master" depends="compile-crawler">
@@ -138,6 +144,7 @@
                 <pathelement location="lib/webserver.jar"/>
                 <pathelement location="lib/servlet-api.jar"/>
                 <pathelement location="lib/je-6.2.31.jar"/>
+                <pathelement location="lib/json-simple-1.1.1.jar"/>
                 <pathelement location="${classes.dir}"/>
             </classpath>
             <arg value="8080"/>
@@ -157,7 +164,7 @@
                 <pathelement location="lib/servlet-api.jar"/>
                 <pathelement location="lib/je-6.2.31.jar"/>
                 <pathelement location="${classes.dir}"/>
-            	
+            	<pathelement location="lib/json-simple-1.1.1.jar"/>
             	<pathelement location="lib/jackson-annotations-2.9.0-20161011.053116-27.jar"/>
             	<pathelement location="lib/jackson-core-2.9.0-20160930.222323-13.jar"/>
         		<pathelement location="lib/jackson-core-asl-1.9.13.jar"/>

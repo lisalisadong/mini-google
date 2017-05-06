@@ -8,6 +8,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by QingxiaoDong on 5/6/17.
@@ -32,12 +33,14 @@ public class DictionaryService {
                 freq.put(line, Integer.parseInt(reader.readLine()));
             }
             new File(backup).createNewFile();
+            reader.close();
             reader = new BufferedReader(new FileReader(backup));
             while ((line = reader.readLine()) != null) {
                 String word = line.trim().toLowerCase();
                 trie.insert(word);
                 freq.put(word, 0);
             }
+            reader.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -59,13 +62,36 @@ public class DictionaryService {
     }
 
     /**
+     * Write cache to file.
+     * @param cache cache file
+     */
+    public static void destroy(String cache) {
+        try {
+            new File(cache).createNewFile();
+            PrintWriter writer = new PrintWriter(new FileWriter(cache));
+            for (Map.Entry<String, Integer> entry : freq.entrySet()) {
+                if (entry.getValue() > 0) {
+                    writer.println(entry.getKey());
+                    writer.println(entry.getValue());
+                }
+            }
+            writer.flush();
+            writer.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Search a query string and get top ten matches in a JSON format.
      * @param query query string
      * @return top ten matches in a JSON format
      */
     public static String search(String query) {
         ArrayList<String> predictions = trie.getWordsStartsWith(query, 1000);
-        if (predictions.size() < 10) {
+        if (predictions.size() < 20) {
             int i = query.lastIndexOf(" ");
             if (i != -1) {
                 String lastWord = query.substring(i + 1);
@@ -91,9 +117,14 @@ public class DictionaryService {
         });
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("predictions", new JSONArray());
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20 && i < predictions.size(); i++) {
             ((JSONArray) jsonObject.get("predictions")).add(predictions.get(i));
         }
         return jsonObject.toJSONString();
+    }
+
+    public static void main(String[] args) {
+        DictionaryService.init("queries", "words.txt");
+        System.out.println(DictionaryService.search("prio"));
     }
 }
