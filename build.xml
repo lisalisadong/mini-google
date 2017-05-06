@@ -149,6 +149,9 @@
 	<target name="crawler-master" depends="compile-crawler" description="Run crawler master">
         <java classname="edu.upenn.cis455.webserver.HttpServer">
             <classpath>
+                <fileset dir="./lib">
+                    <include name="*.jar"/>
+                </fileset>
                 <pathelement location="lib/webserver.jar"/>
                 <pathelement location="lib/servlet-api.jar"/>
                 <pathelement location="lib/je-6.2.31.jar"/>
@@ -176,6 +179,9 @@
 		<property name="id" value="0" />
         <java classname="crawler.worker.CrawlerWorker">
             <classpath>
+                <fileset dir="./lib">
+                    <include name="*.jar"/>
+                </fileset>
                 <pathelement location="lib/webserver.jar"/>
                 <pathelement location="lib/servlet-api.jar"/>
             	<pathelement location="lib/servlet-api-3.1.jar"/>
