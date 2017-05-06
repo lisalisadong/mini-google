@@ -102,7 +102,7 @@ public class CrawlerMasterServlet extends HttpServlet {
 	  }
 	  
       isCrawling = !isCrawling;
-      res.sendRedirect("status");
+      res.sendRedirect("/");
   }
   
   private void sendStopJob(Config config, ObjectMapper mapper,

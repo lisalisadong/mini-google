@@ -1,13 +1,31 @@
 package crawler.stormlite.bolt;
 
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.Protocol;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import crawler.Crawler;
 import crawler.storage.CrawledPage;
 import crawler.storage.DBWrapper;
+import crawler.storage.PageLinks;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.routers.StreamRouter;
@@ -22,6 +40,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -82,11 +102,12 @@ public class LinkExtractorBolt implements IRichBolt {
         CrawledPage page = (CrawledPage) input.getObjectByField("page");
 //         System.out.println(id + " got " + page.getUrl());
         String url = page.getUrl();
+        PageLinks pl = new PageLinks(url);
         if ("text/html".equals(page.getContentType())) {
             byte[] content = page.getContent();
             Document doc = Jsoup.parse(new String(content), url);
             Elements links = doc.select("a[href]");
-
+            if(links.size() == 0) return;
             for (Element link : links) {
                 String l = link.attr("abs:href");
                 
@@ -94,16 +115,14 @@ public class LinkExtractorBolt implements IRichBolt {
                 	if (l == null || l.length() == 0)
                         continue;
                     // System.out.println(id + " emit " + l);
-                	page.addLink(l);
+                	pl.addLink(l);
                     this.collector.emit(new Values<Object>(l));
                 }
             }
         }
         
-//        pageCache.put(page.getUrl(), page);
-        db.savePage(page);
-        db.sync();
-//		System.out.println(id + ": " + url + " downloaded ");
+       db.savePageLinks(pl);
+       db.sync();
     }
 
     /**

@@ -1,3 +1,5 @@
+.ec2/
+apache-ant-1.10.1-bin.tar.gz
 .idea
 bin
 target
