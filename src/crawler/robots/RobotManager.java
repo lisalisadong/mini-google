@@ -76,8 +76,7 @@ public class RobotManager {
 		noCrawlHosts.add("bleacherreport.com");
 		noCrawlHosts.add("artgoldhammer.blogspot.com:80");
 		noCrawlHosts.add("ac360.blogs.cnn.com");
-		
-		
+		noCrawlHosts.add("www.dreamwidth.org");
 	}
 	
 	private String getHostName(String url) {
