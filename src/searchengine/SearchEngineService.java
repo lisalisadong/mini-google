@@ -5,6 +5,7 @@ import indexer.DB.Word;
 import utils.Logger;
 import utils.Stemmer;
 
+import java.io.*;
 import java.util.*;
 
 import static indexer.DB.DBWrapper.INDEXER_DB_DIR;
@@ -21,6 +22,13 @@ public class SearchEngineService {
     private static LRUCache<ResultEntry[][]> cache = new LRUCache<>(100); // LRU with 100 cached queries
 
     private static final DBWrapper INDEXER = new DBWrapper(INDEXER_DB_DIR);
+
+    private static Map<String, Double> pageRank = new HashMap<>();
+
+
+    public static void init(String pageRankFile) {
+        loadPageRank(pageRankFile);
+    }
 
     /**
      * Returns the number of results that are expected.
@@ -202,7 +210,11 @@ public class SearchEngineService {
         // TODO: query page rank database
         String documentId = entry.documentId;
         // fake data!!!
-        entry.pageRank = 1.0 * new Random().nextInt(10000) / 1000;
+        if (pageRank.containsKey(documentId)) {
+            entry.pageRank = pageRank.get(documentId);
+        } else {
+            entry.pageRank = 6;
+        }
     }
 
     /**
@@ -307,5 +319,27 @@ public class SearchEngineService {
             if (entries[i] == null) return false;
         }
         return true;
+    }
+
+    /**
+     * Load page rank.
+     * @param filename
+     */
+    private static void loadPageRank(String filename) {
+        String line;
+        try {
+            log.warn("filename is " + filename);
+            new File(filename).createNewFile();
+            BufferedReader reader = new BufferedReader(new FileReader(filename));
+            while ((line = reader.readLine()) != null) {
+                String[] toks = line.split("\t");
+                pageRank.put(toks[0], Double.parseDouble(toks[1]));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

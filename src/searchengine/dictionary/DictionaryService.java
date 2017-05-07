@@ -9,6 +9,7 @@ import java.io.*;
 import java.util.*;
 
 import static indexer.DB.DBWrapper.INDEXER_DB_DIR;
+import static indexer.IndexerMapWorker.STOP_SET_VALUES;
 
 /**
  * Created by QingxiaoDong on 5/6/17.
@@ -43,6 +44,10 @@ public class DictionaryService {
 //                freq.put(word, 0);
 //            }
             for (String word : words) {
+                trie.insert(word);
+                freq.put(word, 0);
+            }
+            for (String word : STOP_SET_VALUES) {
                 trie.insert(word);
                 freq.put(word, 0);
             }

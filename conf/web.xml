@@ -10,20 +10,24 @@
  <servlet>
   <servlet-name>search-engine</servlet-name>
   <servlet-class>searchengine.SearchEngineServlet</servlet-class>
+  <init-param>
+   <param-name>page_rank_dat</param-name>
+   <param-value>page_rank_dat</param-value>
+  </init-param>
  </servlet>
 
  <servlet>
-  <servlet-name>api-engine</servlet-name>
-  <servlet-class>searchengine.APIServlet</servlet-class>
-  <init-param>
-   <param-name>query-cache</param-name>
-   <param-value>queries</param-value>
-  </init-param>
-  <init-param>
-   <param-name>backup-dict</param-name>
-   <param-value>words.txt</param-value>
-  </init-param>
- </servlet>
+ <servlet-name>api-engine</servlet-name>
+ <servlet-class>searchengine.APIServlet</servlet-class>
+ <init-param>
+  <param-name>query-cache</param-name>
+  <param-value>queries</param-value>
+ </init-param>
+ <init-param>
+  <param-name>backup-dict</param-name>
+  <param-value>words.txt</param-value>
+ </init-param>
+</servlet>
 
  <servlet-mapping>
   <servlet-name>api-engine</servlet-name>
