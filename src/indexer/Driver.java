@@ -18,11 +18,11 @@ public class Driver {
 		
 		Job job = new Job();
 		job.setJarByClass(Driver.class);
-		job.getConfiguration().set("fs.s3n.awsAccessKeyId", "AKIAJBEVSUPUI2OHEX6Q");
-        job.getConfiguration().set("fs.s3n.awsSecretAccessKey","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");
-        job.getConfiguration().set("fs.defaultFS","s3n://crawler-indexer-g02/");
-        System.setProperty("com.amazonaws.services.s3.enableV4", "true");
-        job.getConfiguration().set("com.amazonaws.services.s3.enableV4", "true");
+//		job.getConfiguration().set("fs.s3n.awsAccessKeyId", "AKIAJBEVSUPUI2OHEX6Q");
+//        job.getConfiguration().set("fs.s3n.awsSecretAccessKey","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");
+//        job.getConfiguration().set("fs.defaultFS","s3n://crawler-indexer-g02/");
+//        System.setProperty("com.amazonaws.services.s3.enableV4", "true");
+//        job.getConfiguration().set("com.amazonaws.services.s3.enableV4", "true");
 
 		FileInputFormat.addInputPath(job, new Path(inputPath));
 		FileOutputFormat.setOutputPath(job, new Path(outputPath));
