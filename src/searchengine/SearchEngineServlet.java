@@ -1,6 +1,7 @@
 package searchengine;
 
 import edu.upenn.cis455.webserver.HttpEnum;
+import searchengine.dictionary.DictionaryService;
 import utils.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -35,10 +36,6 @@ public class SearchEngineServlet extends HttpServlet {
         case "/search":
             handleSearch(request, response);
             break;
-        case "/result":
-            contents = new String(Files.readAllBytes(Paths.get("resources/sites/result.html")));
-            writer.println(contents);
-            break;
         case "/scripts":
             try {
                 contents = new String(Files.readAllBytes(Paths.get("resources/scripts" + request.getPathInfo())));
@@ -72,13 +69,28 @@ public class SearchEngineServlet extends HttpServlet {
             if (page != null) {
                 p = Integer.parseInt(page) - 1;
             }
+            query = query.trim().toLowerCase();
             logger.warn("The query is {}", query);
             int numResults = SearchEngineService.preSearch(query);
             ResultEntry[] entries = SearchEngineService.search(query, p * 10, 10);
             double seconds = 1.0 * (System.nanoTime() - time) / 1000000000;
             String contents = new String(Files.readAllBytes(Paths.get("resources/sites/result.html")));
+
+            // num results in num seconds
             contents = contents.replace("${num-results}", NumberFormat.getNumberInstance(Locale.US).format(numResults));
             contents = contents.replace("${num-seconds}", String.format("%.6f", seconds));
+
+            // correction
+            String correction;
+            if ((correction = DictionaryService.correct(query)) != null) {
+                contents = contents.replace("${correction}",
+                        "<p style=\"font-weight:bold;color:grey;font-family:Cochin;font-size:20px\">" +
+                        "Did you mean " + "<a href=\"/search?query=" + correction + "\">" + correction + "</a>?</p>");
+            } else {
+                contents = contents.replace("${correction}", "");
+                DictionaryService.put(query);
+            }
+
             String results = "";
             for (ResultEntry entry : entries) {
                 results += resultToHtml(entry);

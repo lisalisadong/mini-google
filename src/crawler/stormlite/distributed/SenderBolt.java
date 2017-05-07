@@ -18,6 +18,7 @@ import crawler.stormlite.bolt.OutputCollector;
 import crawler.stormlite.routers.StreamRouter;
 import crawler.stormlite.tuple.Fields;
 import crawler.stormlite.tuple.Tuple;
+import crawler.worker.CrawlerWorker;
 import utils.Logger;
 
 /**
@@ -93,8 +94,9 @@ public class SenderBolt implements IRichBolt {
     	isEndOfStream = tuple.isEndOfStream();
     	
 		log.debug("Sender is routing " + tuple.toString() + " to " + address + "/" + stream);
-//		System.out.println("Sender is routing " + tuple.toString() + " to " + address + "/" + stream);
+		System.out.println("Sender is routing " + tuple.toString() + " to " + address + "/" + stream);
 		
+		long start = System.currentTimeMillis();
 		// TODO: send this to /pushdata/{stream} as a POST!
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		conn.setRequestProperty("Content-Type", "application/json");
@@ -107,7 +109,7 @@ public class SenderBolt implements IRichBolt {
 		os.flush();
 		conn.getResponseCode();
 		conn.disconnect();
-		
+		CrawlerWorker.logTime("sent to " + address, start);
     }
 
     /**

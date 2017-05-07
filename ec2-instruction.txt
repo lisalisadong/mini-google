@@ -14,7 +14,7 @@ scp -i /pathTo/crawler-keys.pem -r Users/xiaofandou/Desktop/CIS555/SharedFolder/
 sudo yum update
 sudo yum remove java
 sudo yum install java-1.8.0
-sudo yum install java-1.8.0-openjdk
+sudo yum install java-1.8.0-openjdk-devel
 
 ===================================================install ant======================================================
 scp ant-1.10 package to ec2

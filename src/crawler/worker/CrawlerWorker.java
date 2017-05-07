@@ -225,7 +225,10 @@ public class CrawlerWorker extends WorkerServer {
 		}
 		return sb.toString();
 	}
-	
+    
+    public static void logTime(String job, long start) {
+    	System.out.println("[" + job + "]: " + (System.currentTimeMillis() - start));
+    }
 	
 	
 }

@@ -12,6 +12,24 @@
   <servlet-class>searchengine.SearchEngineServlet</servlet-class>
  </servlet>
 
+ <servlet>
+  <servlet-name>api-engine</servlet-name>
+  <servlet-class>searchengine.APIServlet</servlet-class>
+  <init-param>
+   <param-name>query-cache</param-name>
+   <param-value>queries</param-value>
+  </init-param>
+  <init-param>
+   <param-name>backup-dict</param-name>
+   <param-value>words.txt</param-value>
+  </init-param>
+ </servlet>
+
+ <servlet-mapping>
+  <servlet-name>api-engine</servlet-name>
+  <url-pattern>/api*</url-pattern>
+ </servlet-mapping>
+
  <servlet-mapping>
   <servlet-name>search-engine</servlet-name>
   <url-pattern>/</url-pattern>
@@ -30,11 +48,6 @@
  <servlet-mapping>
   <servlet-name>search-engine</servlet-name>
   <url-pattern>/images*</url-pattern>
- </servlet-mapping>
-
- <servlet-mapping>
-  <servlet-name>search-engine</servlet-name>
-  <url-pattern>/result</url-pattern>
  </servlet-mapping>
 
 </web-app>
