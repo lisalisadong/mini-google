@@ -13,21 +13,23 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 
-public class CFRecordReader extends RecordReader<Text, Text> {
+public class CFRecordReader extends RecordReader<Key, Text> {
 
 	private int index;
 	private CombineFileSplit split;
 	private Configuration conf;
-	private Text key;
+	private Key key;
     private Text value;
     private boolean fileProcessed = false;
+    private String fileName;
 
 	public CFRecordReader(CombineFileSplit split, TaskAttemptContext context, Integer index) throws IOException {
 		this.index = index;
 		this.split = split;
 		this.conf = context.getConfiguration();
-		String fileName = this.split.getPath(index).getName();
-        this.key = new Text(fileName);
+		this.fileName = split.getLength() == 0 ? "" : this.split.getPath(index).getName();
+//		String fileName = this.split.getPath(index).getName();
+        this.key = new Key();
         this.value = new Text();
 	}
 
@@ -35,7 +37,7 @@ public class CFRecordReader extends RecordReader<Text, Text> {
 	public void close() throws IOException { }
 
 	@Override
-	public Text getCurrentKey() throws IOException, InterruptedException {
+	public Key getCurrentKey() throws IOException, InterruptedException {
 		return key;
 	}
 
@@ -58,6 +60,10 @@ public class CFRecordReader extends RecordReader<Text, Text> {
 		if (fileProcessed) {
             return false;
         }
+		if (split.getLength() == 0) {
+			fileProcessed = true;
+			return false;
+		}
 		int length = (int) split.getLength(index);
 		byte[] contents = new byte[length];
 		Path path = split.getPath(index);

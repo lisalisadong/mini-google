@@ -3,7 +3,7 @@ package utils;
 public class Constants {
 
 	//TODO:
-	public static final int TOTAL_DOC_NUM = 1500;
+	public static final int TOTAL_DOC_NUM = 84390;
 	public static final double TF_FACTOR = 0.5;
 
 }
