@@ -19,6 +19,7 @@ public class IndexerReducer extends Reducer<Text, InterValue, Text, OutputValue>
 		}
 		int count = valueList.size();
 		double idf = Math.log((double) Constants.TOTAL_DOC_NUM / count);
+		System.out.println("========word: " + key + " idf: " + idf);
 		
 		for (InterValue value : valueList) {
 //			System.out.println("word:" + key + "docID: " + value.getDocID());
