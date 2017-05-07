@@ -54,10 +54,14 @@ public class IndexerMapWorker {
 	public void parse() throws IOException {
 		String content;
 		switch (contentType) {
-		case "html":
-			Document doc = Jsoup.parse(in, Charset.defaultCharset().name(), "");
-			parseElement(doc.title(), true);
-			parseElement(doc.body().text(), false);
+		case "text/html":
+			try {
+				Document doc = Jsoup.parse(in, Charset.defaultCharset().name(), "");
+				parseElement(doc.title(), true);
+				parseElement(doc.body().text(), false);
+			} catch (Exception e) {
+				
+			}
 			break;
 		case "pdf":
 			PDDocument pdoc = PDDocument.load(in);

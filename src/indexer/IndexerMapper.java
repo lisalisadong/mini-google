@@ -14,11 +14,12 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import utils.Constants;
 
-public class IndexerMapper extends Mapper<LongWritable, Text, Text, InterValue>{
+public class IndexerMapper extends Mapper<Text, Text, Text, InterValue>{
 
-	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+	public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
 		String[] info = value.toString().split("\t", 3);
-		String docID = info[0];
+		String docID = key.toString();
+		String url = info[0];
 		String contentType = info[1];
 		
 		IndexerMapWorker mapWorker = new IndexerMapWorker(new ByteArrayInputStream(info[2].getBytes()), contentType);

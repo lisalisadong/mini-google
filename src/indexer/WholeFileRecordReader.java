@@ -14,11 +14,11 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-public class WholeFileRecordReader extends RecordReader<LongWritable, Text>{
+public class WholeFileRecordReader extends RecordReader<Text, Text>{
 
 	private FileSplit fileSplit;
     private Configuration conf;
-    private LongWritable key;
+    private Text key;
     private Text value;
     private boolean fileProcessed = false;
     
@@ -26,12 +26,13 @@ public class WholeFileRecordReader extends RecordReader<LongWritable, Text>{
 	public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
 		this.fileSplit = (FileSplit) split;
 		this.conf = context.getConfiguration();
-		this.key = new LongWritable();
+		String fileName = this.fileSplit.getPath().getName();
+        this.key = new Text(fileName);
 		this.value = new Text();
 	}
 
 	@Override
-	public LongWritable getCurrentKey() throws IOException, InterruptedException {
+	public Text getCurrentKey() throws IOException, InterruptedException {
 		return key;
 	}
 
