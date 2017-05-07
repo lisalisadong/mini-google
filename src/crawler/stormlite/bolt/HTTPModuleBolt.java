@@ -44,11 +44,15 @@ public class HTTPModuleBolt implements IRichBolt {
 	
 	static Logger logger = new Logger(HTTPModuleBolt.class.getName());
 	
-//	static String FILE_NAME = "../timekilling"
-	
 	Fields schema = new Fields("page");
 	
 	DBWrapper db;
+	
+//	AmazonS3 awsClient;
+//	  String BUCKET = "crawler-indexer-g02";
+//	
+//	  String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
+//	  String secretKey = "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";
 	
    /**
     * To make it easier to debug: we have a unique ID for each

@@ -144,9 +144,12 @@ public class CrawlerWorker extends WorkerServer {
 		db = new DBWrapper(Crawler.DBPath + WORKER_ID);
 		db.setup();
 		
-		workerStatus = db.getWorkerStatus(STATUS_ID);
-		if(workerStatus == null) {
-			workerStatus = new WorkerStatus(STATUS_ID);
+		int num = db.pIdx.map().size();
+		workerStatus = new WorkerStatus(STATUS_ID);
+		workerStatus.crawledFileNum = num;
+		
+//		workerStatus = db.getWorkerStatus(STATUS_ID);
+		if(num == 0) {
 			System.out.println("[status] new status");
 		} else {
 			System.out.println("[status] Pages crawled previously: " + workerStatus.getCrawledFileNum());
