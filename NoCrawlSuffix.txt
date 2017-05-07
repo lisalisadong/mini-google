@@ -8,3 +8,4 @@
 .hk
 .cn
 .ru
+./robots.txt
