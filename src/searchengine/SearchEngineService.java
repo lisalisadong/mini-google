@@ -112,8 +112,10 @@ public class SearchEngineService {
     private static ResultEntry[] getAllEntries(Map<String, Integer> words) {
         HashSet<String> documentIds = new HashSet<>();
         for (String word : words.keySet()) {
+            log.warn("!!!!!!!!!");
             // get all document ids related to the queried words
             ArrayList<String> ids = queryInvertedIndex(word);
+            log.warn("num documents " + ids.size());
             documentIds.addAll(ids);
         }
         ResultEntry[] entries = new ResultEntry[documentIds.size()];
@@ -151,11 +153,10 @@ public class SearchEngineService {
     private static ArrayList<String> queryInvertedIndex(String word) {
         // DONE: query inverted index database
         Word w = INDEXER.getWord(word);
+        log.warn("Num docs in DB " + w.getDocs().size());
         ArrayList<String> res = new ArrayList<>();
         if (w != null) {
-            for (String id : w.getDocs()) {
-                res.add(id);
-            }
+            res.addAll(w.getDocs());
         }
         return res;
     }
@@ -202,9 +203,10 @@ public class SearchEngineService {
     private static void queryDocumentDetail(ResultEntry entry) {
         // TODO: query database: get details about a document by documentID
         // fake data!!!
-        entry.title = entry.documentId;
-        entry.location = "https://this/is/a/fake/location";
-        entry.digest = "This is a fake digest. The page rank is [" + entry.pageRank + "]. " +
+        String[] info = INDEXER.getDocInfo(entry.documentId);
+        entry.title = info[1];
+        entry.location = info[0];
+        entry.digest = info[2] + " This is a fake digest. The page rank is [" + entry.pageRank + "]. " +
                 "The TF-IDF score is [" + entry.tfidf + "]. " +
                 "The total score is [" + entry.score + "].";
     }
