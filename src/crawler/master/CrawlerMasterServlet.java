@@ -253,13 +253,20 @@ public class CrawlerMasterServlet extends HttpServlet {
 	  out.print(begin);
 	  
 	  out.print(tableBegin);
+	  
+	  long totalFileNum = 0;
 	  //show status for each active worker
 	  for(String worker: workerStatus.keySet()) {
 		  if(isActive(worker)) {
+			  
+			  totalFileNum += workerStatus.get(worker).getCrawledFileNum();
+			  
 			  String row = getRow(workerStatus.get(worker));
 			  out.print(row);
 		  }
 	  }
+	  out.print("<tr><td> Total </td><td>" + totalFileNum + "</td></tr>");
+	  
 //	  WorkerStatus stat = new WorkerStatus();
 //	  stat.setParams("0.0.0.0", 8000, "idle", "job", 100, 100, "nothing");
 //	  out.print(getRow(stat));

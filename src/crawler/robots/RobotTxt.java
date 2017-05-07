@@ -138,16 +138,6 @@ public class RobotTxt {
     }
     
     public boolean match(String filePath) {
-    	for (String link : allowedLinks) {
-            if (link.charAt(link.length() - 1) == '/' 
-            		&& link.substring(0, link.length() - 1).equals(filePath))
-            {
-                return true;
-            }
-            if (filePath.startsWith(link))
-                return true;
-        }
-
         for (String link : disallowedLinks) {
             // System.out.println("disallowed link: " + link.length() + ", " +
             // link);
@@ -159,6 +149,17 @@ public class RobotTxt {
             if (filePath.startsWith(link))
                 return false;
         }
+        
+    	for (String link : allowedLinks) {
+            if (link.charAt(link.length() - 1) == '/' 
+            		&& link.substring(0, link.length() - 1).equals(filePath))
+            {
+                return true;
+            }
+            if (filePath.startsWith(link))
+                return true;
+        }
+
         return true;
     }
     
