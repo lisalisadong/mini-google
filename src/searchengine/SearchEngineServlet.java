@@ -116,7 +116,7 @@ public class SearchEngineServlet extends HttpServlet {
 
             PrintWriter writer = response.getWriter();
             writer.println(contents);
-            logger.warn("number of seconds used in total" + 1.0 * (System.nanoTime() - time) / 1000000000);
+            logger.warn("number of seconds used in total " + 1.0 * (System.nanoTime() - time) / 1000000000);
         }
     }
 
