@@ -1,6 +1,8 @@
 package searchengine;
 
 import edu.upenn.cis455.webserver.HttpEnum;
+import searchengine.amazon.AmazonItem;
+import searchengine.amazon.ItemSearchService;
 import searchengine.dictionary.DictionaryService;
 import searchengine.weather.WeatherInfo;
 import searchengine.weather.WeatherSearchService;
@@ -16,6 +18,7 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Locale;
 
 /**
@@ -176,6 +179,7 @@ public class SearchEngineServlet extends HttpServlet {
                 res += forecastToHtml(forecast);
             }
         }
+        ArrayList<AmazonItem> items = ItemSearchService.search(query);
         return res;
     }
 

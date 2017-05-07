@@ -39,7 +39,7 @@ public class SearchEngineServiceTest extends TestCase {
     public void testQuickSelectK() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         ResultEntry[] entries = new ResultEntry[10];
         for (int i = 0 ; i < 10; i++) {
-            entries[i] = new ResultEntry("0");
+            entries[i] = new ResultEntry("0", 0);
             entries[i].score = i;
         }
         Method findKthLargest = SearchEngineService.class.getDeclaredMethod("findKthLargest", ResultEntry[].class, int.class);
