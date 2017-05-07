@@ -1,17 +1,27 @@
 package searchengine;
 
+import com.amazonaws.services.dynamodbv2.xspec.S;
+import indexer.DB.DBWrapper;
+import indexer.DB.Word;
+import utils.Logger;
 import utils.Stemmer;
 
 import java.util.*;
+
+import static indexer.DB.DBWrapper.INDEXER_DB_DIR;
 
 /**
  * Created by QingxiaoDong on 4/29/17.
  */
 public class SearchEngineService {
 
+    private static Logger log = new Logger(SearchEngineService.class.getSimpleName());
+
     private static Stemmer stemmer = new Stemmer();
 
     private static LRUCache cache = new LRUCache(100); // LRU with 100 cached queries
+
+    private static final DBWrapper INDEXER = new DBWrapper(INDEXER_DB_DIR);
 
     /**
      * Returns the number of results that are expected.
@@ -21,11 +31,14 @@ public class SearchEngineService {
     public static int preSearch(String query) {
         // get {word:occurrences} map from query
         Map<String, Integer> wordsOccur = decomposeQuery(query);
+        log.warn("Number of words in query " + wordsOccur.size());
 
         if (cache.getOriginal(query) != null) {
+            log.warn("The result is already cached");
             return cache.getOriginal(query).length;
         } else {
-            ResultEntry[] entries = getAllEntries(Collections.enumeration(wordsOccur.keySet()));
+            log.warn("Getting new result entries");
+            ResultEntry[] entries = getAllEntries(wordsOccur.keySet());
             cache.put(query, entries);
             return entries.length;
         }
@@ -48,7 +61,7 @@ public class SearchEngineService {
 
         // in case this is a new search query and has not been pre-searched, should not happen
         if (cache.getOriginal(query) == null) {
-            ResultEntry[] entries = getAllEntries(Collections.enumeration(wordsOccur.keySet()));
+            ResultEntry[] entries = getAllEntries(wordsOccur.keySet());
             cache.put(query, entries);
         }
 
@@ -97,11 +110,11 @@ public class SearchEngineService {
      * @param words words to be searched
      * @return all candidate result entries
      */
-    private static ResultEntry[] getAllEntries(Enumeration<String> words) {
+    private static ResultEntry[] getAllEntries(Set<String> words) {
         HashSet<String> documentIds = new HashSet<>();
-        while (words.hasMoreElements()) {
+        for (String word : words) {
             // get all document ids related to the queried words
-            ArrayList<String> ids = queryInvertedIndex(words.nextElement());
+            ArrayList<String> ids = queryInvertedIndex(word);
             documentIds.addAll(ids);
         }
         ResultEntry[] entries = new ResultEntry[documentIds.size()];
@@ -123,7 +136,7 @@ public class SearchEngineService {
      */
     private static void processScore(ResultEntry entry) {
         // TODO: TUNE THE ALGORITHM!!!
-        entry.score = entry.pageRank * entry.tf * entry.idf;
+        entry.score = entry.pageRank * entry.tfidf;
     }
 
     /******************************************
@@ -137,12 +150,13 @@ public class SearchEngineService {
      * @return documentId of the documents that contains the word
      */
     private static ArrayList<String> queryInvertedIndex(String word) {
-        // TODO: query inverted index database
-        // fake data!!!
-        Random rand = new Random();
+        // DONE: query inverted index database
+        Word w = INDEXER.getWord(word);
         ArrayList<String> res = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
-            res.add(String.valueOf(rand.nextInt(1000000)));
+        if (w != null) {
+            for (String id : w.getDocs()) {
+                res.add(id);
+            }
         }
         return res;
     }
@@ -152,11 +166,17 @@ public class SearchEngineService {
      * @param words words to be searched
      * @param entry the result entry where the scores will be stored
      */
-    private static void queryTfIdf(ResultEntry entry, Enumeration<String> words) {
-        // TODO: query inverted index database (TF/IDF..)
-        // fake data!!!
-        entry.tf = 1.0 * new Random().nextInt(2000) / 1000;
-        entry.idf = 1.0 * new Random().nextInt(2000) / 1000;
+    private static void queryTfIdf(ResultEntry entry, Set<String> words) {
+        // DONE: query inverted index database (TF/IDF..)
+        entry.tfidf = 0;
+        for (String word : words) {
+            Word w = INDEXER.getWord(word);
+            if (w != null && w.inDoc(entry.documentId)) {
+                entry.tfidf += w.getTf(entry.documentId) * w.getIdf(entry.documentId);
+                System.out.println(w.word + " tf " + w.getTf(entry.documentId));
+                System.out.println(w.word + " idf " + w.getIdf(entry.documentId));
+            }
+        }
     }
 
     /**
@@ -177,12 +197,11 @@ public class SearchEngineService {
     private static void queryDocumentDetail(ResultEntry entry) {
         // TODO: query database: get details about a document by documentID
         // fake data!!!
-        entry.title = "This is a fake title";
+        entry.title = entry.documentId;
         entry.location = "https://this/is/a/fake/location";
         entry.digest = "This is a fake digest. The page rank is [" + entry.pageRank + "]. " +
-                "The TF score is [" + entry.tf + "]. " + "The IDF score is [" + entry.idf + "]. " +
+                "The TF-IDF score is [" + entry.tfidf + "]. " +
                 "The total score is [" + entry.score + "].";
-        entry.lastModified = "Apr 1, 2017";
     }
 
 

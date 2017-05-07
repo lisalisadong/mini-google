@@ -95,8 +95,10 @@ public class SearchEngineServlet extends HttpServlet {
 
             // results
             String results = "";
-            for (ResultEntry entry : entries) {
-                results += resultToHtml(entry);
+            if (entries != null) {
+                for (ResultEntry entry : entries) {
+                    results += resultToHtml(entry);
+                }
             }
             contents = contents.replace("${results}", results);
             int fixPage = numResults % 10 == 0 ? 1 : 0;
@@ -152,14 +154,12 @@ public class SearchEngineServlet extends HttpServlet {
         "                        <span class=\"category\">${location}</span>\n" +
         "                    </div>\n" +
         "                    <div class=\"description\" style=\"color:grey;font-family:Cochin;font-size:15px\">\n" +
-        "                        <text>${date} - </text>\n" +
         "                        <text>${digest}</text>\n" +
         "                    </div>\n" +
         "                </div>\n" +
         "            </a>\n";
         html = html.replace("${header}", entry.title);
         html = html.replace("${location}", entry.location);
-        html = html.replace("${date}", entry.lastModified);
         html = html.replace("${digest}", entry.digest);
         return html;
     }

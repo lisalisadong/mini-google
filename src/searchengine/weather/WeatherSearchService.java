@@ -2,7 +2,6 @@ package searchengine.weather;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import utils.Logger;
 
 import javax.xml.parsers.DocumentBuilder;

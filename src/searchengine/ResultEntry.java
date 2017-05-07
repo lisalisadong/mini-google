@@ -15,9 +15,7 @@ public class ResultEntry {
     String title;
     String location;
     String digest;
-    String lastModified;
-    double tf;
-    double idf;
+    double tfidf;
     double pageRank;
     public double score;
 

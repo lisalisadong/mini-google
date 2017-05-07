@@ -27,6 +27,10 @@ public class Word {
 		this.titlePos = new HashMap<String, List<Integer>>();
 		this.contentPos = new HashMap<String, List<Integer>>();
 	}
+
+	public boolean inDoc(String id) {
+		return tfs.containsKey(id);
+	}
 	
 	public Set<String> getDocs() {
 		return tfs.keySet();
@@ -47,6 +51,10 @@ public class Word {
 	
 	public double getTf(String id) {
 		return tfs.get(id);
+	}
+
+	public double getIdf(String id) {
+		return idfs.get(id);
 	}
 	
 	public List<Integer> getTitlePos(String id) {
