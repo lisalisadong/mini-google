@@ -9,3 +9,4 @@
 .cn
 .ru
 /robots.txt
+.tr

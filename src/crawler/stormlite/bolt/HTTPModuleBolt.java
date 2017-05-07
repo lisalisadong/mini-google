@@ -44,6 +44,8 @@ public class HTTPModuleBolt implements IRichBolt {
 	
 	static Logger logger = new Logger(HTTPModuleBolt.class.getName());
 	
+//	static String FILE_NAME = "../timekilling"
+	
 	Fields schema = new Fields("page");
 	
 	DBWrapper db;
@@ -115,7 +117,8 @@ public class HTTPModuleBolt implements IRichBolt {
 	   boolean validContentType = (contentType == null) || "text/html".equalsIgnoreCase(contentType)
 				|| "text/xml".equalsIgnoreCase(contentType)
 				|| "application/xml".equalsIgnoreCase(contentType) 
-				|| contentType.matches(".*+xml");
+				|| contentType.matches(".*+xml")
+				|| "application/pdf".equals(contentType);
 //	   // TODO: only support xml & html now
 //	   /* the page should be retrieved */
 //	   if(validContentType) {
@@ -183,6 +186,9 @@ public class HTTPModuleBolt implements IRichBolt {
 			return null;
 	   }
 	   client.close();
+	   if(System.currentTimeMillis() - start > 8000) {
+		   Crawler.logEvent("********time consuming url: " + url + "**************", start);
+	   }
 	   Crawler.logEvent("finished download: " + url, start);
 	   
 	   CrawlerWorker.workerStatus.incFileNum();

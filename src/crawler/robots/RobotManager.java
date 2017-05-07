@@ -74,6 +74,10 @@ public class RobotManager {
 		noCrawlHosts.add("sexhotpictures.com");
 		noCrawlHosts.add("pornktube.com");
 		noCrawlHosts.add("bleacherreport.com");
+		noCrawlHosts.add("artgoldhammer.blogspot.com:80");
+		noCrawlHosts.add("ac360.blogs.cnn.com");
+		
+		
 	}
 	
 	private String getHostName(String url) {

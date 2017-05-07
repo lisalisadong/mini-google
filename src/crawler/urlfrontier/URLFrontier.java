@@ -61,10 +61,8 @@ public class URLFrontier {
     			System.out.println("[seed]: https://www.youtube.com/");
     		} else if(CrawlerWorker.WORKER_ID.equals("2")) {
     			addURL("http://www.upenn.edu/");
-    			addURL("https://www.reddit.com/");
     			
     			System.out.println("[seed]: http://www.upenn.edu/");
-    			System.out.println("[seed]: https://www.reddit.com/");
     		} else if(CrawlerWorker.WORKER_ID.equals("3")) {
     			addURL("https://en.wikipedia.org/wiki/Portal:Contents");
     			addURL("https://www.google.com/");
@@ -89,7 +87,15 @@ public class URLFrontier {
     			
     			System.out.println("[seed]: http://stackoverflow.com/");
     			System.out.println("[seed]: https://www.cloudera.com/");
-    		} else {
+    		} else if(CrawlerWorker.WORKER_ID.equals("7")) {
+    			addURL("http://www.oracle.com/index.html");
+    			
+    			System.out.println("[seed]: http://www.oracle.com/index.html");
+    		} else if(CrawlerWorker.WORKER_ID.equals("8")) {
+    			addURL("https://www.reddit.com/");
+
+    			System.out.println("[seed]: https://www.reddit.com/");
+    		}  else {
     			addURL("https://www.facebook.com/");
     		}
     		

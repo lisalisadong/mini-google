@@ -215,12 +215,12 @@ public class Crawler {
     }
     
     public static void logEvent(String event, long start) {
-    	System.out.println("[" + event + "]: " 
+    	System.out.println("[worker + " + CrawlerWorker.WORKER_ID + " ] [" + event + "]: " 
     			+ (System.currentTimeMillis() - start) + "ms");
     }
     
     public static void logEvent(String event) {
-    	System.out.println("[" + event + "]");
+    	System.out.println("[worker + " + CrawlerWorker.WORKER_ID + " ] [" + event + "]");
     }
     
 }
