@@ -28,7 +28,7 @@ public class BDBToS3 {
 
 	private static final String ROOTDIR = "../indexer";
 	
-	private static int LOG_INTERVAL = 10;
+	private static int LOG_INTERVAL = 1000;
 	
 	static AmazonS3 awsClient;
 	
@@ -60,11 +60,10 @@ public class BDBToS3 {
 		db.setup();
 
 		long start = System.currentTimeMillis();
-		logEvent("start uploading");
+		logEvent("start uploading from " + args[0] + " to S3");
 		for(String url: db.pIdx.map().keySet()) {
 
 			try {
-				
 				
 				++fileNum;
 				ObjectMetadata meta = new ObjectMetadata();
