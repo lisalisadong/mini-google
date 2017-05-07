@@ -6,16 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
-import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
 import com.sleepycat.persist.StoreConfig;
@@ -29,6 +25,7 @@ public class DBWrapper {
 	private static EntityStore store;
 
 	public PrimaryIndex<String, Word> wordIndex;
+	public PrimaryIndex<String, DocInfo> docInfoIndex;
 
 	public DBWrapper(String envDir) {
 		this.envDirectory = envDir;
@@ -50,13 +47,14 @@ public class DBWrapper {
 			EnvironmentConfig envConfig = new EnvironmentConfig();
 			StoreConfig storeConfig = new StoreConfig();
 			envConfig.setAllowCreate(true);
-			envConfig.setCacheSize(1000000);
 			envConfig.setTxnWriteNoSync(true);
 			storeConfig.setAllowCreate(true);
+			storeConfig.setDeferredWrite(true);
 			myEnv = new Environment(new File(envDirectory), envConfig);
 			store = new EntityStore(myEnv, STORE_NAME, storeConfig);
 
 			wordIndex = store.getPrimaryIndex(String.class, Word.class);
+			docInfoIndex = store.getPrimaryIndex(String.class, DocInfo.class);
 
 		} catch (DatabaseException dbe) {
 			dbe.printStackTrace();
@@ -72,11 +70,15 @@ public class DBWrapper {
 		store.sync();
 		myEnv.sync();
 	}
-
-//	public void addWord(Word word) {
-//		wordIndex.put(word);
-//	}
 	
+	public void putDocInfo(DocInfo info) {
+		docInfoIndex.put(info);
+	}
+	
+	public String[] getDocInfo(String id) {
+		return docInfoIndex.get(id).getInfo();
+	}
+
 	public Word getWord(String word) {
 		return wordIndex.get(word);
 	}
@@ -95,21 +97,28 @@ public class DBWrapper {
 	public Set<String> getWordDocs(String word) {
 		return wordIndex.get(word).getDocs();
 	}
-
+	
 	public static void main(String[] args) {
 		DBWrapper db = new DBWrapper(INDEXER_DB_DIR);
+		int ii = 0;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader("/Users/liujue/Desktop/output/part-r-00000"));
-			String line = reader.readLine();
-			int lineNum = 1;
-			while (line != null) {
-				String[] parts = line.split("\\t");
-				System.out.println("linePer: " + lineNum/1795090.0 + "num: " + lineNum++ );
-//				System.out.println(Arrays.toString(parts));
+			String line;
+			String last = null;
+			Word word = null;
+			while ((line = reader.readLine()) != null) {
+				// System.out.println(line);
+				System.out.println(ii);
+				ii += 1;
+				String[] parts = line.split("\t");
+				// System.out.println(Arrays.toString(parts));
 				String w = parts[0];
-				Word word = db.getWord(w);
-				if (word == null) {
-					word = db.addWord(w);
+				if (w != last) {
+					if (word != null) {
+						db.putWord(word);
+					}
+					word = new Word(w);
+					last = w;
 				}
 				String docID = parts[1];
 				double tf = Double.parseDouble(parts[2]);
@@ -117,13 +126,13 @@ public class DBWrapper {
 				word.addInfo(docID, tf, idf);
 				String[] titles = parts[4].split("\\D+");
 				String[] contents = parts[5].split("\\D+");
-//				System.out.println("titles: " + Arrays.toString(titles));
-//				System.out.println("contents: " + Arrays.toString(contents));
+				// System.out.println("titles: " + Arrays.toString(titles));
+				// System.out.println("contents: " + Arrays.toString(contents));
 				if (titles.length > 0) {
 					List<Integer> titlePos = new ArrayList<Integer>();
 					for (int i = 1; i < titles.length; i++) {
 						titlePos.add(Integer.parseInt(titles[i]));
-//						System.out.println("title: " + titlePos.get(i - 1));
+						// System.out.println("title: " + titlePos.get(i - 1));
 					}
 					word.addTitlePos(docID, titlePos);
 				}
@@ -131,23 +140,22 @@ public class DBWrapper {
 					List<Integer> contentPos = new ArrayList<Integer>();
 					for (int i = 1; i < contents.length; i++) {
 						contentPos.add(Integer.parseInt(contents[i]));
-//						System.out.println("content: " + contentPos.get(i - 1));
+						// System.out.println("content: " + contentPos.get(i - 1));
 					}
 					word.addContentPos(docID, contentPos);
 				}
-				db.putWord(word);
-				
-				line = reader.readLine();
 			}
+			db.putWord(word);
 			reader.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		db.sync();
 		db.close();
-		
+
 		// test
 //		System.out.println(db.wordIndex.count());
 //		Word w = db.getWord("research");
