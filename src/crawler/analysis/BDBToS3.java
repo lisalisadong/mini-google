@@ -87,12 +87,13 @@ public class BDBToS3 {
 			    	logEvent("Finished uploading " + fileNum + " files", start);
 			    }
 			    
-				if(fileNum == 100) break;
+//				if(fileNum == 100) break;
 			} catch (Exception e) {
 
 			}
 		}
 		logEvent("Finished uploading", start);
+		logEvent("Total file num: " + fileNum);
 	}
 
 	private static void logEvent(String event, long start) {
