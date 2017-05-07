@@ -131,6 +131,7 @@ public class DictionaryService {
      * @return top ten matches in a JSON format
      */
     public static String search(String query) {
+        query = query.trim().toLowerCase();
         ArrayList<String> predictions = trie.getWordsStartsWith(query, 1000);
         if (predictions.size() < 20) {
             int i = query.lastIndexOf(" ");

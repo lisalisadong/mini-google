@@ -62,7 +62,7 @@
         </javac>
     </target>
 
-    <target name="compile-search-engine" depends="compile-utils" description="Compiles the search engine">
+    <target name="compile-search-engine" depends="compile-utils, compile-indexer" description="Compiles the search engine">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="src/searchengine" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
             <classpath>
