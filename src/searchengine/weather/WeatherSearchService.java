@@ -2,12 +2,14 @@ package searchengine.weather;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import searchengine.LRUCache;
 import utils.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
+ * Query openweathermap API.
  * Created by QingxiaoDong on 5/5/17.
  */
 public class WeatherSearchService {
@@ -17,13 +19,25 @@ public class WeatherSearchService {
     private static final String WEATHER_API = "http://api.openweathermap.org/data/2.5/weather?units=metric&appid=c8e43a26d625ce8e89db25631fa4e3e0&mode=xml&q=";
     private static final String FORECAST_API = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=xml&units=metric&appid=c8e43a26d625ce8e89db25631fa4e3e0&q=";
 
+    private static LRUCache<WeatherInfo> currentCache = new LRUCache<>(10);
+    private static LRUCache<WeatherInfo[]> forecastCache = new LRUCache<>(10);
+
+    /**
+     * Get current weather information given keywords.
+     * @param keywords keywords
+     * @return weather information
+     */
     public static WeatherInfo searchCurrent(String keywords) {
+        WeatherInfo weatherInfo = currentCache.get(keywords);
+        if (weatherInfo != null) {
+            return weatherInfo;
+        }
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(WEATHER_API + keywords);
 
-            WeatherInfo weatherInfo = new WeatherInfo();
+            weatherInfo = new WeatherInfo();
 
             // city
             Node node = doc.getElementsByTagName("city").item(0);
@@ -75,6 +89,7 @@ public class WeatherSearchService {
                 return null;
             }
             weatherInfo.time = node.getAttributes().getNamedItem("value").getNodeValue().replace("T", " ");
+            currentCache.put(keywords, weatherInfo);
 
             return weatherInfo;
         } catch (Exception e) {
@@ -83,8 +98,17 @@ public class WeatherSearchService {
         }
     }
 
+    /**
+     * Get 7 days forecast information given keywords.
+     * @param keywords keywords
+     * @return 7 days forecast information
+     */
     public static WeatherInfo[] searchForcast(String keywords) {
-        WeatherInfo[] infos = new WeatherInfo[7];
+        WeatherInfo[] infos = forecastCache.get(keywords);
+        if (infos != null) {
+            return infos;
+        }
+        infos = new WeatherInfo[7];
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
@@ -119,7 +143,7 @@ public class WeatherSearchService {
 
                 infos[i] = weatherInfo;
             }
-
+            forecastCache.put(keywords, infos);
             return infos;
         } catch (Exception e) {
             e.printStackTrace();
