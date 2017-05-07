@@ -209,10 +209,18 @@ public class Crawler {
 //    	urlFrontier.writeSnapshot(Crawler.frontierDB);
     	Crawler.urlSet.writeSnapshot();
     	Crawler.robotManager.writeSnapshot();
-    	
     	urlFrontier.writeSnapshot();
 //    	
 //    	stateDB.sync();
+    }
+    
+    public static void logEvent(String event, long start) {
+    	System.out.println("[" + event + "]: " 
+    			+ (System.currentTimeMillis() - start) + "ms");
+    }
+    
+    public static void logEvent(String event) {
+    	System.out.println("[" + event + "]");
     }
     
 }

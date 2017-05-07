@@ -3,6 +3,7 @@ package crawler.robots;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,8 +23,8 @@ public class RobotTxt {
 	@PrimaryKey
 	String host;
 	
-    private HashSet<RobotPath> allowedLinks;
-    private HashSet<RobotPath> disallowedLinks;
+	private HashSet<String> allowedLinks;
+    private HashSet<String> disallowedLinks;
     private long crawlDelay;
     private boolean empty;
     private boolean self, flag;
@@ -38,10 +39,12 @@ public class RobotTxt {
         allowedLinks = new HashSet<>();
         Client client = Client.getClient(url);
         client.setMethod("GET");
-        if (client == null || !client.sendReq() || client.getStatusCode() != 200) {
+        
+    	if (client == null || !client.sendReq() || client.getStatusCode() != 200) {
             empty = true;
             return;
         }
+    
         crawlDelay = 0;
         BufferedReader bf = client.getBufferedReader();
         String line;
@@ -84,18 +87,25 @@ public class RobotTxt {
                 case "disallow":
                     if (flag) {
                         haveLinks = true;
-                        disallowedLinks.add(new RobotPath(host, val));
+                        if(val != null && val.length() > 0)
+                        	disallowedLinks.add(val);
                     }
                     break;
                 case "allow":
                     if (flag) {
                         haveLinks = true;
-                        allowedLinks.add(new RobotPath(host, val));
+                        if(val != null && val.length() > 0)
+                        	allowedLinks.add(val);
                     }
                     break;
                 case "crawl-delay":
                     if (flag) {
-                        crawlDelay = 1000 * (int) Double.parseDouble(val);
+                        try {
+                        	crawlDelay = 1000 * (int) Double.parseDouble(val);
+                        } catch(NumberFormatException e) {
+                        	crawlDelay = 0;
+                        	empty = true;
+                        }
                     }
                     break;
                 }
@@ -110,46 +120,57 @@ public class RobotTxt {
             return;
         }
     }
+    
+    public boolean isEmpty() {
+    	return empty;
+    }
 
     public long getCrawlDelay() {
         return crawlDelay;
     }
 
-    public Set<RobotPath> getAllowedLinks() {
+    public Set<String> getAllowedLinks() {
         return allowedLinks;
     }
 
-    public Set<RobotPath> getDisallowedLinks() {
+    public Set<String> getDisallowedLinks() {
         return disallowedLinks;
     }
     
     public boolean match(String filePath) {
-    	RobotPath toMatch = new RobotPath("", filePath);
-        for (RobotPath link : allowedLinks) {
-            if (link.match(toMatch)) {
+    	for (String link : allowedLinks) {
+            if (link.charAt(link.length() - 1) == '/' 
+            		&& link.substring(0, link.length() - 1).equals(filePath))
+            {
                 return true;
             }
+            if (filePath.startsWith(link))
+                return true;
         }
 
-        for (RobotPath link : disallowedLinks) {
+        for (String link : disallowedLinks) {
             // System.out.println("disallowed link: " + link.length() + ", " +
             // link);
-            if (link.match(toMatch)) {
+            if (link.charAt(link.length() - 1) == '/' 
+            		&& link.substring(0, link.length() - 1).equals(filePath)) 
+            {
                 return false;
             }
+            if (filePath.startsWith(link))
+                return false;
         }
         return true;
     }
     
     public String toString() {
         StringBuilder sb = new StringBuilder("User-Agent: cis455crawler\n");
-        System.out.println("Crawl delay: " + crawlDelay);
-        for (RobotPath link : allowedLinks) {
-            sb.append("Allow: " + link.toString() + "\n");
-        }
-        for (RobotPath link : disallowedLinks) {
-            sb.append("Disallow: " + link.toString() + "\n");
-        }
+//        System.out.println("Crawl delay: " + crawlDelay);
+//        for (String link : allowedLinks) {
+//            sb.append("Allow: " + link.toString() + "\n");
+//        }
+//        for (String link : disallowedLinks) {
+//            sb.append("Disallow: " + link.toString() + "\n");
+//        }
         return sb.toString();
     }
 

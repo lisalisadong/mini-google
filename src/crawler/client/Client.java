@@ -41,12 +41,15 @@ public abstract class Client {
     protected String charset;
     protected String location;
 
+    protected String urlString;
+    
     /**
      * constructor: set header
      * 
      * @param url
      */
     protected Client(String url) {
+    	urlString = url;
         setUp(url);
         headers = new HashMap<>();
         addHeader(USER_AGENT_HEADER, USER_AGENT);

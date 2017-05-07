@@ -1,12 +1,22 @@
 package crawler.stormlite.bolt;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import crawler.Crawler;
 import crawler.client.URLInfo;
 import crawler.robots.RobotInfoManager;
 import crawler.robots.RobotManager;
+import crawler.storage.CrawledPage;
+import crawler.storage.DBWrapper;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.routers.StreamRouter;
@@ -38,7 +48,9 @@ import utils.Logger;
 public class URLFilterBolt implements IRichBolt {
     static Logger logger = new Logger(URLFilterBolt.class.getName());
 
-    Fields schema = new Fields("host", "url");
+    Fields schema = new Fields("host", "links");
+    
+    DBWrapper db;
 
     /**
      * To make it easier to debug: we have a unique ID for each instance of the
@@ -64,27 +76,73 @@ public class URLFilterBolt implements IRichBolt {
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
         robotManager = Crawler.getRobotManager();
+        db = new DBWrapper(Crawler.DBPath);
+        db.setup();
     }
 
     /**
      * Process a tuple received from the stream, incrementing our counter and
      * outputting a result
      */
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public void execute(Tuple input) {
-        String link = input.getStringByField("link");
+//        String link = input.getStringByField("link");
         // System.out.println(id + " got " + link);
         // TODO: convert relative path to absolute path
-
-        String host = new URLInfo(link).getHostName();
-        // TODO: filter the link
-
-        if(robotManager.isAllowed(link)) {
-        	this.collector.emit(new Values<Object>(host, link));
-            // System.out.println(id + " emit (" + host + ", " + link + ")");
-        } else {
-//        	System.out.println(id + ": " + link + "--not allowed");
+    	CrawledPage page = (CrawledPage) input.getObjectByField("page");
+    	String url = page.getUrl();
+        if(url == null) return;
+        
+        HashMap<String, List<String>> linksToEmit = new HashMap<>();
+        
+        byte[] content = page.getContent();
+        Document doc = Jsoup.parse(new String(content), url);
+        Elements links = doc.select("a[href]");
+        if(links.size() == 0) return;
+        for (Element link : links) {
+            String l = link.attr("abs:href");
+            
+            if(url != null && !url.equals(l)) {
+            	if (l == null || l.length() == 0)
+                    continue;
+            	
+            	if(robotManager.isAllowed(l)) {
+            		String host = new URLInfo(l).getHostName();
+            		if(!linksToEmit.containsKey(host)) {
+            			linksToEmit.put(host, new LinkedList<>());
+            		}
+            		linksToEmit.get(host).add(l);
+            	}
+            	
+            	page.addLink(l);
+            }
+            
         }
+        for(String h: linksToEmit.keySet()) {
+        	this.collector.emit(new Values<Object>(h, linksToEmit.get(h)));
+        }
+        db.savePage(page);
+        db.sync();
+        
+
+////        String host = input.getStringByField("host");
+////    	List<String> links = (List<String>)input.getObjectByField("links");
+//
+//        // TODO: filter the link
+//
+//        List<String> toEmit = new LinkedList<>();
+//        for(String link: links) {
+//        	if(robotManager.isAllowed(link)) {
+//            	toEmit.add(link);
+//                // System.out.println(id + " emit (" + host + ", " + link + ")");
+//            } else {
+////            	System.out.println(id + ": " + link + "--not allowed");
+//            }
+//        }
+//        if(toEmit.size() > 0) {
+//        	
+//        }
     }
 
     /**

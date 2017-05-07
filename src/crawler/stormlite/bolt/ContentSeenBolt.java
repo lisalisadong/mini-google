@@ -84,51 +84,56 @@ public class ContentSeenBolt implements IRichBolt {
    public void execute(Tuple input) 
    {
 	   String url = input.getStringByField("url");
-//	   System.out.println(id + " got " + url);
-	   
-	   /* download the page*/
-	   Client client = Client.getClient(url);
-	   client.setMethod("GET");
-//	   robotManager.waitUntilAvailable(url);	
-//	   /* set last access time */
-//	   robotManager.setHostLastAccessTime(url);
-	   client.sendReq();
-	   
-	   byte[] content = null;
-	   InputStream in = client.getInputStream();
-	   if(in == null) return;
-	   ByteArrayOutputStream bos = new ByteArrayOutputStream();	
-	   int next;
-	   try {
-			while ((next = in.read()) != -1) {
-				bos.write(next);
-			}
-			bos.flush();
-			content = bos.toByteArray();
-			bos.close();
-	   } catch (IOException e) {
-			e.printStackTrace();
-	   }
-	   
-	   
-	   client.close();
-	   
-	   // TODO: 
-	   /* deal with the content seen */
-	   boolean contentSeen = checkContentSeen(content);
-	   
-	   if(!contentSeen) {
-//		   System.out.println(id + " emit " + url);
-		   
-		   CrawlerWorker.workerStatus.incFileNum();
-		   
-		   CrawledPage newPage = new CrawledPage(content, url, client.getResContentType());
-//		   newPage.setLastCrawled(System.currentTimeMillis());
-		   this.collector.emit(new Values<Object>(newPage));
-	   } else {
-		   // TODO: get url via fp and increase the hit
-	   }
-	   
+	   Crawler.logEvent(id + " got " + url);
+////	   System.out.println(id + " got " + url);
+//	   
+//	   long start = System.currentTimeMillis();
+//	   /* download the page*/
+//	   Client client = Client.getClient(url);
+//	   client.setMethod("GET");
+////	   robotManager.waitUntilAvailable(url);	
+////	   /* set last access time */
+////	   robotManager.setHostLastAccessTime(url);
+//	   if(!client.sendReq()) {
+//		   System.out.println("GET req error: " + url);
+//		   return;
+//	   }
+//	   Crawler.logEvent("finished GET: " + url, start);
+//	   
+//	   start = System.currentTimeMillis();
+//	   byte[] content = null;
+//	   InputStream in = client.getInputStream();
+//	   if(in == null) return;
+//	   ByteArrayOutputStream bos = new ByteArrayOutputStream();	
+//	   int next;
+//	   try {
+//			while ((next = in.read()) != -1) {
+//				bos.write(next);
+//			}
+//			bos.flush();
+//			content = bos.toByteArray();
+//			bos.close();
+//	   } catch (IOException e) {
+//			e.printStackTrace();
+//	   }
+//	   client.close();
+//	   Crawler.logEvent("finished download: " + url, start);
+//	   // TODO: 
+//	   /* deal with the content seen */
+//	   boolean contentSeen = checkContentSeen(content);
+//	   
+//	   if(!contentSeen) {
+////		   System.out.println(id + " emit " + url);
+//		   
+//		   CrawlerWorker.workerStatus.incFileNum();
+//		   
+//		   CrawledPage newPage = new CrawledPage(content, url, client.getResContentType());
+////		   newPage.setLastCrawled(System.currentTimeMillis());
+//		   this.collector.emit(new Values<Object>(newPage));
+//	   } else {
+//		   // TODO: get url via fp and increase the hit
+//	   }
+//	   
    }
    
    /**

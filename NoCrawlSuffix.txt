@@ -1,0 +1,8 @@
+.jp
+.fr
+.tw
+.ht
+.sy
+.hk
+.cn
+.ru

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import crawler.Crawler;
+import crawler.client.URLInfo;
 import crawler.storage.CrawledPage;
 import crawler.storage.DBWrapper;
 import crawler.stormlite.OutputFieldsDeclarer;
@@ -16,6 +17,7 @@ import crawler.stormlite.tuple.Tuple;
 import crawler.stormlite.tuple.Values;
 import crawler.utils.LRUCache;
 import crawler.utils.PageCache;
+import crawler.worker.CrawlerWorker;
 import utils.Logger;
 
 import org.jsoup.Jsoup;
@@ -43,7 +45,7 @@ import org.jsoup.select.Elements;
 public class LinkExtractorBolt implements IRichBolt {
     static Logger logger = new Logger(LinkExtractorBolt.class.getName());
 
-    Fields schema = new Fields("link");
+    Fields schema = new Fields("host", "links");
     DBWrapper db;
     LRUCache<CrawledPage> pageCache;
 
@@ -82,11 +84,14 @@ public class LinkExtractorBolt implements IRichBolt {
         CrawledPage page = (CrawledPage) input.getObjectByField("page");
 //         System.out.println(id + " got " + page.getUrl());
         String url = page.getUrl();
+        if(url == null) return;
+        String host = new URLInfo(url).getHostName();
+        
         if ("text/html".equals(page.getContentType())) {
             byte[] content = page.getContent();
             Document doc = Jsoup.parse(new String(content), url);
             Elements links = doc.select("a[href]");
-
+            if(links.size() == 0) return;
             for (Element link : links) {
                 String l = link.attr("abs:href");
                 
@@ -95,14 +100,17 @@ public class LinkExtractorBolt implements IRichBolt {
                         continue;
                     // System.out.println(id + " emit " + l);
                 	page.addLink(l);
-                    this.collector.emit(new Values<Object>(l));
                 }
             }
+            System.out.println(id + " emit links");
+            this.collector.emit(new Values<Object>(host, page.getLinks()));
         }
         
 //        pageCache.put(page.getUrl(), page);
+        CrawlerWorker.workerStatus.incFileNum();
         db.savePage(page);
         db.sync();
+        Crawler.logEvent("finished parsing: " + url);
 //		System.out.println(id + ": " + url + " downloaded ");
     }
 

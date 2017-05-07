@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.text.ParseException;
 import java.util.Date;
 
+import crawler.Crawler;
+
 /**
  * client for http protocol
  * 
@@ -32,7 +34,16 @@ public class HttpClient extends Client {
         try {
             // send request
             // System.out.println("host: " + host);
-            soc.connect(new InetSocketAddress(host, portNum), 10000);
+//        	if(urlString.endsWith("/robots.txt")) {
+//        		soc.connect(new InetSocketAddress(host, portNum), 1500);
+//                soc.setSoTimeout(1500);
+//        	} else {
+//        		soc.connect(new InetSocketAddress(host, portNum), 2000);
+//                soc.setSoTimeout(2000);
+//        	}
+        	soc.connect(new InetSocketAddress(host, portNum), 5000);
+        	soc.setSoTimeout(5000);
+            
             in = soc.getInputStream();
             PrintWriter out = new PrintWriter(soc.getOutputStream());
             out.print(this.toString());
@@ -71,9 +82,8 @@ public class HttpClient extends Client {
                     break;
                 }
             }
-
         } catch (Exception e) {
-            // e.printStackTrace();
+//             e.printStackTrace();
             return false;
         }
         return true;
@@ -97,56 +107,67 @@ public class HttpClient extends Client {
             e.printStackTrace();
         }
     }
+    
 
     public static void main(String[] args) {
     	
-    	String url = "https://www.facebook.com/";
+    	String url = "http://www.audible.com";
         Client client = Client.getClient(url);
+        client.setMethod("GET");
         client.sendReq();
         System.out.println(url + ": " + client.getStatusCode());
         
         url = "https://www.youtube.com/";
         client = Client.getClient(url);
+        client.setMethod("HEAD");
         client.sendReq();
         System.out.println(url + ": " + client.getStatusCode());
         
         url = "http://www.upenn.edu/";
         client = Client.getClient(url);
+        client.setMethod("HEAD");
         client.sendReq();
         System.out.println(url + ": " + client.getStatusCode());
         
         url = "https://www.reddit.com/";
         client = Client.getClient(url);
+        client.setMethod("HEAD");
         client.sendReq();
         System.out.println(url + ": " + client.getStatusCode());
         
         url = "https://en.wikipedia.org/wiki/Main_Page/";
         client = Client.getClient(url);
+        client.setMethod("HEAD");
         client.sendReq();
         System.out.println(url + ": " + client.getStatusCode());
         
         url = "https://www.google.com/";
         client = Client.getClient(url);
+        client.setMethod("HEAD");
         client.sendReq();
         System.out.println(url + ": " + client.getStatusCode());
         
         url = "https://www.amazon.com/";
         client = Client.getClient(url);
+        client.setMethod("HEAD");
         client.sendReq();
         System.out.println(url + ": " + client.getStatusCode());
         
         url = "http://www.ebay.com/";
         client = Client.getClient(url);
+        client.setMethod("HEAD");
         client.sendReq();
         System.out.println(url + ": " + client.getStatusCode());
         
         url = "https://www.bloomberg.com/";
         client = Client.getClient(url);
+        client.setMethod("HEAD");
         client.sendReq();
         System.out.println(url + ": " + client.getStatusCode());
         
         url = "http://www.cnn.com/";
         client = Client.getClient(url);
+        client.setMethod("HEAD");
         client.sendReq();
         System.out.println(url + ": " + client.getStatusCode());
         

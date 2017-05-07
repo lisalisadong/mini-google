@@ -209,14 +209,16 @@ public class CrawlerMasterServlet extends HttpServlet {
       builder.setBolt(Crawler.HTTP_MODULE_BOLT, httpModule, Crawler.HTTP_MODULE_BOLT_NUM)
       .shuffleGrouping(Crawler.URL_SPOUT);
 
-      builder.setBolt(Crawler.CONTENT_SEEN_BOLT, contentSeen, Crawler.CONTENT_SEEN_BOLT_NUM)
-      .shuffleGrouping(Crawler.HTTP_MODULE_BOLT);
+//      builder.setBolt(Crawler.CONTENT_SEEN_BOLT, contentSeen, Crawler.CONTENT_SEEN_BOLT_NUM)
+//      .shuffleGrouping(Crawler.HTTP_MODULE_BOLT);
       
-      builder.setBolt(Crawler.LINK_EXTRACTOR_BOLT, linkExtractor, Crawler.LINK_EXTRACTOR_BOLT_NUM)
-      .shuffleGrouping(Crawler.CONTENT_SEEN_BOLT);
+//      builder.setBolt(Crawler.LINK_EXTRACTOR_BOLT, linkExtractor, Crawler.LINK_EXTRACTOR_BOLT_NUM)
+//      .shuffleGrouping(Crawler.HTTP_MODULE_BOLT);
+//      .shuffleGrouping(Crawler.CONTENT_SEEN_BOLT);
       
       builder.setBolt(Crawler.URL_FILTER_BOLT, urlFilter, Crawler.URL_FILTER_BOLT_NUM)
-      .shuffleGrouping(Crawler.LINK_EXTRACTOR_BOLT);
+//      .shuffleGrouping(Crawler.LINK_EXTRACTOR_BOLT);
+      .shuffleGrouping(Crawler.HTTP_MODULE_BOLT);
       
       builder.setBolt(Crawler.DUE_BOLT, due, Crawler.DUE_BOLT_NUM)
 //      .fieldsGrouping(Crawler.URL_FILTER_BOLT, new Fields("url"));
