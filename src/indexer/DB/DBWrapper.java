@@ -51,6 +51,7 @@ public class DBWrapper {
 			StoreConfig storeConfig = new StoreConfig();
 			envConfig.setAllowCreate(true);
 			envConfig.setCacheSize(1000000);
+			envConfig.setTxnWriteNoSync(true);
 			storeConfig.setAllowCreate(true);
 			myEnv = new Environment(new File(envDirectory), envConfig);
 			store = new EntityStore(myEnv, STORE_NAME, storeConfig);
