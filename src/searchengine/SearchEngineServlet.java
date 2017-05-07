@@ -2,6 +2,8 @@ package searchengine;
 
 import edu.upenn.cis455.webserver.HttpEnum;
 import searchengine.dictionary.DictionaryService;
+import searchengine.weather.WeatherInfo;
+import searchengine.weather.WeatherSearchService;
 import utils.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -88,9 +90,10 @@ public class SearchEngineServlet extends HttpServlet {
                         "Did you mean " + "<a href=\"/search?query=" + correction + "\">" + correction + "</a>?</p>");
             } else {
                 contents = contents.replace("${correction}", "");
-                DictionaryService.put(query);
             }
+            DictionaryService.put(query);
 
+            // results
             String results = "";
             for (ResultEntry entry : entries) {
                 results += resultToHtml(entry);
@@ -98,6 +101,10 @@ public class SearchEngineServlet extends HttpServlet {
             contents = contents.replace("${results}", results);
             int fixPage = numResults % 10 == 0 ? 1 : 0;
             contents = contents.replace("${indices}", indicesToHtml(query, p, numResults / 10 - fixPage));
+
+            // api
+            contents = contents.replace("${api}", getAPI(query));
+
             PrintWriter writer = response.getWriter();
             writer.println(contents);
         }
@@ -154,6 +161,84 @@ public class SearchEngineServlet extends HttpServlet {
         html = html.replace("${location}", entry.location);
         html = html.replace("${date}", entry.lastModified);
         html = html.replace("${digest}", entry.digest);
+        return html;
+    }
+
+    private String getAPI(String query) {
+        String res = "";
+        if (query.contains("weather")) {
+            WeatherInfo current = WeatherSearchService.searchCurrent(query);
+            WeatherInfo[] forecast = WeatherSearchService.searchForcast(query);
+            if (current != null) {
+                res += weatherToHtml(current);
+            }
+            if (forecast != null) {
+                res += forecastToHtml(forecast);
+            }
+        }
+        return res;
+    }
+
+    private String weatherToHtml(WeatherInfo weatherInfo) {
+        String html = "<a class=\"ui fluid link card\" href=\"https://openweathermap.org/find?q=${city}\">\n" +
+        "                <div class=\"content\">\n" +
+        "                    <div class=\"header\" style=\"color:steelblue;font-family:Cochin;font-size:20px\">Weather | ${city}</div>\n" +
+        "                    <div class=\"meta\" style=\"color:crimson;font-family:Cochin;font-size:15px\">\n" +
+        "                        <span class=\"category\">https://openweathermap.org</span>\n" +
+        "                    </div>\n" +
+        "                    <div class=\"description\" style=\"color:grey;font-family:Cochin;font-size:15px\">\n" +
+        "                        <img src=\"${image}\">\n" +
+        "                        <text style=\"font-weight:bold;font-size:28px\">${temp} &#8451; | ${weather}</text>\n" +
+        "                        <p>Max/Min: ${max}/${min}</p>\n" +
+        "                        <p>Humidity: ${humidity}</p>\n" +
+        "                        <p>Wind: ${wind}</p>\n" +
+        "                        <p>Last Update: ${time} UTC</p>\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </a>\n";
+        html = html.replace("${city}", weatherInfo.city);
+        html = html.replace("${image}", weatherInfo.icon);
+        html = html.replace("${temp}", weatherInfo.value);
+        html = html.replace("${weather}", weatherInfo.weather);
+        html = html.replace("${max}", weatherInfo.max);
+        html = html.replace("${min}", weatherInfo.min);
+        html = html.replace("${humidity}", weatherInfo.humidity);
+        html = html.replace("${wind}", weatherInfo.wind);
+        html = html.replace("${time}", weatherInfo.time);
+        return html;
+    }
+
+    private String forecastToHtml(WeatherInfo[] forecast) {
+        String html = "<a class=\"ui fluid link card\" href=\"https://openweathermap.org/find?q=${city}\">\n" +
+        "                <div class=\"content\">\n" +
+        "                    <div class=\"header\" style=\"color:steelblue;font-family:Cochin;font-size:20px\">Forecast | ${city}</div>\n" +
+        "                    <div class=\"meta\" style=\"color:crimson;font-family:Cochin;font-size:15px\">\n" +
+        "                        <span class=\"category\">https://openweathermap.org</span>\n" +
+        "                    </div>\n" +
+        "                    <div class=\"description\" style=\"color:grey;font-family:Cochin;font-size:15px\">\n" +
+        "                        ${entries}\n" +
+        "                    </div>\n" +
+        "                </div>\n" +
+        "            </a>\n";
+        html = html.replace("${city}", forecast[0].city);
+        String entries = "";
+        for (WeatherInfo info : forecast) {
+            entries += forecastEntryToHtml(info);
+        }
+        html = html.replace("${entries}", entries);
+        return html;
+    }
+
+    private String forecastEntryToHtml(WeatherInfo forecastEntry) {
+        String html = "          <div class=\"ui divider\"></div>\n" +
+        "                        <img src=\"${image}\">\n" +
+        "                        <text>${max} &deg; / ${min} &deg; / ${weather}</text>\n" +
+        "                        <text style=\"width:100%;text-align:right\"> [ ${time} ]</text>\n";
+        html = html.replace("${image}", forecastEntry.icon);
+        html = html.replace("${max}", forecastEntry.max);
+        html = html.replace("${min}", forecastEntry.min);
+        html = html.replace("${weather}", forecastEntry.weather);
+        html = html.replace("${time}", forecastEntry.time);
         return html;
     }
 
