@@ -7,22 +7,20 @@ import java.util.HashMap;
  * Least Recently Used Cache.
  * get(key) and put(key, value) are both O(1) operations.
  */
-public class LRUCache {
+public class LRUCache<T> {
 
     /**
      * Linked list node.
      * Stores the original result entries and the sorted result entries.
      */
-    private class Node {
+    private class Node<T> {
         private String key;
-        private ResultEntry[] original;
-        private ResultEntry[] sorted;
+        private T value;
         Node prev;
         Node next;
-        public Node (String key, ResultEntry[] original) {
+        public Node (String key, T value) {
             this.key = key;
-            this.original = original;
-            this.sorted = new ResultEntry[original.length];
+            this.value = value;
             prev = null;
             next = null;
         }
@@ -41,60 +39,59 @@ public class LRUCache {
     public LRUCache(int capacity) {
         this.capacity = capacity;
         map = new HashMap<String, Node>();
-        head = new Node(null, new ResultEntry[0]);
-        tail = new Node(null, new ResultEntry[0]);
+        head = new Node<T>(null, null);
+        tail = new Node<T>(null, null);
         head.next = tail;
         tail.prev = head;
     }
 
     /**
-     * Get the original result entries of the key(query) if the key exists in the cache.
+     * Get the value) if the key exists in the cache.
      * @param key key of the result entries
-     * @return original result entries or null
+     * @return value or null
      */
-    public ResultEntry[] getOriginal(String key) {
+    public T get(String key) {
         if (!map.containsKey(key)) {
             return null;
         }
         Node current = map.get(key);
         remove(current);
         add(current);
-        return map.get(key).original;
+        return (T) map.get(key).value;
     }
 
-    /**
-     * Get the sorted result entries of the key(query) if the key exists in the cache.
-     * @param key key of the result entries
-     * @return sorted result entries or null
-     */
-    public ResultEntry[] getSorted(String key) {
-        if (!map.containsKey(key)) {
-            return null;
-        }
-        Node current = map.get(key);
-        remove(current);
-        add(current);
-        return map.get(key).sorted;
-    }
+//    /**
+//     * Get the sorted result entries of the key(query) if the key exists in the cache.
+//     * @param key key of the result entries
+//     * @return sorted result entries or null
+//     */
+//    public ResultEntry[] getSorted(String key) {
+//        if (!map.containsKey(key)) {
+//            return null;
+//        }
+//        Node current = map.get(key);
+//        remove(current);
+//        add(current);
+//        return map.get(key).sorted;
+//    }
 
     /**
      * Set or insert the result entries if the key is not already present. When the cache reached
      * its capacity, it should invalidate the least recently used item before inserting a new item.
      * @param key key of the result entries
-     * @param original original result entries
+     * @param value original result entries
      */
-    public void put(String key, ResultEntry[] original) {
-        if (getOriginal(key) != null) {
+    public void put(String key, T value) {
+        if (get(key) != null) {
             Node current = map.get(key);
-            current.original = original;
-            current.sorted = new ResultEntry[original.length];
+            current.value = value;
         } else {
             if (map.size() == capacity) {
                 Node lfu = head.next;
                 map.remove(lfu.key);
                 remove(lfu);
             }
-            Node newNode = new Node(key, original);
+            Node newNode = new Node(key, value);
             add(newNode);
             map.put(key, newNode);
         }

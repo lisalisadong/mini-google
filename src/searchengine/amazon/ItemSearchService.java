@@ -10,6 +10,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import searchengine.LRUCache;
 import utils.Logger;
 
 /**
@@ -17,6 +18,8 @@ import utils.Logger;
  * This class call the Amazon Product Advertising API.
  */
 public class ItemSearchService {
+
+    private static LRUCache<ArrayList<AmazonItem>> cache = new LRUCache<>(100);
 
     private static final Logger log = new Logger(ItemSearchService.class.getSimpleName());
     /*
@@ -52,7 +55,13 @@ public class ItemSearchService {
     private static ArrayList<String> itemIds;
 
     public static ArrayList<AmazonItem> search(String keywords) {
-        ArrayList<AmazonItem> items = new ArrayList<>();
+
+        ArrayList<AmazonItem> items = cache.get(keywords);
+        if (items != null) {
+            return items;
+        } else {
+            items = new ArrayList<>();
+        }
 
         /*
          * Set up the signed requests helper
@@ -78,14 +87,17 @@ public class ItemSearchService {
         params.put("Operation", "ItemSearch");
         params.put("ItemPage", "1");
         params.put("SearchIndex", "All");
-        params.put("Keywords", "ps4 game");
+        params.put("Keywords", keywords);
         params.put("ResponseGroup", "Small");
         params.put("AssociateTag","th0426-20");
 
         requestUrl = helper.sign(params);
-        log.warn("Signed Request is \"" + requestUrl + "\"");
+        log.trace("Signed Request is \"" + requestUrl + "\"");
 
         itemIds = fetchItemIds(requestUrl);
+        if (itemIds == null) {
+            return null;
+        }
 
         for(int i = 0; i < itemIds.size(); i++) {
             params.clear();
@@ -99,12 +111,13 @@ public class ItemSearchService {
             params.put("AssociateTag","th0426-20");
             params.put("ResponseGroup", "Medium");
             requestUrl = helper.sign(params);
-            log.warn("Signed Medium Request is \"" + requestUrl + "\"");
+            log.trace("Signed Medium Request is \"" + requestUrl + "\"");
             AmazonItem item = fetchItemDetals(requestUrl);
             if (item != null) {
                 items.add(item);
             }
         }
+        cache.put(keywords, items);
         return items;
     }
 
@@ -124,7 +137,7 @@ public class ItemSearchService {
                 titles.add(nodes.item(i).getTextContent());
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return null;
         }
         return titles;
     }
@@ -159,7 +172,19 @@ public class ItemSearchService {
             if (node == null) return null;
             String url = node.getTextContent();
 
-            return new AmazonItem(title, image, price, url);
+            // url
+            node = doc.getElementsByTagName("Label").item(0);
+            String label;
+            if (node == null) label = "";
+            label = node.getTextContent();
+
+            // url
+            node = doc.getElementsByTagName("Binding").item(0);
+            String binding;
+            if (node == null) binding = "";
+            binding = node.getTextContent();
+
+            return new AmazonItem(title, image, price, url, label, binding);
         } catch (Exception e) {
             return null;
         }

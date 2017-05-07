@@ -85,6 +85,7 @@ public class SearchEngineServlet extends HttpServlet {
             contents = contents.replace("${num-results}", NumberFormat.getNumberInstance(Locale.US).format(numResults));
             contents = contents.replace("${num-seconds}", String.format("%.6f", seconds));
 
+            long t1 = System.nanoTime();
             // correction
             String correction;
             if ((correction = DictionaryService.correct(query)) != null) {
@@ -95,6 +96,7 @@ public class SearchEngineServlet extends HttpServlet {
                 contents = contents.replace("${correction}", "");
             }
             DictionaryService.put(query);
+            logger.warn("number of seconds used in correction " + 1.0 * (System.nanoTime() - t1) / 1000000000);
 
             // results
             String results = "";
@@ -107,11 +109,14 @@ public class SearchEngineServlet extends HttpServlet {
             int fixPage = numResults % 10 == 0 ? 1 : 0;
             contents = contents.replace("${indices}", indicesToHtml(query, p, numResults / 10 - fixPage));
 
+            t1 = System.nanoTime();
             // api
             contents = contents.replace("${api}", getAPI(query));
+            logger.warn("number of seconds used in api " + 1.0 * (System.nanoTime() - t1) / 1000000000);
 
             PrintWriter writer = response.getWriter();
             writer.println(contents);
+            logger.warn("number of seconds used in total" + 1.0 * (System.nanoTime() - time) / 1000000000);
         }
     }
 
@@ -150,8 +155,6 @@ public class SearchEngineServlet extends HttpServlet {
     private String resultToHtml(ResultEntry entry) {
         String html = "<a class=\"ui fluid card\" href=\"${location}\">\n" +
         "                <div class=\"content\">\n" +
-        "                    <i class=\"right floated like thumbs up icon\"></i>\n" +
-        "                    <i class=\"right floated star thumbs down icon\"></i>\n" +
         "                    <div class=\"header\" style=\"color:crimson;font-family:Cochin;font-size:20px\">${header}</div>\n" +
         "                    <div class=\"meta\" style=\"color:steelblue;font-family:Cochin;font-size:15px\">\n" +
         "                        <span class=\"category\">${location}</span>\n" +
@@ -180,7 +183,58 @@ public class SearchEngineServlet extends HttpServlet {
             }
         }
         ArrayList<AmazonItem> items = ItemSearchService.search(query);
+        if (items != null && items.size() > 0) {
+            res += amazonItemsToHtml(items);
+        }
         return res;
+    }
+
+    private String amazonItemsToHtml(ArrayList<AmazonItem> amazonItems) {
+        String html = "<div class=\"ui fluid link card\">\n" +
+                "    <div class=\"content\">\n" +
+                "        <div class=\"header\" style=\"color:steelblue;font-family:Cochin;font-size:20px\">Item Search | Amazon</div>\n" +
+                "        <div class=\"meta\" style=\"color:crimson;font-family:Cochin;font-size:15px\">\n" +
+                "            <span class=\"category\">https://www.amazon.com</span>\n" +
+                "        </div>\n" +
+                "        <div class=\"ui divider\"></div>\n" +
+                "        <div class=\"description\">\n" +
+                "            <div class=\"ui link divided items\">\n" +
+                "                ${items}" +
+                "            </div>\n" +
+                "        </div>\n" +
+                "    </div>\n" +
+                "</div>\n";
+        String items = "";
+        for (AmazonItem item : amazonItems) {
+            items += amazonToHtml(item);
+        }
+        html = html.replace("${items}", items);
+        return html;
+    }
+
+    private String amazonToHtml(AmazonItem amazonItem) {
+        String html = "<a class=\"item\" href=\"${url}\">\n" +
+        "                    <div class=\"ui tiny image\">\n" +
+        "                        <img src=\"${image}\">\n" +
+        "                    </div>\n" +
+        "                    <div class=\"middle aligned content\">\n" +
+        "                        <div class=\"header\" style=\"color:grey;font-family:Cochin;font-size:18px\">${title}</div>\n" +
+        "                        <div class=\"meta\">\n" +
+        "                            <span class=\"label\">${label}</span>\n" +
+        "                        </div>\n" +
+        "                        <div class=\"extra\">\n" +
+        "                            <div class=\"ui label\">${binding}</div>\n" +
+        "                            <div class=\"ui label blue\"><i class=\"dollar icon\"></i>${price}</div>\n" +
+        "                        </div>\n" +
+        "                    </div>\n" +
+        "                </a>\n";
+        html = html.replace("${url}", amazonItem.url);
+        html = html.replace("${image}", amazonItem.image);
+        html = html.replace("${title}", amazonItem.title);
+        html = html.replace("${label}", amazonItem.label);
+        html = html.replace("${binding}", amazonItem.binding);
+        html = html.replace("${price}", amazonItem.price.substring(1));
+        return html;
     }
 
     private String weatherToHtml(WeatherInfo weatherInfo) {

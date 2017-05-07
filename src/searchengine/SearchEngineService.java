@@ -18,7 +18,7 @@ public class SearchEngineService {
 
     private static Stemmer stemmer = new Stemmer();
 
-    private static LRUCache cache = new LRUCache(100); // LRU with 100 cached queries
+    private static LRUCache<ResultEntry[][]> cache = new LRUCache<>(100); // LRU with 100 cached queries
 
     private static final DBWrapper INDEXER = new DBWrapper(INDEXER_DB_DIR);
 
@@ -32,14 +32,16 @@ public class SearchEngineService {
         Map<String, Integer> wordsOccur = decomposeQuery(query);
         log.warn("Number of words in query " + wordsOccur.size());
 
-        if (cache.getOriginal(query) != null) {
+        if (cache.get(query) != null) {
             log.warn("The result is already cached");
-            return cache.getOriginal(query).length;
+            return cache.get(query)[0].length;
         } else {
             log.warn("Getting new result entries");
-            ResultEntry[] entries = getAllEntries(wordsOccur);
+            ResultEntry[][] entries = new ResultEntry[2][];
+            entries[0] = getAllEntries(wordsOccur);
+            entries[1] = new ResultEntry[entries[0].length];
             cache.put(query, entries);
-            return entries.length;
+            return entries[0].length;
         }
     }
 
@@ -59,16 +61,18 @@ public class SearchEngineService {
         Map<String, Integer> wordsOccur = decomposeQuery(query);
 
         // in case this is a new search query and has not been pre-searched, should not happen
-        if (cache.getOriginal(query) == null) {
-            ResultEntry[] entries = getAllEntries(wordsOccur);
+        if (cache.get(query) == null) {
+            ResultEntry[][] entries = new ResultEntry[2][];
+            entries[0] = getAllEntries(wordsOccur);
+            entries[1] = new ResultEntry[entries[0].length];
             cache.put(query, entries);
         }
 
         // out of bound, should not happen
-        if (rank >= cache.getOriginal(query).length) {
+        if (rank >= cache.get(query)[0].length) {
             return null;
         }
-        num = Math.min(num, cache.getOriginal(query).length - rank);
+        num = Math.min(num, cache.get(query)[0].length - rank);
 
         // cache sorted result
         if (!sorted(query, rank, rank + num - 1)) {
@@ -77,7 +81,7 @@ public class SearchEngineService {
 
         // get result
         ResultEntry[] resultEntries = new ResultEntry[num];
-        System.arraycopy(cache.getSorted(query), rank, resultEntries, 0, num);
+        System.arraycopy(cache.get(query)[1], rank, resultEntries, 0, num);
         return resultEntries;
     }
 
@@ -153,7 +157,6 @@ public class SearchEngineService {
     private static ArrayList<String> queryInvertedIndex(String word) {
         // DONE: query inverted index database
         Word w = INDEXER.getWord(word);
-        log.warn("Num docs in DB " + w.getDocs().size());
         ArrayList<String> res = new ArrayList<>();
         if (w != null) {
             res.addAll(w.getDocs());
@@ -179,8 +182,8 @@ public class SearchEngineService {
                     entry.numWordsTitle += w.getTitlePos(entry.documentId).size(); // TODO: USED THIS SOMEWHERE
                 }
                 entry.tfidf += w.getTf(entry.documentId) * w.getIdf(entry.documentId) * w.getIdf(entry.documentId) * words.get(word);
-                System.out.println(w.word + " tf " + w.getTf(entry.documentId));
-                System.out.println(w.word + " idf " + w.getIdf(entry.documentId));
+//                System.out.println(entry.documentId + " tf score:" + w.getTf(entry.documentId));
+//                System.out.println(entry.documentId + " idf score:" + w.getIdf(entry.documentId));
             }
         }
     }
@@ -224,7 +227,7 @@ public class SearchEngineService {
      * @param rankEnd ending rank
      */
     private static void sortAndCache(String query, int rankStart, int rankEnd) {
-        ResultEntry[] entries = cache.getOriginal(query);
+        ResultEntry[] entries = cache.get(query)[0];
         ResultEntry higherBound = findKthLargest(entries, rankStart);
         ResultEntry lowerBound = findKthLargest(entries, rankEnd);
         ResultEntry[] toSort = new ResultEntry[(rankEnd - rankStart + 1)];
@@ -235,7 +238,7 @@ public class SearchEngineService {
             }
         }
         Arrays.sort(toSort, (o1, o2) -> o2.compareTo(o1));
-        System.arraycopy(toSort, 0, cache.getSorted(query), rankStart, rankEnd - rankStart + 1);
+        System.arraycopy(toSort, 0, cache.get(query)[1], rankStart, rankEnd - rankStart + 1);
     }
 
     /**
@@ -294,7 +297,7 @@ public class SearchEngineService {
      * @return true if range is sorted and cached
      */
     private static boolean sorted(String query, int rankStart, int rankEnd) {
-        ResultEntry[] entries = cache.getSorted(query);
+        ResultEntry[] entries = cache.get(query)[1];
         for (int i = rankStart; i <= rankEnd; i++) {
             if (entries[i] == null) return false;
         }
