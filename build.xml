@@ -70,6 +70,7 @@
                     <include name="*.jar"/>
                 </fileset>
                 <pathelement location="lib/json-simple-1.1.1.jar"/>
+                <pathelement location="lib/commons-codec-1.9.jar"/>
             </classpath>
         </javac>
     </target>
@@ -146,6 +147,7 @@
                 <pathelement location="lib/je-6.2.31.jar"/>
                 <pathelement location="lib/json-simple-1.1.1.jar"/>
                 <pathelement location="${classes.dir}"/>
+                <pathelement location="lib/commons-codec-1.9.jar"/>
             </classpath>
             <arg value="8080"/>
             <arg value="."/>
