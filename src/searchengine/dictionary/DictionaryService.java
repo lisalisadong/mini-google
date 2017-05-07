@@ -1,14 +1,15 @@
 package searchengine.dictionary;
 
+import indexer.DB.DBWrapper;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import searchengine.dictionary.trie.Trie;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
+import static indexer.DB.DBWrapper.INDEXER_DB_DIR;
+import static indexer.IndexerMapWorker.STOP_SET_VALUES;
 
 /**
  * Created by QingxiaoDong on 5/6/17.
@@ -17,6 +18,7 @@ public class DictionaryService {
 
     private static Trie trie = new Trie();
     private static HashMap<String, Integer> freq = new HashMap<>();
+    private static final DBWrapper INDEXER = new DBWrapper(INDEXER_DB_DIR);
 
     /**
      * Init dictionary with cached queries and backup dictionary.
@@ -32,11 +34,20 @@ public class DictionaryService {
                 trie.insert(line);
                 freq.put(line, Integer.parseInt(reader.readLine()));
             }
-            new File(backup).createNewFile();
-            reader.close();
-            reader = new BufferedReader(new FileReader(backup));
-            while ((line = reader.readLine()) != null) {
-                String word = line.trim().toLowerCase();
+            Set<String> words = INDEXER.getAllWords();
+//            new File(backup).createNewFile();
+//            reader.close();
+//            reader = new BufferedReader(new FileReader(backup));
+//            while ((line = reader.readLine()) != null) {
+//                String word = line.trim().toLowerCase();
+//                trie.insert(word);
+//                freq.put(word, 0);
+//            }
+            for (String word : words) {
+                trie.insert(word);
+                freq.put(word, 0);
+            }
+            for (String word : STOP_SET_VALUES) {
                 trie.insert(word);
                 freq.put(word, 0);
             }

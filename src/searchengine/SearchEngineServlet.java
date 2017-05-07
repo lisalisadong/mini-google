@@ -8,12 +8,11 @@ import searchengine.weather.WeatherInfo;
 import searchengine.weather.WeatherSearchService;
 import utils.Logger;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -26,6 +25,12 @@ import java.util.Locale;
  */
 public class SearchEngineServlet extends HttpServlet {
     Logger logger = new Logger(getClass().getSimpleName());
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        SearchEngineService.init(getServletConfig().getInitParameter("page_rank_dat"));
+    }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {

@@ -71,6 +71,10 @@ public class DBWrapper {
 		myEnv.sync();
 	}
 
+	public Set<String> getAllWords() {
+		return wordIndex.map().keySet();
+	}
+
 	public void putDocInfo(DocInfo info) {
 		docInfoIndex.put(info);
 	}
