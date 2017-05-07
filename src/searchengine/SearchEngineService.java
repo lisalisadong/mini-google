@@ -76,7 +76,12 @@ public class SearchEngineService {
 
         // cache sorted result
         if (!sorted(query, rank, rank + num - 1)) {
+            long time = System.nanoTime();
             sortAndCache(query, rank, rank + num - 1);
+            for (int i = rank; i < rank + num; i++) {
+                queryDocumentDetail(cache.get(query)[1][i]);
+            }
+            log.warn("number of seconds used in sorting " + 1.0 * (System.nanoTime() - time) / 1000000000);
         }
 
         // get result
@@ -115,23 +120,27 @@ public class SearchEngineService {
      */
     private static ResultEntry[] getAllEntries(Map<String, Integer> words) {
         HashSet<String> documentIds = new HashSet<>();
+        HashMap<Word, Integer> wordMap = new HashMap<>();
         for (String word : words.keySet()) {
-            log.warn("!!!!!!!!!");
             // get all document ids related to the queried words
-            ArrayList<String> ids = queryInvertedIndex(word);
-            log.warn("num documents " + ids.size());
-            documentIds.addAll(ids);
+            Word w = INDEXER.getWord(word);
+            if (w != null) {
+                wordMap.put(w, words.get(word));
+                ArrayList<String> ids = queryInvertedIndex(w);
+                documentIds.addAll(ids);
+            }
         }
         ResultEntry[] entries = new ResultEntry[documentIds.size()];
         int i = 0;
+        long time = System.nanoTime();
         for (String id : documentIds) {
             entries[i] = new ResultEntry(id, words.size());
             queryPageRank(entries[i]);
-            queryTfIdf(entries[i], words);
+            queryTfIdf(entries[i], wordMap);
             processScore(entries[i]);
-            queryDocumentDetail(entries[i]);
             i++;
         }
+        log.warn("number of seconds used in getting page scores " + 1.0 * (System.nanoTime() - time) / 1000000000);
         return entries;
     }
 
@@ -151,16 +160,13 @@ public class SearchEngineService {
     /**
      * Query inverted index database to get all documentIds of the documents that contains
      * the word.
-     * @param word word
+     * @param w word
      * @return documentId of the documents that contains the word
      */
-    private static ArrayList<String> queryInvertedIndex(String word) {
+    private static ArrayList<String> queryInvertedIndex(Word w) {
         // DONE: query inverted index database
-        Word w = INDEXER.getWord(word);
         ArrayList<String> res = new ArrayList<>();
-        if (w != null) {
-            res.addAll(w.getDocs());
-        }
+        res.addAll(w.getDocs());
         return res;
     }
 
@@ -169,19 +175,19 @@ public class SearchEngineService {
      * @param words words to be searched
      * @param entry the result entry where the scores will be stored
      */
-    private static void queryTfIdf(ResultEntry entry, Map<String, Integer> words) {
+    private static void queryTfIdf(ResultEntry entry, Map<Word, Integer> words) {
         // DONE: query inverted index database (TF/IDF..)
         entry.tfidf = 0;
         entry.numWordsMatched = 0;
         entry.numWordsTitle = 0;
-        for (String word : words.keySet()) {
-            Word w = INDEXER.getWord(word);
+        for (Word w : words.keySet()) {
             if (w != null && w.inDoc(entry.documentId)) {
                 entry.numWordsMatched++;
-                if (w.getTitlePos(entry.documentId) != null) {
-                    entry.numWordsTitle += w.getTitlePos(entry.documentId).size(); // TODO: USED THIS SOMEWHERE
+                List<Integer> posTitle = w.getTitlePos(entry.documentId);
+                if (posTitle != null) {
+                    entry.numWordsTitle += posTitle.size(); // TODO: USED THIS SOMEWHERE
                 }
-                entry.tfidf += w.getTf(entry.documentId) * w.getIdf(entry.documentId) * w.getIdf(entry.documentId) * words.get(word);
+                entry.tfidf += w.getTf(entry.documentId) * w.getIdf(entry.documentId) * w.getIdf(entry.documentId) * words.get(w);
 //                System.out.println(entry.documentId + " tf score:" + w.getTf(entry.documentId));
 //                System.out.println(entry.documentId + " idf score:" + w.getIdf(entry.documentId));
             }
@@ -204,8 +210,7 @@ public class SearchEngineService {
      * @param entry result entry that is going to store the details about the document
      */
     private static void queryDocumentDetail(ResultEntry entry) {
-        // TODO: query database: get details about a document by documentID
-        // fake data!!!
+        // DONE: query database: get details about a document by documentID
         String[] info = INDEXER.getDocInfo(entry.documentId);
         entry.title = info[1];
         entry.location = info[0];
