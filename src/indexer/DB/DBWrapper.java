@@ -38,8 +38,8 @@ public class DBWrapper {
 	}
 
 	/**
-	 * call by constructor when the class is instantiated
-	 * set up the db environment
+	 * call by constructor when the class is instantiated set up the db
+	 * environment
 	 */
 	public void setup() {
 		try {
@@ -70,11 +70,11 @@ public class DBWrapper {
 		store.sync();
 		myEnv.sync();
 	}
-	
+
 	public void putDocInfo(DocInfo info) {
 		docInfoIndex.put(info);
 	}
-	
+
 	public String[] getDocInfo(String id) {
 		return docInfoIndex.get(id).getInfo();
 	}
@@ -82,22 +82,22 @@ public class DBWrapper {
 	public Word getWord(String word) {
 		return wordIndex.get(word);
 	}
-	
+
 	public Word addWord(String word) {
 		Word w = new Word(word);
 		wordIndex.put(w);
 		sync();
 		return w;
 	}
-	
+
 	public void putWord(Word word) {
 		wordIndex.put(word);
 	}
-	
+
 	public Set<String> getWordDocs(String word) {
 		return wordIndex.get(word).getDocs();
 	}
-	
+
 	public static void main(String[] args) {
 		DBWrapper db = new DBWrapper(INDEXER_DB_DIR);
 		int ii = 0;
@@ -113,11 +113,8 @@ public class DBWrapper {
 				String[] parts = line.split("\t");
 				// System.out.println(Arrays.toString(parts));
 				String w = parts[0];
-				if (w != last) {
-					if (word != null) {
-						db.putWord(word);
-					}
-					word = new Word(w);
+				if (!w.equals(last)) {
+					word = db.addWord(w);
 					last = w;
 				}
 				String docID = parts[1];
@@ -140,12 +137,13 @@ public class DBWrapper {
 					List<Integer> contentPos = new ArrayList<Integer>();
 					for (int i = 1; i < contents.length; i++) {
 						contentPos.add(Integer.parseInt(contents[i]));
-						// System.out.println("content: " + contentPos.get(i - 1));
+						// System.out.println("content: " + contentPos.get(i -
+						// 1));
 					}
 					word.addContentPos(docID, contentPos);
 				}
+				db.putWord(word);
 			}
-			db.putWord(word);
 			reader.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -155,10 +153,13 @@ public class DBWrapper {
 
 		db.sync();
 		db.close();
+	}
 
-		// test
+//	public static void main(String[] args) {
+//		DBWrapper db = new DBWrapper(INDEXER_DB_DIR);
+//		// test
 //		System.out.println(db.wordIndex.count());
-//		Word w = db.getWord("research");
+//		Word w = db.getWord("reshap");
 //		Set<String> docs = w.getDocs();
 //		for (String id : docs) {
 //			System.out.println("doc: " + id + " tf: " + w.getTf(id));
@@ -166,8 +167,7 @@ public class DBWrapper {
 //			for (int i : cont) {
 //				System.out.println("content pos: " + i);
 //			}
-//			
+//
 //		}
-	}
-	
+//	}
 }

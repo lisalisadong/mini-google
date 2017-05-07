@@ -30,7 +30,7 @@ public class DocInfoRetrival {
 					String url = parts[0];
 					Document doc = Jsoup.parse(parts[2]);
 					String title = doc.title();
-					String description = doc.body().text();
+					String description = "";
 					Elements meta = doc.select("meta");
 					if (meta.attr("name").equals("description")) {
 						description = meta.attr("content");
