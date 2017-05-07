@@ -1,4 +1,6 @@
 .jp
+.tokyo
+.ac
 .fr
 .tw
 .ht
