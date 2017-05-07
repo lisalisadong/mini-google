@@ -33,5 +33,6 @@
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.21.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.7.21.jar"/>
 	<classpathentry kind="lib" path="lib/spark-core-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/aws-java-sdk-1.11.126.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
