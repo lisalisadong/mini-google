@@ -207,5 +207,23 @@
             <arg value="${id}"/>
 	    </java>
 	</target>
+	
+	<target name="show-status" depends="compile-crawler" description="Display worker status">
+
+		<property name="dbpath" value="../db1" />
+		<property name="verbose" value="1" />
+        <java classname="crawler.analysis.ShowStatus">
+            <classpath>
+                <pathelement location="lib/webserver.jar"/>
+                <pathelement location="lib/servlet-api.jar"/>
+            	<pathelement location="lib/servlet-api-3.1.jar"/>
+                <pathelement location="lib/je-6.2.31.jar"/>
+                <pathelement location="${classes.dir}"/>
+            </classpath>
+        	<arg value="${dbpath}"/>
+        	<arg value="${verbose}"/>
+	    </java>
+		
+	</target>
 
 </project>

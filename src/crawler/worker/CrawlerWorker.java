@@ -182,11 +182,18 @@ public class CrawlerWorker extends WorkerServer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
+		worker.writeSnapshot();
 	}
 	
 
-    private void startPingThread() {
+    public void writeSnapshot() {
+		db.saveWorkerStatus(workerStatus);
+		crawler.writeSnapShot();
+		db.sync();
+	}
+
+	private void startPingThread() {
 		Thread backgroundThread = new Thread(){
 			public void run() {
 				while(isRunning) {
