@@ -1,6 +1,5 @@
 package searchengine;
 
-import com.amazonaws.services.dynamodbv2.xspec.S;
 import indexer.DB.DBWrapper;
 import indexer.DB.Word;
 import utils.Logger;
@@ -38,7 +37,7 @@ public class SearchEngineService {
             return cache.getOriginal(query).length;
         } else {
             log.warn("Getting new result entries");
-            ResultEntry[] entries = getAllEntries(wordsOccur.keySet());
+            ResultEntry[] entries = getAllEntries(wordsOccur);
             cache.put(query, entries);
             return entries.length;
         }
@@ -61,7 +60,7 @@ public class SearchEngineService {
 
         // in case this is a new search query and has not been pre-searched, should not happen
         if (cache.getOriginal(query) == null) {
-            ResultEntry[] entries = getAllEntries(wordsOccur.keySet());
+            ResultEntry[] entries = getAllEntries(wordsOccur);
             cache.put(query, entries);
         }
 
@@ -110,9 +109,9 @@ public class SearchEngineService {
      * @param words words to be searched
      * @return all candidate result entries
      */
-    private static ResultEntry[] getAllEntries(Set<String> words) {
+    private static ResultEntry[] getAllEntries(Map<String, Integer> words) {
         HashSet<String> documentIds = new HashSet<>();
-        for (String word : words) {
+        for (String word : words.keySet()) {
             // get all document ids related to the queried words
             ArrayList<String> ids = queryInvertedIndex(word);
             documentIds.addAll(ids);
@@ -120,7 +119,7 @@ public class SearchEngineService {
         ResultEntry[] entries = new ResultEntry[documentIds.size()];
         int i = 0;
         for (String id : documentIds) {
-            entries[i] = new ResultEntry(id);
+            entries[i] = new ResultEntry(id, words.size());
             queryPageRank(entries[i]);
             queryTfIdf(entries[i], words);
             processScore(entries[i]);
@@ -166,13 +165,19 @@ public class SearchEngineService {
      * @param words words to be searched
      * @param entry the result entry where the scores will be stored
      */
-    private static void queryTfIdf(ResultEntry entry, Set<String> words) {
+    private static void queryTfIdf(ResultEntry entry, Map<String, Integer> words) {
         // DONE: query inverted index database (TF/IDF..)
         entry.tfidf = 0;
-        for (String word : words) {
+        entry.numWordsMatched = 0;
+        entry.numWordsTitle = 0;
+        for (String word : words.keySet()) {
             Word w = INDEXER.getWord(word);
             if (w != null && w.inDoc(entry.documentId)) {
-                entry.tfidf += w.getTf(entry.documentId) * w.getIdf(entry.documentId);
+                entry.numWordsMatched++;
+                if (w.getTitlePos(entry.documentId) != null) {
+                    entry.numWordsTitle += w.getTitlePos(entry.documentId).size(); // TODO: USED THIS SOMEWHERE
+                }
+                entry.tfidf += w.getTf(entry.documentId) * w.getIdf(entry.documentId) * w.getIdf(entry.documentId) * words.get(word);
                 System.out.println(w.word + " tf " + w.getTf(entry.documentId));
                 System.out.println(w.word + " idf " + w.getIdf(entry.documentId));
             }

@@ -15,12 +15,16 @@ public class ResultEntry {
     String title;
     String location;
     String digest;
+    int numWordsTotal;
+    int numWordsMatched;
+    int numWordsTitle;
     double tfidf;
     double pageRank;
     public double score;
 
-    public ResultEntry(String id) {
+    public ResultEntry(String id, int numWords) {
         documentId = id;
+        numWordsTotal = numWords;
     }
 
     public int compareTo(ResultEntry other) {
