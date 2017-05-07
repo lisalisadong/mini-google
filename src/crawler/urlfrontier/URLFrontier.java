@@ -64,17 +64,13 @@ public class URLFrontier {
     			
     			System.out.println("[seed]: http://www.upenn.edu/");
     		} else if(CrawlerWorker.WORKER_ID.equals("3")) {
-    			addURL("https://en.wikipedia.org/wiki/Portal:Contents");
     			addURL("https://www.google.com/");
     			
-    			System.out.println("[seed]: https://en.wikipedia.org/wiki/Portal:Contents");
     			System.out.println("[seed]: https://www.google.com/");
     		} else if(CrawlerWorker.WORKER_ID.equals("4")) {
     			addURL("https://www.amazon.com/");
-    			addURL("http://www.ebay.com/");
     			
     			System.out.println("[seed]: https://www.amazon.com/");
-    			System.out.println("[seed]: http://www.ebay.com/");
     		} else if(CrawlerWorker.WORKER_ID.equals("5")) {
     			addURL("https://www.bloomberg.com/");
     			addURL("http://www.cnn.com/");
@@ -95,6 +91,14 @@ public class URLFrontier {
     			addURL("https://www.reddit.com/");
 
     			System.out.println("[seed]: https://www.reddit.com/");
+    		} else if(CrawlerWorker.WORKER_ID.equals("9")) {
+    			addURL("http://www.ebay.com/");
+
+    			System.out.println("[seed]: http://www.ebay.com/");
+    		} else if(CrawlerWorker.WORKER_ID.equals("10")) {
+    			addURL("https://en.wikipedia.org/wiki/Portal:Contents");
+
+    			System.out.println("[seed]: https://en.wikipedia.org/wiki/Portal:Contents");
     		}  else {
     			addURL("https://www.facebook.com/");
     		}
