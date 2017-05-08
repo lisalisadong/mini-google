@@ -251,6 +251,18 @@
         	<arg line="${args}" />
         </java>
     </target>
+
+    <target name="worddb" depends="compile-indexer" description="Index result to BDB">
+        <java classname="indexer.DB.OutputToDB">
+            <classpath>
+                <fileset dir="./lib">
+                    <include name="*.jar"/>
+                </fileset>
+                <pathelement location="${classes.dir}"/>
+            </classpath>
+            <arg line="${args}" />
+        </java>
+    </target>
 	
 	<target name="docdb" depends="compile-indexer" description="Index result to BDB">
         <java classname="indexer.DB.DocInfoRetrival">
