@@ -52,48 +52,48 @@ public class DocInfoRetrival {
 		}
 	}
 
-	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.out.println("input: [input_directory]");
-			System.exit(1);
-		}
-		inputDir = args[0];
-		db = new DBWrapper(DBWrapper.INDEXER_DB_DIR);
-		File folder = new File(inputDir);
-		File[] listOfFiles = folder.listFiles();
-		for (File file : listOfFiles) {
-			queue.add(file);
-		}
-
-		Thread[] pool = new Thread[20];
-		for (int i = 0; i < pool.length; i++) {
-			pool[i] = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					while (!queue.isEmpty()) {
-						File file = queue.poll();
-						handle(file);
-					}
-				}
-			});
-			pool[i].start();
-		}
-		for (Thread t : pool) {
-			try {
-				t.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		db.sync();
-		db.close();
-	}
-	
 //	public static void main(String[] args) {
+//		if (args.length != 1) {
+//			System.out.println("input: [input_directory]");
+//			System.exit(1);
+//		}
+//		inputDir = args[0];
 //		db = new DBWrapper(DBWrapper.INDEXER_DB_DIR);
-//		String[] info = db.getDocInfo("84296");
-//		System.out.println(Arrays.toString(info));
+//		File folder = new File(inputDir);
+//		File[] listOfFiles = folder.listFiles();
+//		for (File file : listOfFiles) {
+//			queue.add(file);
+//		}
+//
+//		Thread[] pool = new Thread[20];
+//		for (int i = 0; i < pool.length; i++) {
+//			pool[i] = new Thread(new Runnable() {
+//				@Override
+//				public void run() {
+//					while (!queue.isEmpty()) {
+//						File file = queue.poll();
+//						handle(file);
+//					}
+//				}
+//			});
+//			pool[i].start();
+//		}
+//		for (Thread t : pool) {
+//			try {
+//				t.join();
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		db.sync();
+//		db.close();
 //	}
+	
+	public static void main(String[] args) {
+		db = new DBWrapper(DBWrapper.INDEXER_DB_DIR);
+		System.out.println("database word is " +  db.wordIndex.map().size());
+		System.out.println("database size is " +  db.docInfoIndex.map().size());
+	}
 
 }
