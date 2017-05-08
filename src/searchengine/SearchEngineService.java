@@ -167,7 +167,7 @@ public class SearchEngineService {
      */
     private static void processScore(ResultEntry entry) {
         // TODO: TUNE THE ALGORITHM!!!
-        entry.score = entry.pageRank * entry.tfidf;
+        entry.score = entry.pageRank * entry.tfidf * entry.numWordsTitle;
     }
 
     /******************************************
