@@ -237,7 +237,7 @@ public class SearchEngineService {
 //                "The TF-IDF score is [" + entry.tfidf + "]. " +
 //                "The total score is [" + entry.score + "].";
         entry.digest = info[2];
-        if (entry.digest.isEmpty() || entry.digest.length() < 50) {
+        if (entry.digest == null || entry.digest.length() < 50) {
             queryPreview(entry);
         }
     }
