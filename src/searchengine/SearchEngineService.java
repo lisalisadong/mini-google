@@ -31,6 +31,8 @@ public class SearchEngineService {
 
     private static Map<String, Double> pageRank = new HashMap<>();
 
+    private static Set<String> docs = INDEXER.docInfoIndex.map().keySet();
+
 
     public static void init(String pageRankFile) {
         loadPageRank(pageRankFile);
@@ -181,7 +183,11 @@ public class SearchEngineService {
     private static ArrayList<String> queryInvertedIndex(Word w) {
         // DONE: query inverted index database
         ArrayList<String> res = new ArrayList<>();
-        res.addAll(w.getDocs());
+        for (String id : w.getDocs()) {
+            if (docs.contains(id)) {
+                res.add(id);
+            }
+        }
         return res;
     }
 
