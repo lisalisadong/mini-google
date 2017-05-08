@@ -47,12 +47,12 @@ public class DictionaryService {
             for (String word : words) {
                 if (freq.containsKey(word)) continue;
                 trie.insert(word);
-                freq.put(word, 0);
+                freq.put(word, 2);
             }
             for (String word : STOP_SET_VALUES) {
                 if (freq.containsKey(word)) continue;
                 trie.insert(word);
-                freq.put(word, 0);
+                freq.put(word, 2);
             }
             reader.close();
         } catch (FileNotFoundException e) {
