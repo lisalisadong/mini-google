@@ -196,11 +196,12 @@ public class SearchEngineService {
     private static ArrayList<String> queryInvertedIndex(Word w) {
         // DONE: query inverted index database
         ArrayList<String> res = new ArrayList<>();
-        for (String id : w.getDocs()) {
-            if (docs.containsKey(id) && docs.get(id).getTitle().length() > 1) {
-                res.add(id);
-            }
-        }
+//        for (String id : w.getDocs()) {
+//            if (docs.containsKey(id) && docs.get(id).getTitle().length() > 1) {
+//                res.add(id);
+//            }
+//        }
+        res.addAll(w.getDocs());
         return res;
     }
 
