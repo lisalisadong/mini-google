@@ -27,8 +27,8 @@ public class CFRecordReader extends RecordReader<Key, Text> {
 		this.index = index;
 		this.split = split;
 		this.conf = context.getConfiguration();
-		this.fileName = split.getLength() == 0 ? "" : this.split.getPath(index).getName();
-//		String fileName = this.split.getPath(index).getName();
+//		this.fileName = split.getLength() == 0 ? "" : this.split.getPath(index).getName();
+		this.fileName = this.split.getPath(index).getName();
         this.key = new Key();
         this.value = new Text();
 	}
@@ -64,6 +64,7 @@ public class CFRecordReader extends RecordReader<Key, Text> {
 			fileProcessed = true;
 			return false;
 		}
+		key.docID = fileName;
 		int length = (int) split.getLength(index);
 		byte[] contents = new byte[length];
 		Path path = split.getPath(index);
