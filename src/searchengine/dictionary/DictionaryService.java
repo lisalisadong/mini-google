@@ -1,6 +1,7 @@
 package searchengine.dictionary;
 
 import indexer.DB.DBWrapper;
+import indexer.DB.Word;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import searchengine.dictionary.trie.Trie;
@@ -26,15 +27,15 @@ public class DictionaryService {
      * @param backup backup dictionary
      */
     public static void init(String cache, String backup) {
-        try {
-            String line;
-            new File(cache).createNewFile();
-            BufferedReader reader = new BufferedReader(new FileReader(cache));
-            while ((line = reader.readLine()) != null) {
-                trie.insert(line);
-                freq.put(line, Integer.parseInt(reader.readLine()));
-            }
-            Set<String> words = INDEXER.getAllWords();
+//        try {
+//            String line;
+//            new File(cache).createNewFile();
+//            BufferedReader reader = new BufferedReader(new FileReader(cache));
+//            while ((line = reader.readLine()) != null) {
+//                trie.insert(line);
+//                freq.put(line, Integer.parseInt(reader.readLine()));
+//            }
+            Collection<Word> words = INDEXER.getAllWords();
 //            new File(backup).createNewFile();
 //            reader.close();
 //            reader = new BufferedReader(new FileReader(backup));
@@ -43,20 +44,20 @@ public class DictionaryService {
 //                trie.insert(word);
 //                freq.put(word, 0);
 //            }
-            for (String word : words) {
-                trie.insert(word);
-                freq.put(word, 0);
+            for (Word word : words) {
+                trie.insert(word.word);
+                freq.put(word.word, word.getDocs().size());
             }
             for (String word : STOP_SET_VALUES) {
                 trie.insert(word);
-                freq.put(word, 0);
+                freq.put(word, 10000);
             }
-            reader.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//            reader.close();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     /**
@@ -84,7 +85,7 @@ public class DictionaryService {
         String[] correction = new String[words.length];
         boolean corrected = false;
         for (int i = 0; i < words.length; i++) {
-            if (freq.containsKey(words[i])) {
+            if (freq.containsKey(words[i]) && freq.get(words[i]) > 1000) {
                 correction[i] = words[i];
                 continue;
             }
@@ -92,7 +93,7 @@ public class DictionaryService {
             String corrWord = words[i];
             for (String word : freq.keySet()) {
                 int dist = editDistance(word, words[i]);
-                if (dist < distance) {
+                if (dist < distance && dist <= 3 && freq.get(word) > 1000) {
                     distance = dist;
                     corrWord = word;
                 }
@@ -118,22 +119,22 @@ public class DictionaryService {
      * @param cache cache file
      */
     public static void destroy(String cache) {
-        try {
-            new File(cache).createNewFile();
-            PrintWriter writer = new PrintWriter(new FileWriter(cache));
-            for (Map.Entry<String, Integer> entry : freq.entrySet()) {
-                if (entry.getValue() > 0) {
-                    writer.println(entry.getKey());
-                    writer.println(entry.getValue());
-                }
-            }
-            writer.flush();
-            writer.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            new File(cache).createNewFile();
+//            PrintWriter writer = new PrintWriter(new FileWriter(cache));
+//            for (Map.Entry<String, Integer> entry : freq.entrySet()) {
+//                if (entry.getValue() > 0) {
+//                    writer.println(entry.getKey());
+//                    writer.println(entry.getValue());
+//                }
+//            }
+//            writer.flush();
+//            writer.close();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     /**
@@ -200,10 +201,5 @@ public class DictionaryService {
             }
         }
         return dp[word1.length()][word2.length()];
-    }
-
-    public static void main(String[] args) {
-        DictionaryService.init("queries", "words.txt");
-        System.out.println(DictionaryService.correct("priority queue"));
     }
 }

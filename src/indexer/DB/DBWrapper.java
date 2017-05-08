@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -76,8 +77,8 @@ public class DBWrapper {
 		myEnv.sync();
 	}
 
-	public Set<String> getAllWords() {
-		return wordIndex.map().keySet();
+	public Collection<Word> getAllWords() {
+		return wordIndex.map().values();
 	}
 
 	public void putDocInfo(DocInfo info) {
