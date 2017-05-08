@@ -2,6 +2,8 @@ package searchengine;
 
 import indexer.DB.DBWrapper;
 import indexer.DB.Word;
+import indexer.WordTokenizer;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import utils.Logger;
@@ -12,6 +14,7 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 import static indexer.DB.DBWrapper.INDEXER_DB_DIR;
+import static indexer.IndexerMapWorker.STOP_LIST;
 
 /**
  * Created by QingxiaoDong on 4/29/17.
@@ -199,7 +202,7 @@ public class SearchEngineService {
                 if (posTitle != null) {
                     entry.numWordsTitle += posTitle.size(); // TODO: USED THIS SOMEWHERE
                 }
-                entry.tfidf += w.getTf(entry.documentId) * w.getIdf(entry.documentId) * w.getIdf(entry.documentId) * words.get(w);
+                entry.tfidf += w.getTf(entry.documentId) * w.getIdf() * w.getIdf() * words.get(w);
 //                System.out.println(entry.documentId + " tf score:" + w.getTf(entry.documentId));
 //                System.out.println(entry.documentId + " idf score:" + w.getIdf(entry.documentId));
             }
@@ -233,21 +236,25 @@ public class SearchEngineService {
         entry.digest = info[2] + " This is a fake digest. The page rank is [" + entry.pageRank + "]. " +
                 "The TF-IDF score is [" + entry.tfidf + "]. " +
                 "The total score is [" + entry.score + "].";
+        if (entry.digest.isEmpty() || entry.digest.length() < 50) {
+            queryPreview(entry);
+        }
     }
 
-    private static void queryPreview(ResultEntry entry, Set<Word> words) {
-        double maxIdf = 0;
-        Word impWord = null;
-        for (Word w : words) {
-            if (w.inDoc(entry.documentId) && w.getIdf(entry.documentId) > maxIdf) {
-                maxIdf = w.getIdf(entry.documentId);
-                impWord = w;
-            }
+    /**
+     * Get a preview of the document.
+     * @param entry result entry
+     */
+    private static void queryPreview(ResultEntry entry) {
+        Connection connection = Jsoup.connect(entry.location);
+        Document doc = null;
+        try {
+            doc = connection.get();
+            String text = doc.body().text();
+            entry.digest = text.substring(0, Math.min(100, text.length())) + "...";
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        entry.position = impWord.getContentPos(entry.documentId).get(0);
-        Document doc = Jsoup.parse(entry.location);
-        String text = doc.body().text();
-        System.out.println(text.substring(entry.position, entry.position + 10));
     }
 
 
