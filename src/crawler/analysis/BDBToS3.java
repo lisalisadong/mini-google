@@ -32,7 +32,8 @@ public class BDBToS3 {
 	
 	static AmazonS3 awsClient;
 	
-	static String INDEXER_BUCKET = "crawler-g02";
+//	static String INDEXER_BUCKET = "crawler-g02";	// for 40w
+	static String INDEXER_BUCKET = "crawler-indexer-10w";	// for 40w
 
 	static String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
 	static String secretKey = "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";
@@ -60,7 +61,7 @@ public class BDBToS3 {
 		db.setup();
 
 		long start = System.currentTimeMillis();
-		logEvent("start uploading from " + args[0] + " to S3");
+		logEvent("start uploading from " + args[0] + " to S3 " + INDEXER_BUCKET);
 		for(String url: db.pIdx.map().keySet()) {
 
 			try {

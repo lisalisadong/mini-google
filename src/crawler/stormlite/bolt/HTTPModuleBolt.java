@@ -22,6 +22,7 @@ import com.amazonaws.Protocol;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -71,13 +72,12 @@ public class HTTPModuleBolt implements IRichBolt {
 	Fields schema = new Fields("page");
 	
 	/* s3 client */
-	static AmazonS3 awsClient;
-	static String INDEXER_BUCKET = "crawler-indexer-10w";
-
-	static String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
-	static String secretKey = "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";
-	static AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-	static ClientConfiguration clientConfig = new ClientConfiguration();
+//	static AmazonS3 awsClient;
+//	
+//	static String INDEXER_BUCKET = "crawler-g02";
+//
+//	static String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
+//	static String secretKey = "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";
 	
 	DBWrapper db;
 	
@@ -98,7 +98,7 @@ public class HTTPModuleBolt implements IRichBolt {
    /**
     * Initialization, just saves the output stream destination
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({ "unchecked", "deprecation" })
    @Override
    public void prepare(Map stormConf, 
    		TopologyContext context, OutputCollector collector) 
@@ -113,8 +113,6 @@ public class HTTPModuleBolt implements IRichBolt {
        } catch (IOException e) {
     	   e.printStackTrace();
        }
-       
-       clientConfig.setProtocol(Protocol.HTTP);
    }
 
    /**
@@ -173,31 +171,27 @@ public class HTTPModuleBolt implements IRichBolt {
 			   collector.emit(new Values<Object>(p));
 		   } 
 		   
-//		   else {
-//			   db.savePage(p);
-//			   db.sync();
-//		   }
-		   
-		   db.savePage(p);
-		   db.sync();
+		   else {
+			   db.savePage(p);
+			   db.sync();
+		   }
 		   
 		   /* upload to s3 */
-		   start = System.currentTimeMillis();
-		   ObjectMetadata meta = new ObjectMetadata();
-			
-		   String key = hashUrl(url);
-		   StringBuilder sb = new StringBuilder();
-		   sb.append(url + "\t");
-		   sb.append(p.getContentType() + "\t");
-		   sb.append(new String(p.getContent()));
-		   meta.setContentType("text/plain");
-		   
-		   byte[] byteToSend = sb.toString().getBytes();
-		   meta.setContentLength(byteToSend.length);
-		   ByteArrayInputStream contentToWrite = new ByteArrayInputStream(byteToSend);
-		   awsClient.putObject(new PutObjectRequest(INDEXER_BUCKET, key, contentToWrite, meta)
-					   .withCannedAcl(CannedAccessControlList.PublicRead));
-		   Crawler.logEvent("finished uploading " + url, start);
+//		   start = System.currentTimeMillis();
+//		   ObjectMetadata meta = new ObjectMetadata();
+//		   String key = hashUrl(url);
+//		   StringBuilder sb = new StringBuilder();
+//		   sb.append(url + "\t");
+//		   sb.append(p.getContentType() + "\t");
+//		   sb.append(new String(p.getContent()));
+//		   meta.setContentType("text/plain");
+//		   
+//		   byte[] byteToSend = sb.toString().getBytes();
+//		   meta.setContentLength(byteToSend.length);
+//		   ByteArrayInputStream contentToWrite = new ByteArrayInputStream(byteToSend);
+//		   awsClient.putObject(new PutObjectRequest(INDEXER_BUCKET, key, contentToWrite, meta)
+//					   .withCannedAcl(CannedAccessControlList.PublicRead));
+//		   Crawler.logEvent("finished uploading " + url, start);
 		   
 	   }
 	   

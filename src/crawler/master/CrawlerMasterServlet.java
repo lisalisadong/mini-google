@@ -160,7 +160,8 @@ public class CrawlerMasterServlet extends HttpServlet {
 		  config.put("workerIndex", String.valueOf(i++));
 		  HttpURLConnection conn = sendJob(dest, "POST", config, "setup", 
 					mapper.writerWithDefaultPrettyPrinter().writeValueAsString(job));
-		  if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) 
+		  int resCode = conn.getResponseCode();
+		  if (resCode != HttpURLConnection.HTTP_OK) 
 		  {	
 			  throw new RuntimeException("Job definition request failed");
 		  }

@@ -81,7 +81,7 @@ public class Crawler {
     public static int PAGE_CACHE_SIZE = 65536;
     public static int NUM_TO_WRITE_SNAPSHOT_FOR_PAGE = 1000;
     
-    public static String DBPath = "../db_10W_";
+    public static String DBPath = "../db_10w_";
     public static DBWrapper pageDB;
     
     public static RobotManager robotManager;

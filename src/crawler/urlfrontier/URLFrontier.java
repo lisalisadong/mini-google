@@ -67,14 +67,15 @@ public class URLFrontier {
     			addURL("http://popurls.com/");
     			addURL("https://philadelphia.craigslist.org/");
     			
-    			System.out.println("[seed]: https://philadelphia.craigslist.org/");
     			System.out.println("[seed]: http://popurls.com/");
     			System.out.println("[seed]: https://www.yahoo.com/");
     			System.out.println("[seed]: http://www.upenn.edu/");
     		} else if(CrawlerWorker.WORKER_ID.equals("3")) {
     			addURL("https://www.google.com/");
     			addURL("https://www.whatsapp.com/");
-    			
+    			addURL("https://philadelphia.craigslist.org/");
+
+    			System.out.println("[seed]: https://philadelphia.craigslist.org/");
     			System.out.println("[seed]: https://www.whatsapp.com/");
     			System.out.println("[seed]: https://www.google.com/");
     		} else if(CrawlerWorker.WORKER_ID.equals("4")) {
@@ -109,15 +110,23 @@ public class URLFrontier {
     			addURL("http://www.oracle.com/index.html");
     			addURL("http://www.espn.com/");
     			addURL("http://movielikers.net/");
+    			addURL("https://en.wikipedia.org/wiki/Apple_Inc.");
+    			addURL("https://en.wikipedia.org/wiki/Alan_Turing");
     			
+    			System.out.println("[seed]: https://en.wikipedia.org/wiki/Alan_Turing");
+    			System.out.println("[seed]: https://en.wikipedia.org/wiki/Apple_Inc.");
     			System.out.println("[seed]: http://movielikers.net/");
     			System.out.println("[seed]: http://www.espn.com/");
     			System.out.println("[seed]: http://www.oracle.com/index.html");
     		} else if(CrawlerWorker.WORKER_ID.equals("8")) {
     			addURL("https://www.reddit.com/");
     			addURL("https://en.wikipedia.org/wiki/List_of_most_popular_websites");
+    			addURL("https://en.wikipedia.org/wiki/Main_Page");
+    			addURL("https://en.wikipedia.org/wiki/Tom_Cruise");
     			addURL("https://www.pinterest.com/");
     			
+    			System.out.println("[seed]: https://en.wikipedia.org/wiki/Tom_Cruise");
+    			System.out.println("[seed]: https://en.wikipedia.org/wiki/Main_Page");
     			System.out.println("[seed]: https://www.pinterest.com/");
     			System.out.println("[seed]: https://en.wikipedia.org/wiki/List_of_most_popular_websites");
     			System.out.println("[seed]: https://www.reddit.com/");
