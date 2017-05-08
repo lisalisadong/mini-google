@@ -10,3 +10,11 @@
 .ru
 /robots.txt
 .tr
+.kp
+.kr
+.kh
+.sa
+.es
+.iq
+.vn
+.mo

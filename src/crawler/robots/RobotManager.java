@@ -65,7 +65,7 @@ public class RobotManager {
 	 * taboo host
 	 */
 	public void confignoCrawlHosts() {
-		noCrawlHosts.add("mailto");
+//		noCrawlHosts.add("mailto");
 		noCrawlHosts.add("pinayot.com");
 		noCrawlHosts.add("thefappening.so");
 		noCrawlHosts.add("jizzbo.com");
@@ -77,6 +77,8 @@ public class RobotManager {
 		noCrawlHosts.add("artgoldhammer.blogspot.com:80");
 		noCrawlHosts.add("ac360.blogs.cnn.com");
 		noCrawlHosts.add("www.dreamwidth.org");
+		noCrawlHosts.add("115630.258ww.com");
+		
 	}
 	
 	private String getHostName(String url) {

@@ -105,7 +105,7 @@ public class BDBToS3 {
 		System.out.println("[" + event + "]" );
 	}
 	
-	private static String hashUrl(String url) {
+	public static String hashUrl(String url) {
       try {
           MessageDigest digest = MessageDigest.getInstance("MD5");
           digest.reset();

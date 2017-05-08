@@ -2,14 +2,29 @@ package crawler.stormlite.bolt;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.xml.bind.DatatypeConverter;
+
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.Protocol;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 
 import crawler.Crawler;
 import crawler.client.Client;
@@ -55,13 +70,16 @@ public class HTTPModuleBolt implements IRichBolt {
 	
 	Fields schema = new Fields("page");
 	
-	DBWrapper db;
+	/* s3 client */
+	static AmazonS3 awsClient;
+	static String INDEXER_BUCKET = "crawler-indexer-10w";
+
+	static String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
+	static String secretKey = "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";
+	static AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+	static ClientConfiguration clientConfig = new ClientConfiguration();
 	
-//	AmazonS3 awsClient;
-//	  String BUCKET = "crawler-indexer-g02";
-//	
-//	  String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
-//	  String secretKey = "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";
+	DBWrapper db;
 	
    /**
     * To make it easier to debug: we have a unique ID for each
@@ -95,6 +113,8 @@ public class HTTPModuleBolt implements IRichBolt {
        } catch (IOException e) {
     	   e.printStackTrace();
        }
+       
+       clientConfig.setProtocol(Protocol.HTTP);
    }
 
    /**
@@ -151,10 +171,34 @@ public class HTTPModuleBolt implements IRichBolt {
 		   if(p == null) return;
 		   if("text/html".equals(p.getContentType())) {
 			   collector.emit(new Values<Object>(p));
-		   } else {
-			   db.savePage(p);
-			   db.sync();
-		   }
+		   } 
+		   
+//		   else {
+//			   db.savePage(p);
+//			   db.sync();
+//		   }
+		   
+		   db.savePage(p);
+		   db.sync();
+		   
+		   /* upload to s3 */
+		   start = System.currentTimeMillis();
+		   ObjectMetadata meta = new ObjectMetadata();
+			
+		   String key = hashUrl(url);
+		   StringBuilder sb = new StringBuilder();
+		   sb.append(url + "\t");
+		   sb.append(p.getContentType() + "\t");
+		   sb.append(new String(p.getContent()));
+		   meta.setContentType("text/plain");
+		   
+		   byte[] byteToSend = sb.toString().getBytes();
+		   meta.setContentLength(byteToSend.length);
+		   ByteArrayInputStream contentToWrite = new ByteArrayInputStream(byteToSend);
+		   awsClient.putObject(new PutObjectRequest(INDEXER_BUCKET, key, contentToWrite, meta)
+					   .withCannedAcl(CannedAccessControlList.PublicRead));
+		   Crawler.logEvent("finished uploading " + url, start);
+		   
 	   }
 	   
 //	   CrawledPage p = downloadPage(url);
@@ -163,6 +207,20 @@ public class HTTPModuleBolt implements IRichBolt {
 //		   Crawler.logEvent("emit " + url);
 //	   }
    }
+   
+   public static String hashUrl(String url) {
+      try {
+          MessageDigest digest = MessageDigest.getInstance("MD5");
+          digest.reset();
+          digest.update(url.getBytes("utf-8"));
+          return DatatypeConverter.printHexBinary(digest.digest());
+      } catch (NoSuchAlgorithmException e) {
+          e.printStackTrace();
+      } catch (UnsupportedEncodingException e) {
+          e.printStackTrace();
+      }
+      return null;
+  }
 
    public CrawledPage downloadPage(String url) {
 	   long start = System.currentTimeMillis();
@@ -210,7 +268,7 @@ public class HTTPModuleBolt implements IRichBolt {
 	   if(time > 8000) {
 		   
 		   try {
-			   bw.write("[********time consuming url: " + url + "**************]: " + time + "ms");
+			   bw.write("[********time consuming url: " + url + "**************]: " + time + "ms\n");
 		   } catch (IOException e) {
 			   e.printStackTrace();
 		   }
