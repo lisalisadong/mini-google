@@ -112,7 +112,9 @@ public class DBWrapper {
 			Word word = null;
 			while ((line = reader.readLine()) != null) {
 				// System.out.println(line);
-				System.out.println(ii);
+				if (ii % 10000 == 0) {
+					System.out.println(ii);
+				}
 				ii += 1;
 				String[] parts = line.split("\t");
 				// System.out.println(Arrays.toString(parts));
