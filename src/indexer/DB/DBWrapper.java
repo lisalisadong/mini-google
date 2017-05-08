@@ -70,14 +70,8 @@ public class DBWrapper {
 		myEnv.sync();
 	}
 
-	public Set<String> getPopularWords() {
-		Set<String> words = new HashSet<>();
-		for (Map.Entry<String, Word> entry : wordIndex.map().entrySet()) {
-			if (entry.getValue().getDocs().size() > 5000) {
-				words.add(entry.getKey());
-			}
-		}
-		return words;
+	public Set<String> getAllWords() {
+		return wordIndex.map().keySet();
 	}
 
 	public void putDocInfo(DocInfo info) {

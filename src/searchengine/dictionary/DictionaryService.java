@@ -35,7 +35,7 @@ public class DictionaryService {
                 trie.insert(line);
                 freq.put(line, Integer.parseInt(reader.readLine()));
             }
-//            Set<String> words = INDEXER.getPopularWords();
+            Set<String> words = INDEXER.getAllWords();
             new File(backup).createNewFile();
             reader.close();
             reader = new BufferedReader(new FileReader(backup));
@@ -44,14 +44,16 @@ public class DictionaryService {
                 trie.insert(word);
                 freq.put(word, 2);
             }
-//            for (String word : words) {
-//                trie.insert(word);
-//                freq.put(word, 3);
-//            }
-//            for (String word : STOP_SET_VALUES) {
-//                trie.insert(word);
-//                freq.put(word, 3);
-//            }
+            for (String word : words) {
+                if (freq.containsKey(word)) continue;
+                trie.insert(word);
+                freq.put(word, 0);
+            }
+            for (String word : STOP_SET_VALUES) {
+                if (freq.containsKey(word)) continue;
+                trie.insert(word);
+                freq.put(word, 0);
+            }
             reader.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
