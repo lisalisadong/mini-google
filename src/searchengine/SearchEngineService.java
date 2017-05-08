@@ -233,9 +233,10 @@ public class SearchEngineService {
         String[] info = INDEXER.getDocInfo(entry.documentId);
         entry.title = info[1];
         entry.location = info[0];
-        entry.digest = info[2] + " This is a fake digest. The page rank is [" + entry.pageRank + "]. " +
-                "The TF-IDF score is [" + entry.tfidf + "]. " +
-                "The total score is [" + entry.score + "].";
+//        entry.digest = info[2] + " This is a fake digest. The page rank is [" + entry.pageRank + "]. " +
+//                "The TF-IDF score is [" + entry.tfidf + "]. " +
+//                "The total score is [" + entry.score + "].";
+        entry.digest = info[2];
         if (entry.digest.isEmpty() || entry.digest.length() < 50) {
             queryPreview(entry);
         }
