@@ -31,7 +31,7 @@ public class PageRankDriver {
 
         // 2. run
         // run certain number of iterations to tune data
-        int numOfIteration = 2;
+        int numOfIteration = 10;
         for (int i = 0; i < numOfIteration; i++) {
             PageRankTask.task(pageRankInputFile + i, pageRankInputFile + (i + 1), PageRankTask.RUN);
         }

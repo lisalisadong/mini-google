@@ -33,7 +33,7 @@ public class PageRankRunReducer extends Reducer<Text, Text, Text, Text> {
 
         if (done) {
             pr = 0.85 * pr + 0.15;
-            context.write(key, new Text(pr + "@" + data));
+            context.write(key, new Text(pr + "\t\t" + data));
         }
     }
 

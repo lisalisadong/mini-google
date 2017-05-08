@@ -207,5 +207,17 @@
             <arg value="${id}"/>
 	    </java>
 	</target>
+	
+	<target name="bdb2s3" depends="compile-crawler" description="BDB to S3">
+        <java classname="crawler.utils.BDBtoS3">
+            <classpath>
+            	<fileset dir="./lib">
+            	   <include name="*.jar"/>
+            	</fileset>
+                <pathelement location="${classes.dir}"/>
+            </classpath>
+            <arg line="${args}"/>
+        </java>
+    </target>
 
 </project>
