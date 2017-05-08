@@ -32,7 +32,7 @@ public class BDBToS3 {
 	
 	static AmazonS3 awsClient;
 	
-	static String INDEXER_BUCKET = "crawler-g02";
+	static String INDEXER_BUCKET = "crawler-indexer-4w";
 
 	static String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
 	static String secretKey = "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";
