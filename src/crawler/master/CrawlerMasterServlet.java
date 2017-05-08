@@ -160,7 +160,8 @@ public class CrawlerMasterServlet extends HttpServlet {
 		  config.put("workerIndex", String.valueOf(i++));
 		  HttpURLConnection conn = sendJob(dest, "POST", config, "setup", 
 					mapper.writerWithDefaultPrettyPrinter().writeValueAsString(job));
-		  if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) 
+		  int resCode = conn.getResponseCode();
+		  if (resCode != HttpURLConnection.HTTP_OK) 
 		  {	
 			  throw new RuntimeException("Job definition request failed");
 		  }
@@ -193,10 +194,7 @@ public class CrawlerMasterServlet extends HttpServlet {
   private Topology buildTopo(Config config) {
 	  URLSpout URLSpout = new URLSpout();
       HTTPModuleBolt httpModule = new HTTPModuleBolt();
-      ContentSeenBolt contentSeen = new ContentSeenBolt();
-      LinkExtractorBolt linkExtractor = new LinkExtractorBolt();
       URLFilterBolt urlFilter = new URLFilterBolt();
-//      HostSplitterBolt hostSplitter = new HostSplitterBolt();
       DUEBolt due = new DUEBolt();
       
       // wordSpout ==> countBolt ==> MongoInsertBolt
@@ -208,18 +206,11 @@ public class CrawlerMasterServlet extends HttpServlet {
       // Four parallel word counters, each of which gets specific words
       builder.setBolt(Crawler.HTTP_MODULE_BOLT, httpModule, Crawler.HTTP_MODULE_BOLT_NUM)
       .shuffleGrouping(Crawler.URL_SPOUT);
-
-      builder.setBolt(Crawler.CONTENT_SEEN_BOLT, contentSeen, Crawler.CONTENT_SEEN_BOLT_NUM)
-      .shuffleGrouping(Crawler.HTTP_MODULE_BOLT);
-      
-      builder.setBolt(Crawler.LINK_EXTRACTOR_BOLT, linkExtractor, Crawler.LINK_EXTRACTOR_BOLT_NUM)
-      .shuffleGrouping(Crawler.CONTENT_SEEN_BOLT);
       
       builder.setBolt(Crawler.URL_FILTER_BOLT, urlFilter, Crawler.URL_FILTER_BOLT_NUM)
-      .shuffleGrouping(Crawler.LINK_EXTRACTOR_BOLT);
+      .shuffleGrouping(Crawler.HTTP_MODULE_BOLT);
       
       builder.setBolt(Crawler.DUE_BOLT, due, Crawler.DUE_BOLT_NUM)
-//      .fieldsGrouping(Crawler.URL_FILTER_BOLT, new Fields("url"));
       .fieldsGrouping(Crawler.URL_FILTER_BOLT, new Fields("host"));
      
       return builder.createTopology();
@@ -251,29 +242,24 @@ public class CrawlerMasterServlet extends HttpServlet {
 	  out.print(begin);
 	  
 	  out.print(tableBegin);
+	  
+	  long totalFileNum = 0;
 	  //show status for each active worker
 	  for(String worker: workerStatus.keySet()) {
 		  if(isActive(worker)) {
+			  
+			  totalFileNum += workerStatus.get(worker).getCrawledFileNum();
+			  
 			  String row = getRow(workerStatus.get(worker));
 			  out.print(row);
 		  }
 	  }
-//	  WorkerStatus stat = new WorkerStatus();
-//	  stat.setParams("0.0.0.0", 8000, "idle", "job", 100, 100, "nothing");
-//	  out.print(getRow(stat));
+	  out.print("<tr><td> Total </td><td>" + totalFileNum + "</td></tr>");
+	  
 	  out.print(tableEnd);
 	  
 	  out.print("<form action=\"/\" method=\"post\">");
-//	  out.println("<strong>Job class path:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong>"
-//	  		+ "<input type=\"text\" name=\"jobclasspath\"><p></p>");
-//	  out.println("<strong>Input directory:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong>"
-//	  		+ "<input type=\"text\" name=\"inputdir\"><p></p>");
-//	  out.println("<strong>Output directory:&nbsp;&nbsp;&nbsp;&nbsp;</strong>"
-//	  		+ "<input type=\"text\" name=\"outputdir\"><p></p>");
-//	  out.println("<strong>Map thread number:&nbsp;&nbsp;</strong>"
-//	  		+ "<input type=\"text\" name=\"mapthreadnum\"><p></p>");
-//	  out.println("<strong>Reduce thread number:&nbsp;</strong>"
-//	  		+ "<input type=\"text\" name=\"reducethreadnum\"><p></p>");
+
 	  if(!isCrawling) {
 		  out.println("<button action=\"/start\" formmethod=\"post\" type=\"submit\" "
 			  		+ "class=\"btn btn-warning btn-md\">Start Crawling</button><p></p>");
@@ -302,7 +288,6 @@ public class CrawlerMasterServlet extends HttpServlet {
 
   private void getWorkerstatusHandler(HttpServletRequest req, HttpServletResponse res) {
 	
-//	  System.out.println("Get worker status!");
 	String ip = req.getRemoteAddr();
 	int port = Integer.parseInt(req.getParameter("port"));
 	

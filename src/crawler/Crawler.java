@@ -81,7 +81,7 @@ public class Crawler {
     public static int PAGE_CACHE_SIZE = 65536;
     public static int NUM_TO_WRITE_SNAPSHOT_FOR_PAGE = 1000;
     
-    public static String DBPath = "../db";
+    public static String DBPath = "../db_10w_";
     public static DBWrapper pageDB;
     
     public static RobotManager robotManager;
@@ -209,10 +209,18 @@ public class Crawler {
 //    	urlFrontier.writeSnapshot(Crawler.frontierDB);
     	Crawler.urlSet.writeSnapshot();
     	Crawler.robotManager.writeSnapshot();
-    	
     	urlFrontier.writeSnapshot();
 //    	
 //    	stateDB.sync();
+    }
+    
+    public static void logEvent(String event, long start) {
+    	System.out.println("[worker + " + CrawlerWorker.WORKER_ID + " ] [" + event + "]: " 
+    			+ (System.currentTimeMillis() - start) + "ms");
+    }
+    
+    public static void logEvent(String event) {
+    	System.out.println("[worker + " + CrawlerWorker.WORKER_ID + " ] [" + event + "]");
     }
     
 }

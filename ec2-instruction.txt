@@ -24,6 +24,9 @@ sudo ln -s /opt/apache-ant-1.10.*** /opt/ant
 sudo ln -s /opt/ant/bin/ant /usr/bin/ant
  
 
+
+master: ec2-54-201-49-232.us-west-2.compute.amazonaws.com:8080
+taskset -c 0,1,2,3 ant crawler-worker -Dmaster ec2-54-201-49-232.us-west-2.compute.amazonaws.com:8080 -Dport 8003 -Did 3
 ==================================================================================================================================
 ec2:
 (1): ec2-user@ec2-54-202-120-77.us-west-2.compute.amazonaws.com
@@ -50,6 +53,19 @@ scp -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem -r /U
 ssh -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem ec2-user@ec2-54-244-207-105.us-west-2.compute.amazonaws.com
 
 scp -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem -r /Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google ec2-user@ec2-54-244-207-105.us-west-2.compute.amazonaws.com:~/
+
+(6) xlarge:
+ssh -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem ec2-user@ec2-54-201-49-232.us-west-2.compute.amazonaws.com
+
+scp -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem -r /Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google ec2-user@ec2-54-201-49-232.us-west-2.compute.amazonaws.com:~/
+
+(7) xlarge
+ssh -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem ec2-user@ec2-54-191-178-189.us-west-2.compute.amazonaws.com
+
+scp -i /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem -r /Users/xiaofandou/Desktop/CIS555/SharedFolder/mini-google ec2-user@ec2-54-191-178-189.us-west-2.compute.amazonaws.com:~/
+
+
+
 
 ==================================================================================================================================
 chmod 400 /Users/xiaofandou/Desktop/CIS555/SharedFolder/.ec2/crawler-keys.pem

@@ -18,6 +18,7 @@ import com.sleepycat.persist.PrimaryIndex;
 import com.sleepycat.persist.StoreConfig;
 
 import crawler.Crawler;
+import crawler.due.SetWrapper;
 import crawler.robots.RobotInfoManager;
 import crawler.robots.RobotTxt;
 import crawler.urlfrontier.URLFrontier;
@@ -39,7 +40,7 @@ public class DBWrapper {
     public PrimaryIndex<String, VisitedURL> vIdx;
     public PrimaryIndex<String, URLWrapper> uwIdx;
     public PrimaryIndex<String, WorkerStatus> wIdx;
-    public PrimaryIndex<String, PageLinks> pgIdx;
+    public PrimaryIndex<String, SetWrapper> sIdx;
 	
     public DBWrapper(String dir) {
         envDir = dir;
@@ -65,7 +66,7 @@ public class DBWrapper {
         vIdx = store.getPrimaryIndex(String.class, VisitedURL.class);
         uwIdx = store.getPrimaryIndex(String.class, URLWrapper.class);
         wIdx = store.getPrimaryIndex(String.class, WorkerStatus.class);
-        pgIdx = store.getPrimaryIndex(String.class, PageLinks.class);
+        sIdx = store.getPrimaryIndex(String.class, SetWrapper.class);
     }
 
     public String getPath() {
@@ -139,12 +140,13 @@ public class DBWrapper {
     	wIdx.put(w);
     }
     
-    public void savePageLinks(PageLinks pl) {
-    	pgIdx.put(pl);
+
+    public void saveSetWrapper(SetWrapper s) {
+    	sIdx.put(s);
     }
     
-    public PageLinks getPageLinks(String url) {
-    	return pgIdx.get(url);
+    public SetWrapper getSetWrapper(String id) {
+    	return sIdx.get(id);
     }
     
     public void sync() {
@@ -162,14 +164,14 @@ public class DBWrapper {
     }
 
     public static void main(String[] args) {
-         DBWrapper db = new DBWrapper("./db1");
+         DBWrapper db = new DBWrapper("../db5");
          db.setup();
-         System.out.println(db.rIdx.map().size());
+         System.out.println(db.pIdx.map().size());
          int i = 0;
-         for(String s: db.rIdx.map().keySet()) {
+         for(String s: db.pIdx.map().keySet()) {
         	 System.out.println(s);
         	 i++;
-        	 if(i == 100) break;
+        	 if(i == 10) break;
          }
          
 //         RobotInfoManager rm = new RobotInfoManager();

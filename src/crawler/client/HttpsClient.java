@@ -2,9 +2,12 @@ package crawler.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
+
+import crawler.Crawler;
 
 /**
  * client for https protocol
@@ -37,6 +40,12 @@ public class HttpsClient extends Client {
         try {
             con = (HttpsURLConnection) url.openConnection();
             con.setConnectTimeout(10000);
+//            if(urlString.endsWith("/robots.txt")) {
+//            	con.setConnectTimeout(1500);
+//        	} else {
+//        		con.setConnectTimeout(2000);
+//        	}
+            
             con.setInstanceFollowRedirects(false);
             con.setRequestMethod(method);
             for (String header : headers.keySet()) {
@@ -53,7 +62,8 @@ public class HttpsClient extends Client {
             setContentType(contentType);
             contentLength = con.getContentLengthLong();
             location = con.getHeaderField("Location");
-
+            
+            
             // String redirect = con.getHeaderField("Location");
             // System.out.println("Location: " + redirect);
             // if(redirect != null) {

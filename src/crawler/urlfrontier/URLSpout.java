@@ -84,10 +84,9 @@ public class URLSpout implements IRichSpout {
      */
     @Override
     public void nextTuple() {
-        long start = System.currentTimeMillis();
-    	String url = URLFrontier.getNextURL();
-    	CrawlerWorker.logTime("fetch url", start);
-    	
+//    	long start = System.currentTimeMillis();
+        String url = URLFrontier.getNextURL();
+//        Crawler.logEvent("Got url", start);
         if (url != null) {
         	
 //        	System.out.println(id + " emit: "  + url);

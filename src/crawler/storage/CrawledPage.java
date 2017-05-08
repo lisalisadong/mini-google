@@ -33,7 +33,6 @@ public class CrawledPage {
 
     @PrimaryKey
     private String url;
-    // private URLInfo urlInfo;
     private long lastCrawledTime;
     private byte[] content;
     private LinkedList<String> links;
@@ -95,17 +94,6 @@ public class CrawledPage {
     public InputStream getContentStream() {
         return new ByteArrayInputStream(content);
     }
-
-    // private void extractUrl() {
-    // if(maxSize > 0 && content.length > maxSize) return;
-    // Document doc = Jsoup.parse(new String(content), url);
-    // Elements links = doc.select("a[href]");
-    // for (Element link : links) {
-    // String l = link.attr("abs:href");
-    // this.links.add(l);
-    //// System.out.println(l);
-    // }
-    // }
 
     public void addLinks(List<String> links) {
         this.links.addAll(links);
