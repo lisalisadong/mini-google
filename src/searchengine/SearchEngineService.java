@@ -196,7 +196,7 @@ public class SearchEngineService {
         // DONE: query inverted index database
         ArrayList<String> res = new ArrayList<>();
         for (String id : w.getDocs()) {
-            if (docs.containsKey(id)) {
+            if (docs.containsKey(id) && docs.get(id).getTitle().length() > 1) {
                 res.add(id);
             }
         }
