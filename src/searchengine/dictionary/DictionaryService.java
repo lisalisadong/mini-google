@@ -85,7 +85,9 @@ public class DictionaryService {
         String[] correction = new String[words.length];
         boolean corrected = false;
         for (int i = 0; i < words.length; i++) {
+            System.out.println(words[i] + " " + freq.get(words[i]));
             if (freq.containsKey(words[i]) && freq.get(words[i]) > 1) {
+                System.out.println("No correction");
                 correction[i] = words[i];
                 continue;
             }
@@ -119,22 +121,22 @@ public class DictionaryService {
      * @param cache cache file
      */
     public static void destroy(String cache) {
-//        try {
-//            new File(cache).createNewFile();
-//            PrintWriter writer = new PrintWriter(new FileWriter(cache));
-//            for (Map.Entry<String, Integer> entry : freq.entrySet()) {
-//                if (entry.getValue() > 0) {
-//                    writer.println(entry.getKey());
-//                    writer.println(entry.getValue());
-//                }
-//            }
-//            writer.flush();
-//            writer.close();
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            new File(cache).createNewFile();
+            PrintWriter writer = new PrintWriter(new FileWriter(cache));
+            for (Map.Entry<String, Integer> entry : freq.entrySet()) {
+                if (entry.getValue() > 0) {
+                    writer.println(entry.getKey());
+                    writer.println(entry.getValue());
+                }
+            }
+            writer.flush();
+            writer.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
