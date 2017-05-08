@@ -5,7 +5,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 
 import com.sleepycat.je.DatabaseException;
@@ -70,8 +73,8 @@ public class DBWrapper {
 		myEnv.sync();
 	}
 
-	public Map<String, Word> getAllWords() {
-		return wordIndex.map();
+	public Collection<Word> getAllWords() {
+		return wordIndex.map().values();
 	}
 
 	public void putDocInfo(DocInfo info) {
