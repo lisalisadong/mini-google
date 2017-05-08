@@ -37,6 +37,9 @@ public class DocInfoRetrival {
 					Elements meta = doc.select("meta");
 					if (meta.attr("name").equals("description")) {
 						description = meta.attr("content");
+					} else {
+						String body = doc.body().text();
+						description = body.substring(0, Math.min(300, body.length()));
 					}
 					DocInfo docInfo = new DocInfo(docID, url, title, description);
 					db.putDocInfo(docInfo);
