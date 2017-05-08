@@ -101,8 +101,6 @@ public class CrawlerWorker extends WorkerServer {
 				try {
 					String stream = arg0.params(":stream");
 					Tuple tuple = om.readValue(arg0.body(), Tuple.class);
-					logger.debug("Worker received: " + tuple + " for " + stream);
-//					System.out.println("Worker received: " + tuple + " for " + stream);
 					
 					crawler.pushData(stream, tuple);
 					
@@ -125,7 +123,6 @@ public class CrawlerWorker extends WorkerServer {
 				System.out.println("received shutdown!");
         		logger.debug("Shutting down all workers");
         		shutdown();
-//        		System.exit(0);
 				return "Shutted down";
 			}
         });
@@ -148,7 +145,6 @@ public class CrawlerWorker extends WorkerServer {
 		workerStatus = new WorkerStatus(STATUS_ID);
 		workerStatus.crawledFileNum = num;
 		
-//		workerStatus = db.getWorkerStatus(STATUS_ID);
 		if(num == 0) {
 			System.out.println("[status] new status");
 		} else {
@@ -219,7 +215,6 @@ public class CrawlerWorker extends WorkerServer {
 						conn.getResponseCode();
 						conn.disconnect();
 					} catch (IOException e) {
-//						e.printStackTrace();
 					} 
 				}
 			}

@@ -33,14 +33,6 @@ public class HttpClient extends Client {
         soc = new Socket();
         try {
             // send request
-            // System.out.println("host: " + host);
-//        	if(urlString.endsWith("/robots.txt")) {
-//        		soc.connect(new InetSocketAddress(host, portNum), 1500);
-//                soc.setSoTimeout(1500);
-//        	} else {
-//        		soc.connect(new InetSocketAddress(host, portNum), 2000);
-//                soc.setSoTimeout(2000);
-//        	}
         	soc.connect(new InetSocketAddress(host, portNum), 5000);
         	soc.setSoTimeout(5000);
             
@@ -171,18 +163,5 @@ public class HttpClient extends Client {
         client.sendReq();
         System.out.println(url + ": " + client.getStatusCode());
         
-        
-//        InputStream in = client.getInputStream();
-//        String line = null;
-//        try {
-//            while ((line = Client.readLine(in)) != null) {
-//                line = line.trim();
-//                if (line.length() == 0)
-//                    break;
-//                System.out.println(line);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 }

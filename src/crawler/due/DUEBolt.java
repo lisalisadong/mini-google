@@ -80,27 +80,14 @@ public class DUEBolt implements IRichBolt {
     @SuppressWarnings("unchecked")
 	@Override
     public void execute(Tuple input) {
-//        String url = input.getStringByField("url");
-//        System.out.println(id + " got " + url);
     	List<String> links = (List<String>)input.getObjectByField("links");
-//
-//      System.out.println(id + " got " + url);
 
-//    	long start = System.currentTimeMillis();
         for(String link: links) {
         	// add to frontier queue if set does not contain the url
             if(urlSet.addURL(link)) {
-//            	System.out.println(id + " add " + url);
-//            	logger.debug(" add " + link);
-//            	start = System.currentTimeMillis();
             	urlFrontier.addURL(link);
-            } else {
-//            	System.out.println(id +  " " + url + ": duplicate");
-//            	logger.debug(" " + link + ": duplicate");
-            }
+            } 
         }
-
-//    	Crawler.logEvent("add links to frontier", start);
         
     }
 

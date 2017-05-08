@@ -54,18 +54,11 @@ public class RobotManager {
 		}
 		System.out.println("[Robot Manager]: finish config suffix");
 	}
-	
-//	public static void addToNoCrawlHost(String host) {
-//		synchronized(noCrawlHosts) {
-//			noCrawlHosts.add(host);
-//		}
-//	}
 
 	/**
 	 * taboo host
 	 */
 	public void confignoCrawlHosts() {
-//		noCrawlHosts.add("mailto");
 		noCrawlHosts.add("pinayot.com");
 		noCrawlHosts.add("thefappening.so");
 		noCrawlHosts.add("jizzbo.com");
@@ -94,17 +87,14 @@ public class RobotManager {
         if (!robotUrl.startsWith("http://") && !robotUrl.startsWith("https://")) {
             robotUrl = "http://" + robotUrl;
         }
-        
-//        long start = System.currentTimeMillis();
+
         rt = new RobotTxt(robotUrl);
         if(rt.isEmpty()) {
-//        	addToNoCrawlHost(host);
         	noCrawlHosts.add(host);
         	return rt;
         }
-//        System.out.println("[got robot cache]: " + (System.currentTimeMillis() - start));
+
         db.saveRobotTxt(rt);
-//        db.sync();
         return rt;
     }
 	

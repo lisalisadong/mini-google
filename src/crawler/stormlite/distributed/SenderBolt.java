@@ -92,12 +92,7 @@ public class SenderBolt implements IRichBolt {
     private synchronized void send(Tuple tuple) throws IOException {
 
     	isEndOfStream = tuple.isEndOfStream();
-    	
-		log.debug("Sender is routing " + tuple.toString() + " to " + address + "/" + stream);
-//		System.out.println("Sender is routing " + tuple.toString() + " to " + address + "/" + stream);
-		
 		long start = System.currentTimeMillis();
-		// TODO: send this to /pushdata/{stream} as a POST!
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		conn.setRequestProperty("Content-Type", "application/json");
 		conn.setRequestMethod("POST");

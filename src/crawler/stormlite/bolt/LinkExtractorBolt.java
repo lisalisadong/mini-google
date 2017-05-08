@@ -81,37 +81,7 @@ public class LinkExtractorBolt implements IRichBolt {
      */
     @Override
     public void execute(Tuple input) {
-        CrawledPage page = (CrawledPage) input.getObjectByField("page");
-//         System.out.println(id + " got " + page.getUrl());
-        String url = page.getUrl();
-        if(url == null) return;
-        String host = new URLInfo(url).getHostName();
-        
-        if ("text/html".equals(page.getContentType())) {
-            byte[] content = page.getContent();
-            Document doc = Jsoup.parse(new String(content), url);
-            Elements links = doc.select("a[href]");
-            if(links.size() == 0) return;
-            for (Element link : links) {
-                String l = link.attr("abs:href");
-                
-                if(url != null && !url.equals(l)) {
-                	if (l == null || l.length() == 0)
-                        continue;
-                    // System.out.println(id + " emit " + l);
-                	page.addLink(l);
-                }
-            }
-            System.out.println(id + " emit links");
-            this.collector.emit(new Values<Object>(host, page.getLinks()));
-        }
-        
-//        pageCache.put(page.getUrl(), page);
-        CrawlerWorker.workerStatus.incFileNum();
-        db.savePage(page);
-        db.sync();
-        Crawler.logEvent("finished parsing: " + url);
-//		System.out.println(id + ": " + url + " downloaded ");
+        // not used any more
     }
 
     /**

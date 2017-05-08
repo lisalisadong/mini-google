@@ -35,8 +35,8 @@ public class BDBToS3 {
 //	static String INDEXER_BUCKET = "crawler-g02";	// for 40w
 	static String INDEXER_BUCKET = "crawler-indexer-10w";	// for 40w
 
-	static String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
-	static String secretKey = "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";
+	static String accessKey = "6Q";
+	static String secretKey = "7b";
 	
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {

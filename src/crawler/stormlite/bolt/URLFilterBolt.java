@@ -87,9 +87,6 @@ public class URLFilterBolt implements IRichBolt {
     @SuppressWarnings("unchecked")
 	@Override
     public void execute(Tuple input) {
-//        String link = input.getStringByField("link");
-        // System.out.println(id + " got " + link);
-        // TODO: convert relative path to absolute path
     	CrawledPage page = (CrawledPage) input.getObjectByField("page");
     	String url = page.getUrl();
         if(url == null) return;
@@ -124,25 +121,6 @@ public class URLFilterBolt implements IRichBolt {
         }
         db.savePage(page);
         db.sync();
-        
-
-////        String host = input.getStringByField("host");
-////    	List<String> links = (List<String>)input.getObjectByField("links");
-//
-//        // TODO: filter the link
-//
-//        List<String> toEmit = new LinkedList<>();
-//        for(String link: links) {
-//        	if(robotManager.isAllowed(link)) {
-//            	toEmit.add(link);
-//                // System.out.println(id + " emit (" + host + ", " + link + ")");
-//            } else {
-////            	System.out.println(id + ": " + link + "--not allowed");
-//            }
-//        }
-//        if(toEmit.size() > 0) {
-//        	
-//        }
     }
 
     /**

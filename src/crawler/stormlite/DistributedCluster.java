@@ -113,26 +113,10 @@ public class DistributedCluster implements Runnable {
 	public void run() {
 		while (!quit.get()) {
 			
-//			System.out.println("Task queue size: " + taskQueue.size());
-			
 			/* busy wating */
 			Runnable task = taskQueue.poll();
 			if(task == null) Thread.yield();
 			else executor.execute(task);
-			
-//			synchronized(taskQueue) {
-//				while(taskQueue.isEmpty()) {
-//					try {
-//						taskQueue.wait();
-//					} catch (InterruptedException e) { }
-//				}
-//				Runnable task = taskQueue.poll();
-//				if(task == null) {
-//					System.out.println("***********Null task, should not happen");
-//					System.exit(0);
-//				}
-//				executor.execute(task);
-//			}
 			
 		}
 	}

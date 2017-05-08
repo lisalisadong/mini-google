@@ -38,7 +38,6 @@ public class URLFrontier {
     	this.maxSize = maxSize;
     	
     	db = new DBWrapper(DBPath);
-//    	db = new DBWrapper("./tmp");
     	db.setup();
     	
     	inQueue = new LinkedBlockingQueue<String>();
@@ -158,29 +157,10 @@ public class URLFrontier {
     		
     		return;
     	}
-
-//    	addURL("http://www.upenn.edu/");
-//		addURL("https://www.reddit.com/");
-//		System.out.println("[seed]: http://www.upenn.edu/");
-//		System.out.println("[seed]: https://www.reddit.com/");
-//		addURL("https://en.wikipedia.org/wiki/Main_Page/");
-//		addURL("https://www.google.com/");
-//		System.out.println("[seed]: https://en.wikipedia.org/wiki/Main_Page/");
-//		System.out.println("[seed]: https://www.google.com/");
-//		addURL("https://www.amazon.com/");
-//		addURL("http://www.ebay.com/");
-//		System.out.println("[seed]: https://www.amazon.com/");
-//		System.out.println("[seed]: http://www.ebay.com/");
-//		addURL("https://www.bloomberg.com/");
-//		addURL("http://www.cnn.com/");
-//		System.out.println("[seed]: https://www.bloomberg.com/");
-//		System.out.println("[seed]: http://www.cnn.com/");
 		
     	logger.debug("restore from db");
     	System.out.println("[URL Frontier] restore from last crawl: " 
     			+ db.uwIdx.map().size());
-    	
-    	
     }
 
     /**

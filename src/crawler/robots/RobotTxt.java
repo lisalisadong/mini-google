@@ -110,10 +110,6 @@ public class RobotTxt {
                     break;
                 }
             }
-
-//             System.out.println("=====robot========");
-//             System.out.println(toString());
-//             System.out.println("==================");
         } catch (IOException e) {
             e.printStackTrace();
             empty = true;
@@ -139,8 +135,6 @@ public class RobotTxt {
     
     public boolean match(String filePath) {
         for (String link : disallowedLinks) {
-            // System.out.println("disallowed link: " + link.length() + ", " +
-            // link);
             if (link.charAt(link.length() - 1) == '/' 
             		&& link.substring(0, link.length() - 1).equals(filePath)) 
             {
@@ -165,13 +159,13 @@ public class RobotTxt {
     
     public String toString() {
         StringBuilder sb = new StringBuilder("User-Agent: cis455crawler\n");
-//        System.out.println("Crawl delay: " + crawlDelay);
-//        for (String link : allowedLinks) {
-//            sb.append("Allow: " + link.toString() + "\n");
-//        }
-//        for (String link : disallowedLinks) {
-//            sb.append("Disallow: " + link.toString() + "\n");
-//        }
+        System.out.println("Crawl delay: " + crawlDelay);
+        for (String link : allowedLinks) {
+            sb.append("Allow: " + link.toString() + "\n");
+        }
+        for (String link : disallowedLinks) {
+            sb.append("Disallow: " + link.toString() + "\n");
+        }
         return sb.toString();
     }
 
