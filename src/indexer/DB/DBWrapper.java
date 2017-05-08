@@ -5,9 +5,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import javax.xml.bind.DatatypeConverter;
 
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
@@ -101,18 +106,33 @@ public class DBWrapper {
 	public Set<String> getWordDocs(String word) {
 		return wordIndex.get(word).getDocs();
 	}
+	
+  private static String hashUrl(String url) {
+  try {
+      MessageDigest digest = MessageDigest.getInstance("MD5");
+      digest.reset();
+      digest.update(url.getBytes("utf-8"));
+      return DatatypeConverter.printHexBinary(digest.digest());
+  } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+  } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+  }
+  return null;
+}
 
 	public static void main(String[] args) {
 		DBWrapper db = new DBWrapper(INDEXER_DB_DIR);
 		int ii = 0;
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader("9output/part-r-00000"));
+//			BufferedReader reader = new BufferedReader(new FileReader("/Users/liujue/Desktop/output/part-r-00000"));
+			BufferedReader reader = new BufferedReader(new FileReader("/Users/liujue/Desktop/9output/part-r-00000"));
 			String line;
 			String last = null;
 			Word word = null;
 			while ((line = reader.readLine()) != null) {
 				// System.out.println(line);
-				if (ii % 10000 == 0) {
+				if (ii % 100 == 0) {
 					System.out.println(ii);
 				}
 				ii += 1;
@@ -120,13 +140,17 @@ public class DBWrapper {
 				// System.out.println(Arrays.toString(parts));
 				String w = parts[0];
 				if (!w.equals(last)) {
+					if (word != null) {
+						db.putWord(word);
+					}
 					word = db.addWord(w);
 					last = w;
-				}
+					double idf = Double.parseDouble(parts[3]);
+					word.addIdf(idf);
+				} 
 				String docID = parts[1];
 				double tf = Double.parseDouble(parts[2]);
-				double idf = Double.parseDouble(parts[3]);
-				word.addInfo(docID, tf, idf);
+				word.addTf(docID, tf);
 				String[] titles = parts[4].split("\\D+");
 				String[] contents = parts[5].split("\\D+");
 				// System.out.println("titles: " + Arrays.toString(titles));
@@ -148,7 +172,7 @@ public class DBWrapper {
 					}
 					word.addContentPos(docID, contentPos);
 				}
-				db.putWord(word);
+//				db.putWord(word);
 			}
 			reader.close();
 		} catch (FileNotFoundException e) {
