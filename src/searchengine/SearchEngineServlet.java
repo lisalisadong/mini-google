@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by QingxiaoDong on 4/6/17.
@@ -135,7 +136,7 @@ public class SearchEngineServlet extends HttpServlet {
             logger.warn("getting results");
             ResultEntry[] entries = null;
             try {
-                entries = searchThread.get();
+                entries = searchThread.get(5, TimeUnit.SECONDS);
             } catch (Exception e) {
                 e.printStackTrace();
             }
