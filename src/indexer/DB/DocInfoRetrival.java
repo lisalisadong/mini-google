@@ -3,6 +3,7 @@ package indexer.DB;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -69,13 +70,30 @@ public class DocInfoRetrival {
 			pool[i] = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					File file = queue.poll();
-					handle(file);
+					while (!queue.isEmpty()) {
+						File file = queue.poll();
+						handle(file);
+					}
 				}
 			});
+			pool[i].start();
+		}
+		for (Thread t : pool) {
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		db.sync();
 		db.close();
 	}
+	
+//	public static void main(String[] args) {
+//		db = new DBWrapper(DBWrapper.INDEXER_DB_DIR);
+//		String[] info = db.getDocInfo("84296");
+//		System.out.println(Arrays.toString(info));
+//	}
 
 }
