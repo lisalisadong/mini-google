@@ -107,8 +107,11 @@ public class SearchEngineServlet extends HttpServlet {
             new Thread(searchThread).start();
 
             // correction
-            FutureTask<String> correctionThread = new FutureTask<String>(new CorrectionThread(query));
-            new Thread(correctionThread).start();
+            FutureTask<String> correctionThread = null;
+            if (numResults < 1000) {
+                correctionThread = new FutureTask<String>(new CorrectionThread(query));
+                new Thread(correctionThread).start();
+            }
 
             // weather
             FutureTask<WeatherInfo> weatherThread = null;
@@ -138,14 +141,16 @@ public class SearchEngineServlet extends HttpServlet {
             contents = contents.replace("${num-seconds}", String.format("%.6f", seconds));
 
             // correction
-            String correction = correctionThread.get();
-            logger.warn("number of seconds used get correction " + 1.0 * (System.nanoTime() - time) / 1000000000);
-            if (correction != null) {
-                contents = contents.replace("${correction}",
-                        "<p style=\"font-weight:bold;color:grey;font-family:Cochin;font-size:20px\">" +
-                        "Did you mean " + "<a href=\"/search?query=" + correction + "\">" + correction + "</a>?</p>");
-            } else {
-                contents = contents.replace("${correction}", "");
+            if (correctionThread != null) {
+                String correction = correctionThread.get();
+                logger.warn("number of seconds used get correction " + 1.0 * (System.nanoTime() - time) / 1000000000);
+                if (correction != null) {
+                    contents = contents.replace("${correction}",
+                            "<p style=\"font-weight:bold;color:grey;font-family:Cochin;font-size:20px\">" +
+                                    "Did you mean " + "<a href=\"/search?query=" + correction + "\">" + correction + "</a>?</p>");
+                } else {
+                    contents = contents.replace("${correction}", "");
+                }
             }
             DictionaryService.put(query);
 
