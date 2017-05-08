@@ -2,6 +2,7 @@ package indexer.DB;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -18,6 +19,9 @@ public class OutputToDB {
     static BlockingQueue<File> queue = new LinkedBlockingQueue<>();
 
     public static void handle(File file) {
+    	if (!file.isFile() || file.getName().equals(".DS_Store") || file.getName().equals("_SUCCESS")) {
+    		return;
+    	}
         int ii = 0;
         try {
 //			BufferedReader reader = new BufferedReader(new FileReader("/Users/liujue/Desktop/output/part-r-00000"));
@@ -33,7 +37,9 @@ public class OutputToDB {
                 }
                 ii += 1;
                 String[] parts = line.split("\t");
-                // System.out.println(Arrays.toString(parts));
+                if (parts.length != 6) {
+                	return;
+                }
                 String w = parts[0];
                 if (!w.equals(last)) {
                     if (word != null) {
@@ -91,7 +97,7 @@ public class OutputToDB {
             queue.add(file);
         }
 
-        Thread[] pool = new Thread[20];
+        Thread[] pool = new Thread[listOfFiles.length];
         for (int i = 0; i < pool.length; i++) {
             pool[i] = new Thread(new Runnable() {
                 @Override

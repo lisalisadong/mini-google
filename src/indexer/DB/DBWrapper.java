@@ -105,16 +105,16 @@ public class DBWrapper {
 	}
 	
 	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.out.println("input: [input_file_path]");
-			System.exit(1);
-		}
+//		if (args.length != 1) {
+//			System.out.println("input: [input_file_path]");
+//			System.exit(1);
+//		}
 		DBWrapper db = new DBWrapper(INDEXER_DB_DIR);
 		int ii = 0;
 		try {
-//			BufferedReader reader = new BufferedReader(new FileReader("/Users/liujue/Desktop/output/part-r-00000"));
+			BufferedReader reader = new BufferedReader(new FileReader("/Users/liujue/Desktop/output/part-r-0000"));
 //			BufferedReader reader = new BufferedReader(new FileReader("9output/part-r-00000"));
-			BufferedReader reader = new BufferedReader(new FileReader(args[0]));
+//			BufferedReader reader = new BufferedReader(new FileReader(args[0]));
 			String line;
 			String last = null;
 			Word word = null;
