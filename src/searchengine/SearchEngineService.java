@@ -70,6 +70,7 @@ public class SearchEngineService {
 
         // in case this is a new search query and has not been pre-searched, should not happen
         if (cache.get(query) == null) {
+            log.warn("Get new query search");
             ResultEntry[][] entries = new ResultEntry[2][];
             entries[0] = getAllEntries(wordsOccur);
             entries[1] = new ResultEntry[entries[0].length];

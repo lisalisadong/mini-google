@@ -19,6 +19,9 @@ import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 /**
  * Created by QingxiaoDong on 4/6/17.
@@ -44,7 +47,13 @@ public class SearchEngineServlet extends HttpServlet {
             writer.println(contents);
             break;
         case "/search":
-            handleSearch(request, response);
+            try {
+                handleSearch(request, response);
+            } catch (ExecutionException e) {
+                response.sendError(500);
+            } catch (InterruptedException e) {
+                response.sendError(500);
+            }
             break;
         case "/scripts":
             try {
@@ -68,7 +77,7 @@ public class SearchEngineServlet extends HttpServlet {
         }
     }
 
-    private void handleSearch(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleSearch(HttpServletRequest request, HttpServletResponse response) throws IOException, ExecutionException, InterruptedException {
         if (request.getParameter("query") == null) {
             response.sendError(404, "Page Not Found");
         } else {
@@ -81,19 +90,56 @@ public class SearchEngineServlet extends HttpServlet {
             }
             query = query.trim().toLowerCase();
             logger.warn("The query is {}", query);
-            int numResults = SearchEngineService.preSearch(query);
-            ResultEntry[] entries = SearchEngineService.search(query, p * 10, 10);
-            double seconds = 1.0 * (System.nanoTime() - time) / 1000000000;
+
+            // amazon
+            FutureTask<ArrayList<AmazonItem>> amazonThread = new FutureTask<ArrayList<AmazonItem>>(new AmazonThread(query));
+            new Thread(amazonThread).start();
+
+            // pre search : get number of results
+            FutureTask<Integer> preSearchThread = new FutureTask<Integer>(new PreSearchThread(query));
+            new Thread(preSearchThread).start();
+            int numResults = preSearchThread.get();
+            logger.warn("number of seconds used get number of results " + 1.0 * (System.nanoTime() - time) / 1000000000);
+
+            // search results
+            FutureTask<ResultEntry[]> searchThread = new FutureTask<ResultEntry[]>(new SearchThread(query, p * 10, 10));
+            new Thread(searchThread).start();
+
+            // correction
+            FutureTask<String> correctionThread = new FutureTask<String>(new CorrectionThread(query));
+            new Thread(correctionThread).start();
+
+            // weather
+            FutureTask<WeatherInfo> weatherThread = null;
+            FutureTask<WeatherInfo[]> forecastThread = null;
+            if (query.contains("weather")) {
+                // weather thread
+                weatherThread = new FutureTask<WeatherInfo>(new WeatherThread(query));
+                new Thread(weatherThread).start();
+
+                // forecast thread
+                forecastThread = new FutureTask<WeatherInfo[]>(new ForecastThread(query));
+                new Thread(forecastThread).start();
+            }
+
+
+//            int numResults = SearchEngineService.preSearch(query);
+//            ResultEntry[] entries = SearchEngineService.search(query, p * 10, 10);
+
             String contents = new String(Files.readAllBytes(Paths.get("resources/sites/result.html")));
+
+            ResultEntry[] entries = searchThread.get();
+            logger.warn("number of seconds used get results " + 1.0 * (System.nanoTime() - time) / 1000000000);
+            double seconds = 1.0 * (System.nanoTime() - time) / 1000000000;
 
             // num results in num seconds
             contents = contents.replace("${num-results}", NumberFormat.getNumberInstance(Locale.US).format(numResults));
             contents = contents.replace("${num-seconds}", String.format("%.6f", seconds));
 
-            long t1 = System.nanoTime();
             // correction
-            String correction;
-            if ((correction = DictionaryService.correct(query)) != null) {
+            String correction = correctionThread.get();
+            logger.warn("number of seconds used get correction " + 1.0 * (System.nanoTime() - time) / 1000000000);
+            if (correction != null) {
                 contents = contents.replace("${correction}",
                         "<p style=\"font-weight:bold;color:grey;font-family:Cochin;font-size:20px\">" +
                         "Did you mean " + "<a href=\"/search?query=" + correction + "\">" + correction + "</a>?</p>");
@@ -101,7 +147,6 @@ public class SearchEngineServlet extends HttpServlet {
                 contents = contents.replace("${correction}", "");
             }
             DictionaryService.put(query);
-            logger.warn("number of seconds used in correction " + 1.0 * (System.nanoTime() - t1) / 1000000000);
 
             // results
             String results = "";
@@ -114,10 +159,24 @@ public class SearchEngineServlet extends HttpServlet {
             int fixPage = numResults % 10 == 0 ? 1 : 0;
             contents = contents.replace("${indices}", indicesToHtml(query, p, numResults / 10 - fixPage));
 
-            t1 = System.nanoTime();
             // api
-            contents = contents.replace("${api}", getAPI(query));
-            logger.warn("number of seconds used in api " + 1.0 * (System.nanoTime() - t1) / 1000000000);
+            String api = "";
+            if (query.contains("weather")) {
+                WeatherInfo current = weatherThread.get();
+                WeatherInfo[] forecast = forecastThread.get();
+                if (current != null) {
+                    api += weatherToHtml(current);
+                }
+                if (forecast != null) {
+                    api += forecastToHtml(forecast);
+                }
+            }
+            logger.warn("number of seconds used get weather " + 1.0 * (System.nanoTime() - time) / 1000000000);
+            ArrayList<AmazonItem> items = amazonThread.get();
+            if (items != null && items.size() > 0) {
+                api += amazonItemsToHtml(items);
+            }
+            contents = contents.replace("${api}", api);
 
             PrintWriter writer = response.getWriter();
             writer.println(contents);
@@ -310,6 +369,127 @@ public class SearchEngineServlet extends HttpServlet {
             return URLEncoder.encode(content, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             return content;
+        }
+    }
+
+    class PreSearchThread implements Callable<Integer> {
+        private String query;
+
+        public PreSearchThread(String query) {
+            this.query = query;
+        }
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public Integer call() throws Exception {
+            return SearchEngineService.preSearch(query);
+        }
+    }
+
+    class SearchThread implements Callable<ResultEntry[]> {
+        private String query;
+        private int rank;
+        private int num;
+
+        public SearchThread(String query, int rank, int num) {
+            this.query = query;
+            this.rank = rank;
+            this.num = num;
+        }
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public ResultEntry[] call() throws Exception {
+            return SearchEngineService.search(query, rank, num);
+        }
+    }
+
+    class CorrectionThread implements Callable<String> {
+        private String query;
+
+        public CorrectionThread(String query) {
+            this.query = query;
+        }
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public String call() throws Exception {
+            return DictionaryService.correct(query);
+        }
+    }
+
+    class AmazonThread implements Callable<ArrayList<AmazonItem>> {
+
+        private String query;
+
+        public AmazonThread(String query) {
+            this.query = query;
+        }
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public ArrayList<AmazonItem> call() throws Exception {
+            return ItemSearchService.search(query);
+        }
+    }
+
+    class WeatherThread implements Callable<WeatherInfo> {
+
+        private String query;
+
+        public WeatherThread(String query) {
+            this.query = query;
+        }
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public WeatherInfo call() throws Exception {
+            return WeatherSearchService.searchCurrent(query);
+        }
+    }
+
+    class ForecastThread implements Callable<WeatherInfo[]> {
+
+        private String query;
+
+        public ForecastThread(String query) {
+            this.query = query;
+        }
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public WeatherInfo[] call() throws Exception {
+            return WeatherSearchService.searchForcast(query);
         }
     }
 }
