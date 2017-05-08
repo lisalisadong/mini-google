@@ -126,7 +126,7 @@ public class DBWrapper {
 		int ii = 0;
 		try {
 //			BufferedReader reader = new BufferedReader(new FileReader("/Users/liujue/Desktop/output/part-r-00000"));
-			BufferedReader reader = new BufferedReader(new FileReader("/Users/liujue/Desktop/9output/part-r-00000"));
+			BufferedReader reader = new BufferedReader(new FileReader("9output/part-r-00000"));
 			String line;
 			String last = null;
 			Word word = null;
