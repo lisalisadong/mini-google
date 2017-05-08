@@ -154,6 +154,7 @@ public class SearchEngineService {
             entries[i] = new ResultEntry(id, words.size());
             queryPageRank(entries[i]);
             queryTfIdf(entries[i], wordMap);
+            queryDocumentDetail(entries[i]); // TODO: comment out
             processScore(entries[i]);
             i++;
         }
