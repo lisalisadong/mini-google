@@ -176,7 +176,7 @@ public class SearchEngineService {
         entry.score = entry.pageRank * entry.tfidf;
         for (String url : urls) {
             if (entry.location.startsWith(url)) {
-                entry.score *= 1.0 * 100 / entry.location.length();
+                entry.score *= 1.0 * 10 / entry.location.length();
             }
         }
 
