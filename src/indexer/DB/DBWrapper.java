@@ -107,26 +107,17 @@ public class DBWrapper {
 		return wordIndex.get(word).getDocs();
 	}
 	
-  private static String hashUrl(String url) {
-  try {
-      MessageDigest digest = MessageDigest.getInstance("MD5");
-      digest.reset();
-      digest.update(url.getBytes("utf-8"));
-      return DatatypeConverter.printHexBinary(digest.digest());
-  } catch (NoSuchAlgorithmException e) {
-      e.printStackTrace();
-  } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-  }
-  return null;
-}
-
 	public static void main(String[] args) {
+		if (args.length != 1) {
+			System.out.println("input: [input_file_path]");
+			System.exit(1);
+		}
 		DBWrapper db = new DBWrapper(INDEXER_DB_DIR);
 		int ii = 0;
 		try {
 //			BufferedReader reader = new BufferedReader(new FileReader("/Users/liujue/Desktop/output/part-r-00000"));
-			BufferedReader reader = new BufferedReader(new FileReader("9output/part-r-00000"));
+//			BufferedReader reader = new BufferedReader(new FileReader("9output/part-r-00000"));
+			BufferedReader reader = new BufferedReader(new FileReader(args[0]));
 			String line;
 			String last = null;
 			Word word = null;
