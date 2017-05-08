@@ -239,5 +239,26 @@
         	<arg value="${v}"/>
 	    </java>
 	</target>
+	
+	<target name="indexerdb" depends="compile-indexer" description="Index result to BDB">
+        <java classname="indexer.DB.DBWrapper">
+            <classpath>
+            	<fileset dir="./lib">
+                    <include name="*.jar"/>
+                </fileset>
+            	<pathelement location="${classes.dir}"/>
+            </classpath>
+        </java>
+    </target>
+	<target name="docdb" depends="compile-indexer" description="Index result to BDB">
+        <java classname="indexer.DB.DocInfoRetrival">
+            <classpath>
+            	<fileset dir="./lib">
+                    <include name="*.jar"/>
+                </fileset>
+            	<pathelement location="${classes.dir}"/>
+            </classpath>
+        </java>
+    </target>	
 
 </project>
