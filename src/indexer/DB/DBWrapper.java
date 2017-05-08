@@ -85,6 +85,7 @@ public class DBWrapper {
 	}
 
 	public String[] getDocInfo(String id) {
+		System.out.println("id is " + docInfoIndex.get(id));
 		return docInfoIndex.get(id).getInfo();
 	}
 
