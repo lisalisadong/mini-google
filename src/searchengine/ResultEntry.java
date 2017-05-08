@@ -15,6 +15,7 @@ public class ResultEntry {
     String title;
     String location;
     String digest;
+    int position;
     int numWordsTotal;
     int numWordsMatched;
     int numWordsTitle;

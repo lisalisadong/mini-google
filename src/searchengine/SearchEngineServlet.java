@@ -234,25 +234,6 @@ public class SearchEngineServlet extends HttpServlet {
         return html;
     }
 
-    private String getAPI(String query) {
-        String res = "";
-        if (query.contains("weather")) {
-            WeatherInfo current = WeatherSearchService.searchCurrent(query);
-            WeatherInfo[] forecast = WeatherSearchService.searchForcast(query);
-            if (current != null) {
-                res += weatherToHtml(current);
-            }
-            if (forecast != null) {
-                res += forecastToHtml(forecast);
-            }
-        }
-        ArrayList<AmazonItem> items = ItemSearchService.search(query);
-        if (items != null && items.size() > 0) {
-            res += amazonItemsToHtml(items);
-        }
-        return res;
-    }
-
     private String amazonItemsToHtml(ArrayList<AmazonItem> amazonItems) {
         String html = "<div class=\"ui fluid link card\">\n" +
                 "    <div class=\"content\">\n" +

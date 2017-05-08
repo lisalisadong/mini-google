@@ -2,10 +2,13 @@ package searchengine;
 
 import indexer.DB.DBWrapper;
 import indexer.DB.Word;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import utils.Logger;
 import utils.Stemmer;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import static indexer.DB.DBWrapper.INDEXER_DB_DIR;
@@ -230,6 +233,21 @@ public class SearchEngineService {
         entry.digest = info[2] + " This is a fake digest. The page rank is [" + entry.pageRank + "]. " +
                 "The TF-IDF score is [" + entry.tfidf + "]. " +
                 "The total score is [" + entry.score + "].";
+    }
+
+    private static void queryPreview(ResultEntry entry, Set<Word> words) {
+        double maxIdf = 0;
+        Word impWord = null;
+        for (Word w : words) {
+            if (w.inDoc(entry.documentId) && w.getIdf(entry.documentId) > maxIdf) {
+                maxIdf = w.getIdf(entry.documentId);
+                impWord = w;
+            }
+        }
+        entry.position = impWord.getContentPos(entry.documentId).get(0);
+        Document doc = Jsoup.parse(entry.location);
+        String text = doc.body().text();
+        System.out.println(text.substring(entry.position, entry.position + 10));
     }
 
 
