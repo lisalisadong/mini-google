@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.jsoup.nodes.Element;
 
 
 public class DocInfoRetrival {
@@ -35,15 +36,19 @@ public class DocInfoRetrival {
 					String title = doc.title();
 					String description = "";
 					Elements meta = doc.select("meta");
-					if (meta.attr("name").equals("description")) {
-						description = meta.attr("content");
-					} else {
+					for (Element m : meta) {
+						if (m.attr("name").equals("description")) {
+							description = m.attr("content");
+							break;
+						}
+					}
+					if (description.length() < 10) {
 						String body = doc.body().text();
 						description = body.substring(0, Math.min(300, body.length()));
 					}
 					DocInfo docInfo = new DocInfo(docID, url, title, description);
 					db.putDocInfo(docInfo);
-//					System.out.println("url: " + url + " title: " + title + " description: " + description);
+					System.out.println("url: " + url + " title: " + title + " description: " + description);
 				} catch (Exception e) {
 				}
 		        System.out.println("=============================docID: " + docID);
