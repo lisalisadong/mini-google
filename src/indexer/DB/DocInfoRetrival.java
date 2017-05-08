@@ -42,8 +42,7 @@ public class DocInfoRetrival {
 					DocInfo docInfo = new DocInfo(docID, url, title, description);
 					db.putDocInfo(docInfo);
 //					System.out.println("url: " + url + " title: " + title + " description: " + description);
-				} catch (IOException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
 				}
 		        System.out.println("=============================docID: " + docID);
 		    }
