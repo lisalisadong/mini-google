@@ -1,6 +1,7 @@
 package searchengine;
 
 import indexer.DB.DBWrapper;
+import indexer.DB.DocInfo;
 import indexer.DB.Word;
 import indexer.WordTokenizer;
 import org.jsoup.Connection;
@@ -31,13 +32,14 @@ public class SearchEngineService {
 
     private static Map<String, Double> pageRank = new HashMap<>();
 
-    private static Set<String> docs = INDEXER.docInfoIndex.map().keySet();
 
     private static Set<String> urls = new HashSet<>();
 
+    private static Map<String, DocInfo> docs = INDEXER.docInfoIndex.map();
+
 
     public static void init(String pageRankFile) {
-        loadPageRank(pageRankFile);
+//        loadPageRank(pageRankFile);
         loadSeedUrls("seed_urls");
     }
 
@@ -98,9 +100,9 @@ public class SearchEngineService {
         if (!sorted(query, rank, rank + num - 1)) {
             long time = System.nanoTime();
             sortAndCache(query, rank, rank + num - 1);
-            for (int i = rank; i < rank + num; i++) {
-                queryDocumentDetail(cache.get(query)[1][i]);
-            }
+//            for (int i = rank; i < rank + num; i++) {
+//                queryDocumentDetail(cache.get(query)[1][i]);
+//            }
             log.warn("number of seconds used in sorting " + 1.0 * (System.nanoTime() - time) / 1000000000);
         }
 
@@ -157,7 +159,7 @@ public class SearchEngineService {
             entries[i] = new ResultEntry(id, words.size());
             queryPageRank(entries[i]);
             queryTfIdf(entries[i], wordMap);
-            queryDocumentDetail(entries[i]); // TODO: comment out
+            queryDocumentDetail(entries[i]);
             processScore(entries[i]);
             i++;
         }
@@ -172,9 +174,12 @@ public class SearchEngineService {
     private static void processScore(ResultEntry entry) {
         // TODO: TUNE THE ALGORITHM!!!
         entry.score = entry.pageRank * entry.tfidf;
-        if (entry.location.equalsIgnoreCase("https://www.facebook.com/")) {
-            entry.score *= 100;
+        for (String url : urls) {
+            if (entry.location.startsWith(url)) {
+                entry.score *= 1.0 * 100 / entry.location.length();
+            }
         }
+
     }
 
     /******************************************
@@ -191,7 +196,7 @@ public class SearchEngineService {
         // DONE: query inverted index database
         ArrayList<String> res = new ArrayList<>();
         for (String id : w.getDocs()) {
-            if (docs.contains(id)) {
+            if (docs.containsKey(id)) {
                 res.add(id);
             }
         }
@@ -243,13 +248,13 @@ public class SearchEngineService {
      */
     private static void queryDocumentDetail(ResultEntry entry) {
         // DONE: query database: get details about a document by documentID
-        String[] info = INDEXER.getDocInfo(entry.documentId);
+        String[] info = docs.get(entry.documentId).getInfo();
         entry.title = info[1];
         entry.location = info[0];
-        entry.digest = info[2] + " This is a fake digest. The page rank is [" + entry.pageRank + "]. " +
-                "The TF-IDF score is [" + entry.tfidf + "]. " +
-                "The total score is [" + entry.score + "].";
-//        entry.digest = info[2];
+//        entry.digest = info[2] + " This is a fake digest. The page rank is [" + entry.pageRank + "]. " +
+//                "The TF-IDF score is [" + entry.tfidf + "]. " +
+//                "The total score is [" + entry.score + "].";
+        entry.digest = info[2];
 //        if (entry.digest == null || entry.digest.length() < 50) {
 //            queryPreview(entry);
 //        }
