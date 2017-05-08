@@ -133,7 +133,7 @@ public class SearchEngineServlet extends HttpServlet {
             String contents = new String(Files.readAllBytes(Paths.get("resources/sites/result.html")));
 
             logger.warn("getting results");
-            ResultEntry[] entries;
+            ResultEntry[] entries = null;
             try {
                 entries = searchThread.get();
             } catch (Exception e) {
