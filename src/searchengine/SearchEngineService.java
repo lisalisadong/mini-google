@@ -175,7 +175,7 @@ public class SearchEngineService {
         // TODO: TUNE THE ALGORITHM!!!
         entry.score = entry.pageRank * entry.tfidf;
         for (String url : urls) {
-            if (entry.location.startsWith(url)) {
+            if (entry.numWordsTitle > 0 && entry.location.startsWith(url)) {
                 entry.score += 50 / entry.location.length();
                 break;
             }
