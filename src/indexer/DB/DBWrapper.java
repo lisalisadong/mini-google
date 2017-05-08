@@ -23,7 +23,7 @@ import com.sleepycat.persist.StoreConfig;
 
 public class DBWrapper {
 
-	public static final String INDEXER_DB_DIR = "IndexerDB";
+	public static final String INDEXER_DB_DIR = "../IndexerDB";
 	private static final String STORE_NAME = "Indexer";
 	private static String envDirectory = null;
 	private static Environment myEnv;
