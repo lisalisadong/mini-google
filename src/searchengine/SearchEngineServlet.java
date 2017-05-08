@@ -132,7 +132,13 @@ public class SearchEngineServlet extends HttpServlet {
 
             String contents = new String(Files.readAllBytes(Paths.get("resources/sites/result.html")));
 
-            ResultEntry[] entries = searchThread.get();
+            logger.warn("getting results");
+            ResultEntry[] entries;
+            try {
+                entries = searchThread.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             logger.warn("number of seconds used get results " + 1.0 * (System.nanoTime() - time) / 1000000000);
             double seconds = 1.0 * (System.nanoTime() - time) / 1000000000;
 
