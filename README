@@ -3,14 +3,81 @@ SEAS logins:   qingxiao, xiaofand, liujue, yishang
 
 Which features did you implement? 
   (list features, or write 'Entire assignment')
-  Entire assignment
+  Entire project.
 
 Did you complete any extra-credit tasks? If so, describe them!
   (list extra-credit tasks)
-  TODO:
+  - Integrate search results from web services (Amazon and Weather APIs) and  display these
+     results in a sidebar
+  - Implement a simple Google-style spell-check: for words with few hits, try simple edits to
+    the word (e.g., adding, removing, transposing characters) and see if a much more popular word is
+    “nearby.”
+  - Added AJAX support to the search interface (auto complete). Use ReactJS and our own
+    API: http://ec2-54-218-62-138.us-west-2.compute.amazonaws.com:8080/api/predict?q=word
+  - Including document title, description, and the word locations in title and content, which are used
+    for displaying original document and increase word rankings if it shows up in the title.
 
 Any special instructions for building and running your solution?
   (include detailed instructions)
+  Crawler: (using our own HW1 web server)
+    Master: ant crawler-master -Dport {port}
+    Slave: ant crawler-worker -Dmaster {master addr} -Dport {port} -Did {id}
+  Indexer:
+    1. compile indexer.jar: jar cfm Manifest.txt indexer.jar indexer/* utils/* ../lib/*.jar
+    2. run hadoop: bin/hadoop jar indexer.jar input_path output_path
+    3. convert hadoop output to BDB: ant worddb -Dargs="input_folder"
+  Search Engine: (using our own HW1 web server)
+    ant search
+  JARs to be included: (download at https://mvnrepository.com/artifact/)
+      aws-java-sdk-1.11.126.jar
+      commons-codec-1.4.jar
+      commons-codec-1.4-javadoc.jar
+      commons-codec-1.4-sources.jar
+      commons-codec-1.9.jar
+      commons-configuration-1.10.jar
+      commons-httpclient-3.1.jar
+      commons-lang3-3.4.jar
+      commons-lang-2.6.jar
+      commons-logging.jar
+      commons-logging-1.2.jar
+      fluent-hc-4.5.3.jar
+      guava-18.0.jar
+      hadoop-common-2.6.0.jar
+      hadoop-common-2.7.3.jar
+      hadoop-core-1.2.1.jar
+      hadoop-mapreduce-client-core-2.6.0.jar
+      hadoop-mapreduce-client-core-2.7.3.jar
+      httpclient-4.5.3.jar
+      httpclient-cache-4.5.3.jar
+      httpclient-win-4.5.3.jar
+      httpcore-4.4.6.jar
+      httpmime-4.5.3.jar
+      jackson-annotations-2.9.0-20161011.053116-27.jar
+      jackson-core-2.9.0-20160930.222323-13.jar
+      jackson-core-asl-1.9.13.jar
+      jackson-databind-2.9.0-20161012.002007-91.jar
+      jackson-mapper-asl-1.9.13.jar
+      je-6.2.31.jar
+      jetty-http-9.3.13.v20161014.jar
+      jetty-io-9.3.13.v20161014.jar
+      jetty-server-9.3.13.v20161014.jar
+      jetty-util-9.3.13.v20161014.jar
+      jetty-webapp-9.3.13.v20161014.jar
+      jna-4.1.0.jar
+      jna-platform-4.1.0.jar
+      joda-time-2.4.jar
+      json-simple-1.1.1.jar
+      jsoup-1.10.2.jar
+      jtidy-r938.jar
+      junit-4.12.jar
+      log4j-1.2.9.jar
+      pdfbox-app-1.8.9.jar
+      servlet-api.jar
+      servlet-api-3.1.jar
+      slf4j-api-1.7.21.jar
+      slf4j-log4j12-1.7.21.jar
+      spark-core-1.1.1.jar
+      webserver.jar (compiled from homework 1)
 
 Did the members of this team personally write _all_ the code they are 
 submitting (other than code from the course web page, code from their 

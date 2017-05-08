@@ -135,7 +135,7 @@
 
     <target name="pack" description="Create an archive for submission">
         <zip destfile="mini-google.zip">
-            <zipfileset dir="." excludes="lib/**,.idea/**,database/**,target/**,examples/**,**/*.class,mini-google.zip"/>
+            <zipfileset dir="." excludes="lib/**,.idea/**,database/**,target/**,examples/**,**/*.class,mini-google.zip,word.txt,page_rank_dat,queries,.settings/**,mini-google.iml,galary/**"/>
         </zip>
     </target>
 
