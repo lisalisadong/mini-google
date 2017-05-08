@@ -33,9 +33,12 @@ public class SearchEngineService {
 
     private static Set<String> docs = INDEXER.docInfoIndex.map().keySet();
 
+    private static Set<String> urls = new HashSet<>();
+
 
     public static void init(String pageRankFile) {
         loadPageRank(pageRankFile);
+        loadSeedUrls("seed_urls");
     }
 
     /**
@@ -230,7 +233,7 @@ public class SearchEngineService {
         if (pageRank.containsKey(documentId)) {
             entry.pageRank = pageRank.get(documentId);
         } else {
-            entry.pageRank = 6;
+            entry.pageRank = 1.5;
         }
     }
 
@@ -371,6 +374,26 @@ public class SearchEngineService {
             while ((line = reader.readLine()) != null) {
                 String[] toks = line.split("\t");
                 pageRank.put(toks[0], Double.parseDouble(toks[1]));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Load seed urls
+     * @param filename
+     */
+    private static void loadSeedUrls(String filename) {
+        String line;
+        try {
+            log.warn("filename is " + filename);
+            new File(filename).createNewFile();
+            BufferedReader reader = new BufferedReader(new FileReader(filename));
+            while ((line = reader.readLine()) != null) {
+                urls.add(line);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

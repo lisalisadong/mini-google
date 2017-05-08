@@ -12,7 +12,7 @@
   <servlet-class>searchengine.SearchEngineServlet</servlet-class>
   <init-param>
    <param-name>page_rank_dat</param-name>
-   <param-value>page_rank_dat</param-value>
+   <param-value>../pagerank_10w/part-r-00000</param-value>
   </init-param>
  </servlet>
 
