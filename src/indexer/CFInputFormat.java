@@ -12,7 +12,7 @@ import org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileRecordReader;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 
-public class CFInputFormat extends CombineFileInputFormat<Text, Text> {
+public class CFInputFormat extends CombineFileInputFormat<Key, Text> {
 
 	public CFInputFormat() {
 		super();
@@ -25,8 +25,8 @@ public class CFInputFormat extends CombineFileInputFormat<Text, Text> {
     }
 
 	@Override
-	public RecordReader<Text, Text> createRecordReader(InputSplit split, TaskAttemptContext context) throws IOException {
-		return new CombineFileRecordReader<Text, Text>((CombineFileSplit)split, context, CFRecordReader.class);
+	public RecordReader<Key, Text> createRecordReader(InputSplit split, TaskAttemptContext context) throws IOException {
+		return new CombineFileRecordReader<Key, Text>((CombineFileSplit)split, context, CFRecordReader.class);
 	}
 	
 

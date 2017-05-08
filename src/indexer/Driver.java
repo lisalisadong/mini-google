@@ -35,8 +35,8 @@ public class Driver {
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(OutputValue.class);
 
-//		job.setInputFormatClass(WholeFileInputFormat.class);
-		job.setInputFormatClass(CFInputFormat.class);
+		job.setInputFormatClass(WholeFileInputFormat.class);
+//		job.setInputFormatClass(CFInputFormat.class);
 		
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 		
