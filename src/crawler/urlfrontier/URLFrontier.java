@@ -133,9 +133,9 @@ public class URLFrontier {
     		} else if(CrawlerWorker.WORKER_ID.equals("9")) {
     			addURL("http://www.ebay.com/");
     			addURL("https://www.apple.com/");
-    			addURL("http://www.accuweather.com");
+//    			addURL("http://www.accuweather.com");
     			
-    			System.out.println("[seed]: http://www.accuweather.com");
+//    			System.out.println("[seed]: http://www.accuweather.com");
     			System.out.println("[seed]: https://www.apple.com/");
     			System.out.println("[seed]: http://www.ebay.com/");
     		} else if(CrawlerWorker.WORKER_ID.equals("10")) {
