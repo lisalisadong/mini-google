@@ -168,10 +168,10 @@ public class SearchEngineService {
      */
     private static void processScore(ResultEntry entry) {
         // TODO: TUNE THE ALGORITHM!!!
-        entry.score = entry.pageRank * entry.tfidf * entry.numWordsTitle;
-        if (entry.location.equalsIgnoreCase("https://www.facebook.com/")) {
-            entry.score *= 100;
-        }
+        entry.score = entry.pageRank * entry.tfidf;
+//        if (entry.location.equalsIgnoreCase("https://www.facebook.com/")) {
+//            entry.score *= 100;
+//        }
     }
 
     /******************************************
