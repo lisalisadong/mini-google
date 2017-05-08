@@ -14,7 +14,7 @@ public class Word {
 	@PrimaryKey
 	public String word;
 	private Map<String, Double> tfs; // docID : tf
-	private Map<String, Double> idfs; // docID : idf
+	private double idf; // docID : idf
 	private Map<String, List<Integer>> titlePos; 
 	private Map<String, List<Integer>> contentPos;
 
@@ -23,7 +23,6 @@ public class Word {
 	public Word(String word) {
 		this.word = word;
 		this.tfs = new HashMap<String, Double>();
-		this.idfs = new HashMap<String, Double>();
 		this.titlePos = new HashMap<String, List<Integer>>();
 		this.contentPos = new HashMap<String, List<Integer>>();
 	}
@@ -36,9 +35,12 @@ public class Word {
 		return tfs.keySet();
 	}
 	
-	public void addInfo(String id, double tf, double idf) {
+	public void addTf(String id, double tf) {
 		tfs.put(id, tf);
-		idfs.put(id, idf);
+	}
+	
+	public void addIdf(double idf) {
+		this.idf = idf;
 	}
 	
 	public void addTitlePos(String id, List<Integer> pos) {
@@ -53,8 +55,8 @@ public class Word {
 		return tfs.get(id);
 	}
 
-	public double getIdf(String id) {
-		return idfs.get(id);
+	public double getIdf() {
+		return idf;
 	}
 	
 	public List<Integer> getTitlePos(String id) {

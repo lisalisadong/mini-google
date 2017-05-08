@@ -13,7 +13,11 @@ import org.jsoup.select.Elements;
 public class DocInfoRetrival {
 
 	public static void main(String[] args) {
-		String inputDir = "/Users/liujue/Desktop/s3";
+		if (args.length != 1) {
+			System.out.println("input: [input_directory]");
+			System.exit(1);
+		}
+		String inputDir = args[0];
 		DBWrapper db = new DBWrapper(DBWrapper.INDEXER_DB_DIR);
 		File folder = new File(inputDir);
 		File[] listOfFiles = folder.listFiles();
@@ -37,7 +41,7 @@ public class DocInfoRetrival {
 					}
 					DocInfo docInfo = new DocInfo(docID, url, title, description);
 					db.putDocInfo(docInfo);
-					System.out.println("url: " + url + " title: " + title + " description: " + description);
+//					System.out.println("url: " + url + " title: " + title + " description: " + description);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
