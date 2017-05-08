@@ -1,6 +1,11 @@
 package crawler.stormlite.bolt;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -44,6 +49,10 @@ public class HTTPModuleBolt implements IRichBolt {
 	
 	static Logger logger = new Logger(HTTPModuleBolt.class.getName());
 	
+	static String TIME_CONSUMING_URL_LOG = "timeConsumingUrls.txt";
+	
+	static BufferedWriter bw;
+	
 	Fields schema = new Fields("page");
 	
 	DBWrapper db;
@@ -80,6 +89,12 @@ public class HTTPModuleBolt implements IRichBolt {
        
        db = new DBWrapper(Crawler.DBPath);
        db.setup();
+       
+       try {
+       		bw = new BufferedWriter(new FileWriter(TIME_CONSUMING_URL_LOG));
+       } catch (IOException e) {
+    	   e.printStackTrace();
+       }
    }
 
    /**
@@ -190,7 +205,16 @@ public class HTTPModuleBolt implements IRichBolt {
 			return null;
 	   }
 	   client.close();
-	   if(System.currentTimeMillis() - start > 8000) {
+	   
+	   long time = System.currentTimeMillis() - start;
+	   if(time > 8000) {
+		   
+		   try {
+			   bw.write("[********time consuming url: " + url + "**************]: " + time + "ms");
+		   } catch (IOException e) {
+			   e.printStackTrace();
+		   }
+		   
 		   Crawler.logEvent("********time consuming url: " + url + "**************", start);
 	   }
 	   Crawler.logEvent("finished download: " + url, start);

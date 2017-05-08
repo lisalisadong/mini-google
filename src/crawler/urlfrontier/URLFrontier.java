@@ -93,11 +93,15 @@ public class URLFrontier {
     			System.out.println("[seed]: https://www.reddit.com/");
     		} else if(CrawlerWorker.WORKER_ID.equals("9")) {
     			addURL("http://www.ebay.com/");
-
+    			addURL("https://www.apple.com/");
+    			
+    			System.out.println("[seed]: https://www.apple.com/");
     			System.out.println("[seed]: http://www.ebay.com/");
     		} else if(CrawlerWorker.WORKER_ID.equals("10")) {
     			addURL("https://en.wikipedia.org/wiki/Portal:Contents");
-
+    			addURL("https://www.nytimes.com/");
+    			
+    			System.out.println("[seed]: https://www.nytimes.com/");
     			System.out.println("[seed]: https://en.wikipedia.org/wiki/Portal:Contents");
     		}  else {
     			addURL("https://www.facebook.com/");
