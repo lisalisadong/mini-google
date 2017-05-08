@@ -52,6 +52,7 @@ public class SearchEngineServlet extends HttpServlet {
             } catch (ExecutionException e) {
                 response.sendError(500);
             } catch (InterruptedException e) {
+                System.out.println("Interrupted!");
                 response.sendError(500);
             }
             break;

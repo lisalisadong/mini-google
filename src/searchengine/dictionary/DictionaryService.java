@@ -27,15 +27,15 @@ public class DictionaryService {
      * @param backup backup dictionary
      */
     public static void init(String cache, String backup) {
-//        try {
-//            String line;
-//            new File(cache).createNewFile();
-//            BufferedReader reader = new BufferedReader(new FileReader(cache));
-//            while ((line = reader.readLine()) != null) {
-//                trie.insert(line);
-//                freq.put(line, Integer.parseInt(reader.readLine()));
-//            }
-            Collection<Word> words = INDEXER.getAllWords();
+        try {
+            String line;
+            new File(cache).createNewFile();
+            BufferedReader reader = new BufferedReader(new FileReader(cache));
+            while ((line = reader.readLine()) != null) {
+                trie.insert(line);
+                freq.put(line, Integer.parseInt(reader.readLine()));
+            }
+            Set<String> words = INDEXER.getPopularWords();
 //            new File(backup).createNewFile();
 //            reader.close();
 //            reader = new BufferedReader(new FileReader(backup));
@@ -44,20 +44,20 @@ public class DictionaryService {
 //                trie.insert(word);
 //                freq.put(word, 0);
 //            }
-            for (Word word : words) {
-                trie.insert(word.word);
-                freq.put(word.word, word.getDocs().size());
+            for (String word : words) {
+                trie.insert(word);
+                freq.put(word, 2);
             }
             for (String word : STOP_SET_VALUES) {
                 trie.insert(word);
-                freq.put(word, 10000);
+                freq.put(word, 2);
             }
-//            reader.close();
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+            reader.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -85,7 +85,7 @@ public class DictionaryService {
         String[] correction = new String[words.length];
         boolean corrected = false;
         for (int i = 0; i < words.length; i++) {
-            if (freq.containsKey(words[i]) && freq.get(words[i]) > 1000) {
+            if (freq.containsKey(words[i]) && freq.get(words[i]) > 1) {
                 correction[i] = words[i];
                 continue;
             }
@@ -93,7 +93,7 @@ public class DictionaryService {
             String corrWord = words[i];
             for (String word : freq.keySet()) {
                 int dist = editDistance(word, words[i]);
-                if (dist < distance && dist <= 3 && freq.get(word) > 1000) {
+                if (dist < distance && dist <= 3 && freq.get(word) > 1) {
                     distance = dist;
                     corrWord = word;
                 }

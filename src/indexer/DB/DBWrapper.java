@@ -5,10 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 import com.sleepycat.je.DatabaseException;
@@ -20,7 +17,7 @@ import com.sleepycat.persist.StoreConfig;
 
 public class DBWrapper {
 
-	public static final String INDEXER_DB_DIR = "../IndexerDB";
+	public static final String INDEXER_DB_DIR = "../IndexerDB_10w";
 	private static final String STORE_NAME = "Indexer";
 	private static String envDirectory = null;
 	private static Environment myEnv;
@@ -73,8 +70,14 @@ public class DBWrapper {
 		myEnv.sync();
 	}
 
-	public Collection<Word> getAllWords() {
-		return wordIndex.map().values();
+	public Set<String> getPopularWords() {
+		Set<String> words = new HashSet<>();
+		for (Map.Entry<String, Word> entry : wordIndex.map().entrySet()) {
+			if (entry.getValue().getDocs().size() > 5000) {
+				words.add(entry.getKey());
+			}
+		}
+		return words;
 	}
 
 	public void putDocInfo(DocInfo info) {
