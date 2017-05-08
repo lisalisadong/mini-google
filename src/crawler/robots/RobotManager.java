@@ -5,11 +5,25 @@ import java.util.LinkedList;
 import crawler.Crawler;
 import crawler.client.URLInfo;
 import crawler.storage.DBWrapper;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 public class RobotManager {
 	
-	public static HashSet<String> tabooHosts 
-		= new HashSet<String>(); 
+	public static String NO_CRAWL_SUFFIX_FILE = "./NoCrawlSuffix.txt";
+	
+	public static HashSet<String> noCrawlHosts 
+		= new HashSet<String>();  
+	
+	public static LinkedList<String> noCrawlSuffixes 
+		= new LinkedList<String>(); 
+	
+	public static HashSet<String> allowedHostsCache
+		= new HashSet<String>();
 
 	public DBWrapper db;
 	
@@ -17,20 +31,47 @@ public class RobotManager {
 		db = new DBWrapper(DBPath);
 		db.setup();
 		System.out.println("[Robot Manager] Robot info cache: " + db.rIdx.map().size());
+		confignoCrawlHosts();
+		configNoCrawlSuffix();
 	}
 	
+	private void configNoCrawlSuffix() {
+		BufferedReader br = null;
+		FileReader fr = null;
+		
+		try {
+			fr = new FileReader(NO_CRAWL_SUFFIX_FILE);
+			br = new BufferedReader(fr);
+			
+			String line = null;
+			while((line = br.readLine()) != null) {
+				System.out.println("[Robot Manager]: no crawl suffix--" + line);
+				noCrawlSuffixes.offer(line);
+			}
+			
+		} catch(IOException e) {
+			
+		}
+		System.out.println("[Robot Manager]: finish config suffix");
+	}
+
 	/**
 	 * taboo host
 	 */
-	public void configTabooHosts() {
-		tabooHosts.add("mailto");
-		tabooHosts.add("pinayot.com");
-		tabooHosts.add("thefappening.so");
-		tabooHosts.add("jizzbo.com");
-		tabooHosts.add("bestpornpictures.com");
-		tabooHosts.add("freepornpics.net");
-		tabooHosts.add("sexhotpictures.com");
-		tabooHosts.add("pornktube.com");
+	public void confignoCrawlHosts() {
+		noCrawlHosts.add("pinayot.com");
+		noCrawlHosts.add("thefappening.so");
+		noCrawlHosts.add("jizzbo.com");
+		noCrawlHosts.add("bestpornpictures.com");
+		noCrawlHosts.add("freepornpics.net");
+		noCrawlHosts.add("sexhotpictures.com");
+		noCrawlHosts.add("pornktube.com");
+		noCrawlHosts.add("bleacherreport.com");
+		noCrawlHosts.add("artgoldhammer.blogspot.com:80");
+		noCrawlHosts.add("ac360.blogs.cnn.com");
+		noCrawlHosts.add("www.dreamwidth.org");
+		noCrawlHosts.add("115630.258ww.com");
+		
 	}
 	
 	private String getHostName(String url) {
@@ -48,8 +89,12 @@ public class RobotManager {
         }
 
         rt = new RobotTxt(robotUrl);
+        if(rt.isEmpty()) {
+        	noCrawlHosts.add(host);
+        	return rt;
+        }
+
         db.saveRobotTxt(rt);
-//        db.sync();
         return rt;
     }
 	
@@ -59,13 +104,13 @@ public class RobotManager {
      * @param url
      * @return
      */
-    public boolean isAllowed(String url) {
+    public synchronized boolean isAllowed(String url) {
     	String host = getHostName(url);
-        if (host == null)
+        if (host == null || host.startsWith("mailto"))
             return false;
         
-        if(isTabooHost(host)) return false;
-        
+        if(isNoCrawlHost(host)) return false;
+        if(hasNoCrawlSuffix(host)) return false;
 //        /* return false if exceed the crawl limits */
 //        Integer num = crawledPageNum.get(host);
 //        if(num != null && num >= crawledPageLimit) return false;
@@ -75,23 +120,27 @@ public class RobotManager {
             return true;
         
         /* not crawl the host with delay */
-        if(robotTxt.getCrawlDelay() > 0) return false;
+        if(robotTxt.isEmpty() || robotTxt.getCrawlDelay() > 0) return false;
         	
         String filePath = new URLInfo(url).getFilePath();
         
         return robotTxt.match(filePath);
     }
     
-    /**
+    private boolean hasNoCrawlSuffix(String host) {
+		for(String suffix: noCrawlSuffixes) {
+			if(host.endsWith(suffix)) return true;
+		}
+		return false;
+	}
+
+	/**
      * returns true if the host is taboo
      * @param host
      * @return
      */
-    private boolean isTabooHost(String host) {
-		for(String tabooHost: tabooHosts) {
-			if(host.contains(tabooHost)) return true;
-		}
-		return false;
+    private boolean isNoCrawlHost(String host) {
+		return noCrawlHosts.contains(host);
 	}
 
 	public void writeSnapshot() {
@@ -100,4 +149,9 @@ public class RobotManager {
     		System.out.println("Robot txt size: " + db.rIdx.map().size());
     	}
     }
+	
+	public static void main(String[] args) {
+		RobotManager rm = new RobotManager("../tmp");
+		System.out.println(rm.isAllowed("http://ameblo.jp/qoomin0928/"));
+	}
 }

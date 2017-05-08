@@ -175,8 +175,37 @@
             	
             	<pathelement location="lib/log4j-1.2.9.jar"/>
             	
+            	<pathelement location="lib/aws-java-sdk-1.11.126.jar"/>
+            			    	
+		    	<pathelement location="lib/commons-configuration-1.10.jar"/>
+            	<pathelement location="lib/commons-httpclient-3.1.jar"/>
+        		<pathelement location="lib/commons-lang-2.6.jar"/>
+        		<pathelement location="lib/commons-lang3-3.4.jar"/>
+        		<pathelement location="lib/commons-logging.jar"/>
+		    	<pathelement location="lib/commons-codec-1.4-javadoc.jar"/>
+            	<pathelement location="lib/commons-codec-1.4-sources.jar"/>
+        		<pathelement location="lib/commons-codec-1.4.jar"/>
+        		<pathelement location="lib/commons-lang3-3.4.jar"/>
+        		<pathelement location="lib/commons-codec-1.9.jar"/>
+		    	
+		    	<pathelement location="lib/fluent-hc-4.5.3.jar"/>
+		    	
+		    	<pathelement location="lib/httpclient-4.5.3.jar"/>
+            	<pathelement location="lib/httpclient-cache-4.5.3.jar"/>
+		    	<pathelement location="lib/httpclient-win-4.5.3.jar"/>
+		    	<pathelement location="lib/httpcore-4.4.6.jar"/>
+            	<pathelement location="lib/httpmime-4.5.3.jar"/>
+            	
+		    	<pathelement location="lib/jna-4.1.0.jar"/>
+		    	<pathelement location="lib/jna-platform-4.1.0.jar"/>
+		    	<pathelement location="lib/joda-time-2.4.jar"/>
+            	
             </classpath>
+<<<<<<< HEAD
         	<arg value="10000"/>
+=======
+            <arg value="${port}"/>
+>>>>>>> crawler
             <arg value="."/>
             <arg value="conf/crawler.xml"/>
         </java>
@@ -223,11 +252,19 @@
 	    </java>
 	</target>
 	
+<<<<<<< HEAD
 	<target name="gen-host-file" depends="compile-crawler" description="analysis hosts crawled">
 
 		<property name="dbpath" value="../db" />
 		<property name="v" value="a" />
         <java classname="crawler.analysis.ShowHosts">
+=======
+	<target name="show-status" depends="compile-crawler" description="Display worker status">
+
+		<property name="dbpath" value="../db1" />
+		<property name="verbose" value="1" />
+        <java classname="crawler.analysis.ShowStatus">
+>>>>>>> crawler
             <classpath>
                 <pathelement location="lib/webserver.jar"/>
                 <pathelement location="lib/servlet-api.jar"/>
@@ -236,6 +273,7 @@
                 <pathelement location="${classes.dir}"/>
             </classpath>
         	<arg value="${dbpath}"/>
+<<<<<<< HEAD
         	<arg value="${v}"/>
 	    </java>
 	</target>
@@ -275,5 +313,71 @@
         	<arg line="${args}" />
         </java>
     </target>	
+=======
+        	<arg value="${verbose}"/>
+	    </java>
+		
+	</target>
+	
+	<target name="upload" depends="compile-crawler" description="Upload data to S3">
+
+		<property name="dbpath" value="../db1" />
+		<property name="verbose" value="1" />
+		<java classname="crawler.analysis.BDBToS3">
+		    <classpath>
+		        <pathelement location="lib/webserver.jar"/>
+		        <pathelement location="lib/servlet-api.jar"/>
+		    	<pathelement location="lib/servlet-api-3.1.jar"/>
+		        <pathelement location="lib/je-6.2.31.jar"/>
+		        <pathelement location="${classes.dir}"/>
+		    	
+		    	<pathelement location="lib/aws-java-sdk-1.11.126.jar"/>
+		    	
+		    	<pathelement location="lib/commons-configuration-1.10.jar"/>
+            	<pathelement location="lib/commons-httpclient-3.1.jar"/>
+        		<pathelement location="lib/commons-lang-2.6.jar"/>
+        		<pathelement location="lib/commons-lang3-3.4.jar"/>
+        		<pathelement location="lib/commons-logging.jar"/>
+		    	<pathelement location="lib/commons-codec-1.4-javadoc.jar"/>
+            	<pathelement location="lib/commons-codec-1.4-sources.jar"/>
+        		<pathelement location="lib/commons-codec-1.4.jar"/>
+        		<pathelement location="lib/commons-lang3-3.4.jar"/>
+        		<pathelement location="lib/commons-codec-1.9.jar"/>
+		    	
+		    	<pathelement location="lib/fluent-hc-4.5.3.jar"/>
+		    	
+		    	<pathelement location="lib/httpclient-4.5.3.jar"/>
+            	<pathelement location="lib/httpclient-cache-4.5.3.jar"/>
+		    	<pathelement location="lib/httpclient-win-4.5.3.jar"/>
+		    	<pathelement location="lib/httpcore-4.4.6.jar"/>
+            	<pathelement location="lib/httpmime-4.5.3.jar"/>
+            	
+		    	<pathelement location="lib/jna-4.1.0.jar"/>
+		    	<pathelement location="lib/jna-platform-4.1.0.jar"/>
+		    	<pathelement location="lib/joda-time-2.4.jar"/>
+		    			    	
+		    	<pathelement location="lib/jackson-annotations-2.9.0-20161011.053116-27.jar"/>
+            	<pathelement location="lib/jackson-core-2.9.0-20160930.222323-13.jar"/>
+        		<pathelement location="lib/jackson-core-asl-1.9.13.jar"/>
+        		<pathelement location="lib/jackson-databind-2.9.0-20161012.002007-91.jar"/>
+        		<pathelement location="lib/jackson-mapper-asl-1.9.13.jar"/>
+            	<pathelement location="lib/spark-core-1.1.1.jar"/>
+            	
+            	<pathelement location="lib/log4j-1.2.9.jar"/>
+            	<pathelement location="lib/slf4j-api-1.7.21.jar"/>
+            	<pathelement location="lib/slf4j-log4j12-1.7.21.jar"/>
+            	
+            	<pathelement location="lib/jetty-http-9.3.13.v20161014.jar"/>
+            	<pathelement location="lib/jetty-io-9.3.13.v20161014.jar"/>
+            	<pathelement location="lib/jetty-server-9.3.13.v20161014.jar"/>
+            	<pathelement location="lib/jetty-util-9.3.13.v20161014.jar"/>
+            	<pathelement location="lib/jetty-webapp-9.3.13.v20161014.jar"/>
+		    </classpath>
+			<arg value="${dbpath}"/>
+			<arg value="${verbose}"/>
+		</java>
+	
+	</target>
+>>>>>>> crawler
 
 </project>

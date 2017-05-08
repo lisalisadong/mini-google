@@ -20,6 +20,11 @@ public class URLInfo {
         	docURL = docURL.substring(0, idx);
         }
         
+        idx = docURL.indexOf('#');
+        if(idx != -1) {
+        	docURL = docURL.substring(0, idx);
+        }
+        
         docURL = docURL.trim();
 
         // Stripping off 'http://'

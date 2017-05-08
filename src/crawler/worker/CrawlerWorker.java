@@ -101,8 +101,6 @@ public class CrawlerWorker extends WorkerServer {
 				try {
 					String stream = arg0.params(":stream");
 					Tuple tuple = om.readValue(arg0.body(), Tuple.class);
-					logger.debug("Worker received: " + tuple + " for " + stream);
-//					System.out.println("Worker received: " + tuple + " for " + stream);
 					
 					crawler.pushData(stream, tuple);
 					
@@ -125,7 +123,6 @@ public class CrawlerWorker extends WorkerServer {
 				System.out.println("received shutdown!");
         		logger.debug("Shutting down all workers");
         		shutdown();
-//        		System.exit(0);
 				return "Shutted down";
 			}
         });
@@ -144,9 +141,11 @@ public class CrawlerWorker extends WorkerServer {
 		db = new DBWrapper(Crawler.DBPath + WORKER_ID);
 		db.setup();
 		
-		workerStatus = db.getWorkerStatus(STATUS_ID);
-		if(workerStatus == null) {
-			workerStatus = new WorkerStatus(STATUS_ID);
+		int num = db.pIdx.map().size();
+		workerStatus = new WorkerStatus(STATUS_ID);
+		workerStatus.crawledFileNum = num;
+		
+		if(num == 0) {
 			System.out.println("[status] new status");
 		} else {
 			System.out.println("[status] Pages crawled previously: " + workerStatus.getCrawledFileNum());
@@ -182,11 +181,18 @@ public class CrawlerWorker extends WorkerServer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
+		worker.writeSnapshot();
 	}
 	
 
-    private void startPingThread() {
+    public void writeSnapshot() {
+		db.saveWorkerStatus(workerStatus);
+		crawler.writeSnapShot();
+		db.sync();
+	}
+
+	private void startPingThread() {
 		Thread backgroundThread = new Thread(){
 			public void run() {
 				while(isRunning) {
@@ -209,7 +215,6 @@ public class CrawlerWorker extends WorkerServer {
 						conn.getResponseCode();
 						conn.disconnect();
 					} catch (IOException e) {
-//						e.printStackTrace();
 					} 
 				}
 			}

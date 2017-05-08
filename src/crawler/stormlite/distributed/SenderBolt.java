@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import crawler.Crawler;
 import crawler.stormlite.OutputFieldsDeclarer;
 import crawler.stormlite.TopologyContext;
 import crawler.stormlite.bolt.IRichBolt;
@@ -92,12 +93,7 @@ public class SenderBolt implements IRichBolt {
     private synchronized void send(Tuple tuple) throws IOException {
 
     	isEndOfStream = tuple.isEndOfStream();
-    	
-		log.debug("Sender is routing " + tuple.toString() + " to " + address + "/" + stream);
-		System.out.println("Sender is routing " + tuple.toString() + " to " + address + "/" + stream);
-		
 		long start = System.currentTimeMillis();
-		// TODO: send this to /pushdata/{stream} as a POST!
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		conn.setRequestProperty("Content-Type", "application/json");
 		conn.setRequestMethod("POST");
@@ -109,7 +105,7 @@ public class SenderBolt implements IRichBolt {
 		os.flush();
 		conn.getResponseCode();
 		conn.disconnect();
-		CrawlerWorker.logTime("sent to " + address, start);
+		Crawler.logEvent("Sent to remote host", start);
     }
 
     /**

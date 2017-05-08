@@ -23,6 +23,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import crawler.Crawler;
+import crawler.client.URLInfo;
 import crawler.storage.CrawledPage;
 import crawler.storage.DBWrapper;
 import crawler.storage.PageLinks;
@@ -64,7 +65,7 @@ import javax.xml.bind.DatatypeConverter;
 public class LinkExtractorBolt implements IRichBolt {
     static Logger logger = new Logger(LinkExtractorBolt.class.getName());
 
-    Fields schema = new Fields("link");
+    Fields schema = new Fields("host", "links");
     DBWrapper db;
     LRUCache<CrawledPage> pageCache;
 
@@ -100,35 +101,7 @@ public class LinkExtractorBolt implements IRichBolt {
      */
     @Override
     public void execute(Tuple input) {
-        CrawledPage page = (CrawledPage) input.getObjectByField("page");
-//         System.out.println(id + " got " + page.getUrl());
-        String url = page.getUrl();
-        
-        long start = System.currentTimeMillis();
-        PageLinks pl = new PageLinks(url);
-        if ("text/html".equals(page.getContentType())) {
-            byte[] content = page.getContent();
-            Document doc = Jsoup.parse(new String(content), url);
-            Elements links = doc.select("a[href]");
-            if(links.size() == 0) return;
-            for (Element link : links) {
-                String l = link.attr("abs:href");
-                
-                if(url != null && !url.equals(l)) {
-                	if (l == null || l.length() == 0)
-                        continue;
-                    // System.out.println(id + " emit " + l);
-                	pl.addLink(l);
-                    this.collector.emit(new Values<Object>(l));
-                }
-            }
-        }
-        CrawlerWorker.logTime("extract links", start);
-        
-        start = System.currentTimeMillis();
-        db.savePageLinks(pl);
-        db.sync();
-        CrawlerWorker.logTime("store extract links", start);
+        // not used any more
     }
 
     /**
