@@ -151,6 +151,8 @@ public class SearchEngineServlet extends HttpServlet {
                 } else {
                     contents = contents.replace("${correction}", "");
                 }
+            } else {
+                contents = contents.replace("${correction}", "");
             }
             DictionaryService.put(query);
 
