@@ -1,7 +1,7 @@
 Team members:  Qingxiao Dong, Xiaofan Dou, Jue Liu, Yi Shang
 SEAS logins:   qingxiao, xiaofand, liujue, yishang
 
-Which features did you implement? 
+Which features did you implement?
   (list features, or write 'Entire assignment')
   Entire project.
 
@@ -26,6 +26,11 @@ Any special instructions for building and running your solution?
     1. compile indexer.jar: jar cfm Manifest.txt indexer.jar indexer/* utils/* ../lib/*.jar
     2. run hadoop: bin/hadoop jar indexer.jar input_path output_path
     3. convert hadoop output to BDB: ant worddb -Dargs="input_folder"
+  PageRank:
+    1. put all input files into one single input/ folder
+    2. run PageRankDriver.java with 3 command line arguments:
+        path/to/input path/to/iteration path/to/output
+    3. the output file will be generated under the specified output folder
   Search Engine: (using our own HW1 web server)
     ant search
   JARs to be included: (download at https://mvnrepository.com/artifact/)
@@ -79,13 +84,13 @@ Any special instructions for building and running your solution?
       spark-core-1.1.1.jar
       webserver.jar (compiled from homework 1)
 
-Did the members of this team personally write _all_ the code they are 
-submitting (other than code from the course web page, code from their 
+Did the members of this team personally write _all_ the code they are
+submitting (other than code from the course web page, code from their
 own homework submissions, and tools specifically authorized on Piazza)?
   [X] Yes
   [ ] No
 
-Did the members of this team copy any code from the Internet, or from 
+Did the members of this team copy any code from the Internet, or from
 classmates who were not on this team?
   [ ] Yes
   [X] No
