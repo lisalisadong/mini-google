@@ -71,13 +71,6 @@ public class HTTPModuleBolt implements IRichBolt {
 	
 	Fields schema = new Fields("page");
 	
-	/* s3 client */
-//	static AmazonS3 awsClient;
-//	
-//	static String INDEXER_BUCKET = "crawler-g02";
-//
-//	static String accessKey = "AKIAJBEVSUPUI2OHEX6Q";
-//	static String secretKey = "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";
 	
 	DBWrapper db;
 	
@@ -147,23 +140,12 @@ public class HTTPModuleBolt implements IRichBolt {
 //	   
 //	   //TODO: HANDLE 3XX
 	   String contentType = client.getResContentType();
-//	   Crawler.logEvent(url + " content type" + contentType);
-//	   Crawler.logEvent(url + " stats code: " + client.getStatusCode());
-////	   System.out.println(id + " content type: " + contentType);
-////	   System.out.println(id + " status code: " + client.getStatusCode());
 	   boolean validContentType = (contentType == null) || "text/html".equalsIgnoreCase(contentType)
 				|| "text/xml".equalsIgnoreCase(contentType)
 				|| "application/xml".equalsIgnoreCase(contentType) 
 				|| contentType.matches(".*+xml")
 				|| "application/pdf".equals(contentType);
-//	   // TODO: only support xml & html now
-//	   /* the page should be retrieved */
-//	   if(validContentType) {
-//		   Crawler.logEvent("emit: " + url);
-//		   CrawledPage p = downloadPage(url);
-//		   collector.emit(new Values<Object>(p));
-//	   }
-	   
+
 	   if(validContentType) {
 		   CrawledPage p = downloadPage(url);
 		   if(p == null) return;
@@ -176,29 +158,7 @@ public class HTTPModuleBolt implements IRichBolt {
 			   db.sync();
 		   }
 		   
-		   /* upload to s3 */
-//		   start = System.currentTimeMillis();
-//		   ObjectMetadata meta = new ObjectMetadata();
-//		   String key = hashUrl(url);
-//		   StringBuilder sb = new StringBuilder();
-//		   sb.append(url + "\t");
-//		   sb.append(p.getContentType() + "\t");
-//		   sb.append(new String(p.getContent()));
-//		   meta.setContentType("text/plain");
-//		   
-//		   byte[] byteToSend = sb.toString().getBytes();
-//		   meta.setContentLength(byteToSend.length);
-//		   ByteArrayInputStream contentToWrite = new ByteArrayInputStream(byteToSend);
-//		   awsClient.putObject(new PutObjectRequest(INDEXER_BUCKET, key, contentToWrite, meta)
-//					   .withCannedAcl(CannedAccessControlList.PublicRead));
-//		   Crawler.logEvent("finished uploading " + url, start);
-		   
 	   }
-	   
-//	   CrawledPage p = downloadPage(url);
-//	   if(p != null) {
-//		   collector.emit(new Values<Object>(p));
-//		   Crawler.logEvent("emit " + url);
 //	   }
    }
    
