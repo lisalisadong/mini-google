@@ -173,7 +173,7 @@ public class SearchEngineService {
      */
     private static void processScore(ResultEntry entry) {
         // TODO: TUNE THE ALGORITHM!!!
-        entry.score = entry.pageRank * entry.tfidf;
+        entry.score = Math.log(entry.pageRank) * entry.tfidf;
         for (String url : urls) {
             if (entry.numWordsTitle > 0 && entry.location.startsWith(url)) {
                 entry.score += 1.0 * 50 / Math.log(entry.location.length());
