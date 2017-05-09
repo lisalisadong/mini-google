@@ -201,11 +201,7 @@
 		    	<pathelement location="lib/joda-time-2.4.jar"/>
             	
             </classpath>
-<<<<<<< HEAD
-        	<arg value="10000"/>
-=======
             <arg value="${port}"/>
->>>>>>> crawler
             <arg value="."/>
             <arg value="conf/crawler.xml"/>
         </java>
@@ -252,19 +248,11 @@
 	    </java>
 	</target>
 	
-<<<<<<< HEAD
-	<target name="gen-host-file" depends="compile-crawler" description="analysis hosts crawled">
-
-		<property name="dbpath" value="../db" />
-		<property name="v" value="a" />
-        <java classname="crawler.analysis.ShowHosts">
-=======
 	<target name="show-status" depends="compile-crawler" description="Display worker status">
 
 		<property name="dbpath" value="../db1" />
 		<property name="verbose" value="1" />
         <java classname="crawler.analysis.ShowStatus">
->>>>>>> crawler
             <classpath>
                 <pathelement location="lib/webserver.jar"/>
                 <pathelement location="lib/servlet-api.jar"/>
@@ -273,47 +261,6 @@
                 <pathelement location="${classes.dir}"/>
             </classpath>
         	<arg value="${dbpath}"/>
-<<<<<<< HEAD
-        	<arg value="${v}"/>
-	    </java>
-	</target>
-	
-	<target name="indexerdb" depends="compile-indexer" description="Index result to BDB">
-        <java classname="indexer.DB.DBWrapper">
-            <classpath>
-            	<fileset dir="./lib">
-                    <include name="*.jar"/>
-                </fileset>
-            	<pathelement location="${classes.dir}"/>
-            </classpath>
-        	<arg line="${args}" />
-        </java>
-    </target>
-
-    <target name="worddb" depends="compile-indexer" description="Index result to BDB">
-        <java classname="indexer.DB.OutputToDB">
-            <classpath>
-                <fileset dir="./lib">
-                    <include name="*.jar"/>
-                </fileset>
-                <pathelement location="${classes.dir}"/>
-            </classpath>
-            <arg line="${args}" />
-        </java>
-    </target>
-	
-	<target name="docdb" depends="compile-indexer" description="Index result to BDB">
-        <java classname="indexer.DB.DocInfoRetrival">
-            <classpath>
-            	<fileset dir="./lib">
-                    <include name="*.jar"/>
-                </fileset>
-            	<pathelement location="${classes.dir}"/>
-            </classpath>
-        	<arg line="${args}" />
-        </java>
-    </target>	
-=======
         	<arg value="${verbose}"/>
 	    </java>
 		
@@ -378,6 +325,5 @@
 		</java>
 	
 	</target>
->>>>>>> crawler
 
 </project>
