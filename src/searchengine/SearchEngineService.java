@@ -39,8 +39,8 @@ public class SearchEngineService {
 
 
     public static void init(String pageRankFile) {
-//        loadPageRank(pageRankFile);
-        loadSeedUrls("seed_urls");
+        loadPageRank(pageRankFile);
+//        loadSeedUrls("seed_urls");
     }
 
     /**
